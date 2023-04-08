@@ -1,0 +1,10 @@
+Um grafo não direccionado é constituído por um par não ordenado de arestas e vértices. 
+Vértice é um ponto, uma aresta é composta por um par de vértices o que indica que estão ligados.
+
+- Foi especificado que os grafos têm de ser gerados aleatoriamente. Isso implica que o número de vértices é escolhido ao acaso e também o número de ligações que cada um tem e a que vértices estão ligados.
+
+- Gerador aleatório de grafos.
+    -- Tem de ser indicado um número máximo e mínimo de vértices
+    -- Tem de ser indicado um número máximo de arestas que cada vértice pode ter, sendo que o mínimo é 0
+    -- Tamanho do grafo é indicado pelo número de vértices indicado
+    -- Cada grafo é um vetor de pares (vértices, arestas)

@@ -3,6 +3,7 @@ srcDir = ./src/
 buildDir = ./build/
 binDir = ./bin/
 objectFiles = #$(buildDir)xml.o $(buildDir)lua.o $(buildDir)planeta.o $(buildDir)menu.o $(buildDir)menu_principal.o
+CCFLAGS = -Wall
  
 all: 
 	$(CC) $(CCFLAGS) $(srcDir)main.c $(objectFiles) -o $(binDir)$(binaryName)
