@@ -9,3 +9,4 @@ Vértice é um ponto, uma aresta é composta por um par de vértices o que indic
     -- Tamanho do grafo é indicado pelo número de vértices indicado
     -- Cada grafo é um vetor de pares (vértices, arestas)
     -- Para responder ao facto de que é gerado aleatóriamente o melhor é fazer single linked list e alocar tudo na heap.
+    -- Não pode haver vértices sem pelo menos uma aresta.
