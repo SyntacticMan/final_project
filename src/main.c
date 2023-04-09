@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
-#define MAX_EDGE 3;
-#define MIN_EDGE 1;
-#define GRAPH_SIZE 10;
+#define MAX_EDGE 3
+#define MIN_EDGE 1
+#define GRAPH_SIZE_MIN 10
+#define GRAPH_SIZE_MAX 50
 
 typedef struct edge
 {
@@ -30,7 +32,12 @@ edge *add_edge(int u, int v);
 
 int main()
 {
-	graph *test = create_graph();
+	srand(time NULL);
+	int graph_size = (rand() % (GRAPH_SIZE_MAX - GRAPH_SIZE_MIN + 1)) + GRAPH_SIZE_MIN;
+
+	printf("rand: %d\n", graph_size);
+
+	graph *test = create_graph(graph_size);
 
 	while (test->edge_head != NULL)
 	{
@@ -51,7 +58,7 @@ int main()
 	return 0;
 }
 
-graph *create_graph()
+graph *create_graph(int graph_size)
 {
 	graph *graph = malloc(sizeof(graph));
 
@@ -59,7 +66,7 @@ graph *create_graph()
 	vertice *vertice_head = add_vertice(1);
 	vertice *vertice_list = vertice_head;
 
-	for (int i = 2; i <= 10; i++)
+	for (int i = 2; i <= graph_size; i++)
 	{
 		vertice_list->next_vertice = add_vertice(i);
 		vertice_list = vertice_list->next_vertice;
@@ -69,7 +76,7 @@ graph *create_graph()
 	edge *edge_head = add_edge(1, 2);
 	edge *edge_list = edge_head;
 
-	for (int i = 2; i < 10; i++)
+	for (int i = 2; i < graph_size; i++)
 	{
 		edge_list->next_edge = add_edge(i, i + 1);
 		edge_list = edge_list->next_edge;

@@ -5,7 +5,7 @@ Vértice é um ponto, uma aresta é composta por um par de vértices o que indic
 
 - Gerador aleatório de grafos.
     -- Tem de ser indicado um número máximo e mínimo de vértices
-    -- Tem de ser indicado um número máximo de arestas que cada vértice pode ter, sendo que o mínimo é 0
+    -- Tem de ser indicado um número máximo de arestas que cada vértice pode ter, sendo que o mínimo é 1
     -- Tamanho do grafo é indicado pelo número de vértices indicado
     -- Cada grafo é um vetor de pares (vértices, arestas)
     -- Para responder ao facto de que é gerado aleatóriamente o melhor é fazer single linked list e alocar tudo na heap.
