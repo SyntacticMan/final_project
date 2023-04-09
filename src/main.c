@@ -1,3 +1,15 @@
+/********************************************************************
+ *  Projecto Final em Engenharia Informática                         *
+ *                                                                  *
+ * Programação Paralela Multi tarefa								*
+ * Algoritmo de Prim para obter uma árvore geradora mínima			*
+ * 																	*
+ * Nuno Méren														*
+ * 1902937															*
+ * 																	*
+ * Orientador: Paulo Shirley										*
+ * ******************************************************************/
+
 #include <stdio.h>
 #include <time.h>
 

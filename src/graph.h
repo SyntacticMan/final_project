@@ -1,3 +1,10 @@
+/********************************************************************
+ *  Módulo graph                                                    *
+ *                                                                  *
+ *  Constrói um grafo com base nos valores    						*
+ *  indicados nos #define                                           *
+ * ******************************************************************/
+
 #include <stdlib.h>
 
 #define MAX_EDGE 3
