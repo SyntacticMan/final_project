@@ -1,10 +1,18 @@
 #include "graph.h"
 
+/*
+ *   Função random_generator
+ *   gera um inteiro entre min e max
+ */
 int random_generator(int max, int min)
 {
     return (rand() % (max - min + 1)) + min;
 }
 
+/*
+ * Função create_graph
+ * cria um novo grafo, com lista de vértices e arestas
+ */
 graph *create_graph()
 {
     int graph_size = random_generator(GRAPH_SIZE_MAX, GRAPH_SIZE_MIN);
@@ -74,17 +82,28 @@ graph *create_graph()
     return graph;
 }
 
+/*
+ * Função add_edge
+ * cria uma aresta com os vértices u e v
+ */
 edge *add_edge(int u, int v)
 {
     edge *new_edge = malloc(sizeof(edge));
     new_edge->next_edge = NULL;
     new_edge->u = u;
     new_edge->v = v;
+
+    // o peso é atribuído ao acaso
     new_edge->weight = random_generator(MAX_WEIGHT, MIN_WEIGHT);
 
     return new_edge;
 }
 
+/*
+ * Função check_edge
+ * devolve o número de arestas que o vertice dado
+ * tem na lista de arestas edge
+ */
 int check_edge(edge *edge_head, int vertice)
 {
     // se ainda não tiverem sido criadas arestas
@@ -106,6 +125,10 @@ int check_edge(edge *edge_head, int vertice)
     return vertice_count;
 }
 
+/*
+ * Função add_vertice
+ * adiciona um vértice com id n
+ */
 vertice *add_vertice(int n)
 {
     vertice *new_vertice = malloc(sizeof(vertice));
