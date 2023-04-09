@@ -39,11 +39,8 @@ int random_generator(int max, int min);
 int main()
 {
 	srand(time NULL);
-	int graph_size = random_generator(GRAPH_SIZE_MAX, GRAPH_SIZE_MIN);
 
-	printf("rand: %d\n", graph_size);
-
-	graph *test = create_graph(graph_size);
+	graph *test = create_graph();
 
 	while (test->edge_head != NULL)
 	{
@@ -57,10 +54,6 @@ int main()
 		test->vertice_head = test->vertice_head->next_vertice;
 	}
 
-	// printf("%d", test->id);
-	// printf("%d", test->edge_element->u);
-	// printf("%d\n", test->edge_element->v);
-
 	return 0;
 }
 
@@ -69,8 +62,9 @@ int random_generator(int max, int min)
 	return (rand() % (max - min + 1)) + min;
 }
 
-graph *create_graph(int graph_size)
+graph *create_graph()
 {
+	int graph_size = random_generator(GRAPH_SIZE_MAX, GRAPH_SIZE_MIN);
 	graph *graph = malloc(sizeof(graph));
 
 	// adicionar os vértices
