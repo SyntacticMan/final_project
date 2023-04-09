@@ -4,6 +4,10 @@
 
 #define MAX_EDGE 3
 #define MIN_EDGE 1
+
+#define MAX_WEIGHT 15
+#define MIN_WEIGHT 1
+
 #define GRAPH_SIZE_MIN 10
 #define GRAPH_SIZE_MAX 50
 
@@ -26,14 +30,16 @@ typedef struct graph
 	edge *edge_head;
 } graph;
 
+// funções
 graph *create_graph();
 vertice *add_vertice(int n);
 edge *add_edge(int u, int v);
+int random_generator(int max, int min);
 
 int main()
 {
 	srand(time NULL);
-	int graph_size = (rand() % (GRAPH_SIZE_MAX - GRAPH_SIZE_MIN + 1)) + GRAPH_SIZE_MIN;
+	int graph_size = random_generator(GRAPH_SIZE_MAX, GRAPH_SIZE_MIN);
 
 	printf("rand: %d\n", graph_size);
 
@@ -56,6 +62,11 @@ int main()
 	// printf("%d\n", test->edge_element->v);
 
 	return 0;
+}
+
+int random_generator(int max, int min)
+{
+	return (rand() % (max - min + 1)) + min;
 }
 
 graph *create_graph(int graph_size)
@@ -94,7 +105,7 @@ edge *add_edge(int u, int v)
 	new_edge->next_edge = NULL;
 	new_edge->u = u;
 	new_edge->v = v;
-	new_edge->weight = 1;
+	new_edge->weight = random_generator(MAX_WEIGHT, MIN_WEIGHT);
 
 	return new_edge;
 }
