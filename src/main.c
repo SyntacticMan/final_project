@@ -33,6 +33,7 @@ typedef struct graph
 // funções
 graph *create_graph();
 vertice *add_vertice(int n);
+
 edge *add_edge(int u, int v);
 int check_edge(edge *edge_head, int vertice);
 
@@ -44,6 +45,7 @@ int main()
 
 	graph *test = create_graph();
 
+	// impressão do grafo de teste
 	while (test->edge_head != NULL)
 	{
 		printf("aresta: %d->%d (%d)\n", test->edge_head->u, test->edge_head->v, test->edge_head->weight);
@@ -56,6 +58,7 @@ int main()
 		test->vertice_head = test->vertice_head->next_vertice;
 	}
 
+	// limpeza da memória
 	while (test->vertice_head != NULL)
 	{
 		vertice *temp = test->vertice_head->next_vertice;
@@ -69,6 +72,8 @@ int main()
 		free(test->edge_head);
 		test->edge_head = temp;
 	}
+
+	free(test);
 
 	return 0;
 }
@@ -84,13 +89,21 @@ graph *create_graph()
 	graph *graph = malloc(sizeof(graph));
 
 	// adicionar os vértices
-	vertice *vertice_head = add_vertice(1);
-	vertice *vertice_list = vertice_head;
+	vertice *vertice_head = NULL;
+	vertice *vertice_list = NULL;
 
-	for (int i = 2; i <= graph_size; i++)
+	for (int i = 1; i <= graph_size; i++)
 	{
-		vertice_list->next_vertice = add_vertice(i);
-		vertice_list = vertice_list->next_vertice;
+		if (i == 1)
+		{
+			vertice_head = add_vertice(i);
+			vertice_list = vertice_head;
+		}
+		else
+		{
+			vertice_list->next_vertice = add_vertice(i);
+			vertice_list = vertice_list->next_vertice;
+		}
 	}
 
 	// adicionar arestas
@@ -98,7 +111,7 @@ graph *create_graph()
 	vertice_list = vertice_head;
 
 	edge *edge_head = NULL;
-	edge *edge_list = edge_head;
+	edge *edge_list = NULL;
 
 	while (vertice_list != NULL)
 	{
@@ -116,12 +129,13 @@ graph *create_graph()
 			// avaliar o vértice da lista ao qual vou adicionar uma aresta
 			int vertice_count = check_edge(edge_head, vertice_list->id);
 
-			if (vertice_count < MAX_EDGE)
+			if (vertice_count <= MAX_EDGE)
 			{
 				// avaliar o vértice escolhido para formar uma aresta
 				vertice_count = check_edge(edge_head, vertice);
 
-				if (vertice_count < MAX_EDGE)
+				// se nenhum dos dois exceder o limite, adicionar a aresta
+				if (vertice_count <= MAX_EDGE)
 				{
 					edge_list->next_edge = add_edge(vertice_list->id, vertice);
 					edge_list = edge_list->next_edge;
