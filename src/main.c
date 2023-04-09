@@ -34,7 +34,7 @@ typedef struct graph
 graph *create_graph();
 vertice *add_vertice(int n);
 edge *add_edge(int u, int v);
-int check_edge(edge *edge_head, int u, int v);
+int check_edge(edge *edge_head, int vertice);
 
 int random_generator(int max, int min);
 
@@ -54,6 +54,20 @@ int main()
 	{
 		printf("vertice: %d\n", test->vertice_head->id);
 		test->vertice_head = test->vertice_head->next_vertice;
+	}
+
+	while (test->vertice_head != NULL)
+	{
+		vertice *temp = test->vertice_head->next_vertice;
+		free(test->vertice_head);
+		test->vertice_head = temp;
+	}
+
+	while (test->edge_head != NULL)
+	{
+		edge *temp = test->edge_head->next_edge;
+		free(test->edge_head);
+		test->edge_head = temp;
 	}
 
 	return 0;
@@ -80,30 +94,42 @@ graph *create_graph()
 	}
 
 	// adicionar arestas
-	// escolher os vertices a ligar
-	int edge_count = 10;
-	int u = 0;
-	int v = 0;
+	int vertice = 0;
+	vertice_list = vertice_head;
 
-	edge *edge_head = add_edge(u, v);
+	edge *edge_head = NULL;
 	edge *edge_list = edge_head;
 
-	while (edge_count >= MAX_EDGE)
+	while (vertice_list != NULL)
 	{
+		// escolher um vértice
+		vertice = random_generator(graph_size, 1);
 
-		u = random_generator(1, graph_size);
-		v = random_generator(1, graph_size);
+		// se ainda não tiver arestas, simplesmente adicionar
+		if (edge_head == NULL)
+		{
+			edge_head = add_edge(vertice_list->id, vertice);
+			edge_list = edge_head;
+		}
+		else
+		{
+			// avaliar o vértice da lista ao qual vou adicionar uma aresta
+			int vertice_count = check_edge(edge_head, vertice_list->id);
 
-		edge_count = check_edge(edge_head, u, v);
-	}
+			if (vertice_count < MAX_EDGE)
+			{
+				// avaliar o vértice escolhido para formar uma aresta
+				vertice_count = check_edge(edge_head, vertice);
 
-	edge_list->next_edge = add_edge(u, v);
-	edge_list = edge_list->next_edge;
+				if (vertice_count < MAX_EDGE)
+				{
+					edge_list->next_edge = add_edge(vertice_list->id, vertice);
+					edge_list = edge_list->next_edge;
+				}
+			}
+		}
 
-	for (int i = 2; i < graph_size; i++)
-	{
-		edge_list->next_edge = add_edge(i, i + 1);
-		edge_list = edge_list->next_edge;
+		vertice_list = vertice_list->next_vertice;
 	}
 
 	graph->vertice_head = vertice_head;
@@ -123,7 +149,7 @@ edge *add_edge(int u, int v)
 	return new_edge;
 }
 
-int check_edge(edge *edge_head, int u, int v)
+int check_edge(edge *edge_head, int vertice)
 {
 	// se ainda não tiverem sido criadas arestas
 	// devolver logo contagem a 0
@@ -131,23 +157,17 @@ int check_edge(edge *edge_head, int u, int v)
 		return 0;
 
 	edge *edge_list = edge_head;
-	int u_count = 0;
-	int v_count = 0;
+	int vertice_count = 0;
 
-	while (edge_list->next_edge != NULL)
+	while (edge_list != NULL)
 	{
-		if (edge_list->u == u)
-			u_count++;
+		if (edge_list->u == vertice || edge_list->v == vertice)
+			vertice_count++;
 
-		if (edge_list->v == v)
-			v_count++;
+		edge_list = edge_list->next_edge;
 	}
 
-	// devolver a maior das contagens
-	if (u_count >= v_count)
-		return u_count;
-	else
-		return v_count;
+	return vertice_count;
 }
 
 vertice *add_vertice(int n)
