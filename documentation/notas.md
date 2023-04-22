@@ -40,3 +40,4 @@ Foi especificado que os grafos têm de ser gerados aleatoriamente. Isso implica 
 - testar o máximo de processamento que o portátil consegue aguentar antes da defesa do projecto
 
 
+https://stackoverflow.com/questions/6235847/how-to-generate-nan-infinity-and-infinity-in-ansi-c
