@@ -7,6 +7,7 @@
 * Apresentar pequeno relatório no fim a indicar o número de vértices, arestas e percentagem relativa gerada e pedida
 
 ## Módulo de ficheiros
+* Determinar o formato do ficheiro do grafo
 * Criar módulo de ficheiros
 * Implementar tradução do array do grafo para o ficheiro
 * Disponibilizar função para gravar o ficheiro
