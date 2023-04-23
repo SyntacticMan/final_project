@@ -24,37 +24,36 @@ int main()
 {
 	srand(time NULL);
 
-	graph *test = create_graph();
+	int **graph = create_graph(5);
 
 	// impressão do grafo de teste
-	while (test->edge_head != NULL)
+	// while (test->edge_head != NULL)
+	// {
+	// 	printf("aresta: %d->%d (%d)\n", test->edge_head->u, test->edge_head->v, test->edge_head->weight);
+	// 	test->edge_head = test->edge_head->next_edge;
+	// }
+
+	for (int i = 0; i < 9; i++)
 	{
-		printf("aresta: %d->%d (%d)\n", test->edge_head->u, test->edge_head->v, test->edge_head->weight);
-		test->edge_head = test->edge_head->next_edge;
+		printf("vertice: %d\n", *graph[i]);
 	}
 
-	while (test->vertice_head != NULL)
-	{
-		printf("vertice: %d\n", test->vertice_head->id);
-		test->vertice_head = test->vertice_head->next_vertice;
-	}
+	// // limpeza da memória
+	// while (test->vertice_head != NULL)
+	// {
+	// 	vertice *temp = test->vertice_head->next_vertice;
+	// 	free(test->vertice_head);
+	// 	test->vertice_head = temp;
+	// }
 
-	// limpeza da memória
-	while (test->vertice_head != NULL)
-	{
-		vertice *temp = test->vertice_head->next_vertice;
-		free(test->vertice_head);
-		test->vertice_head = temp;
-	}
+	// while (test->edge_head != NULL)
+	// {
+	// 	edge *temp = test->edge_head->next_edge;
+	// 	free(test->edge_head);
+	// 	test->edge_head = temp;
+	// }
 
-	while (test->edge_head != NULL)
-	{
-		edge *temp = test->edge_head->next_edge;
-		free(test->edge_head);
-		test->edge_head = temp;
-	}
-
-	free(test);
+	// free(test);
 
 	return 0;
 }

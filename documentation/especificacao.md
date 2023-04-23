@@ -8,11 +8,14 @@ O projecto tem duas componentes, o gerador de grafos e a implementação do algo
 ### Gerador de grafos
 Os grafos a ser gerados são densos, ou seja, com múltiplas arestas por vértice. Estes grafos serão representados em matriz de adjacência, mas apenas a triangular superior, uma vez que estas matrizes acabam por ser sempre simétricas. 
 
+A matriz de adjacência será representada por um vetor de apontadores unidimensional, em que a bidimensionalidade é simulada pelas funções de escrita e leitura. Isto porque utilizar um vetor bidimensional iria resultar na ocupação de memória com entradas que nunca seriam utilizadas. Assim as colunas serão tantas quantas os vértices mas cada coluna terá $n-1$ linhas, ou seja, a coluna $1$ terá $0$ linhas, $2$ terá $1$ linhas e por aí adiante. Este esquema omite os $0$ que existem quando $A(i,j), i=j$.
+
 O número de arestas é estipulado dando uma percentagem, como opção de linha de comandos, do número total de arestas. Independentemente da percentagem, todos os vértices terão de ter, pelo menos, uma aresta. Cada aresta criada terá de ser avaliada contra a percentagem total de arestas que ainda faltam preencher de modo a não exceder o limite indicado. O número total de arestas é dado por $\frac{n\times(n-1)}{2}$.
 
 Os pesos a atribuir a cada aresta serão indicados como um intervalo mínimo e máximo de inteiros positivos, com um mínimo absoluto de 0. Cada vértice sem ligação é representado na matriz como um infinito, recorrento a uma biblioteca em C adequada.
 
 Depois de criado o grafo este é emitido para o disco num ficheiro binário que o executável do algoritmo depois irá carregar.
+
 
 ### Algoritmo de Prim
 O algoritmo de Prim, na sua versão de processo único e multi processo, será implementado num único executável. O número de processos será indicado na linha de comando, sendo que por omissão, ou se fôr indicado apenas um, ele executará a versão de processo simples. Quando a árvore geradora mínima fôr encontrada deve ser produzido um relatório com o tempo de execução e o número de processos utilizados, bem como um desenho do grafo e da àrvore geradora mínima. 

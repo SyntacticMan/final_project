@@ -6,6 +6,7 @@
  * ******************************************************************/
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #define MAX_EDGE 3
 #define MIN_EDGE 1
@@ -16,29 +17,20 @@
 #define GRAPH_SIZE_MIN 10
 #define GRAPH_SIZE_MAX 50
 
-typedef struct edge
-{
-    int u, v;
-    int weight;
-    struct edge *next_edge;
-} edge;
+// grafo é representado como um vetor de pointeiros dinamicamente alocado de ints
+// uma vez que o tamanho do grafo é determinado durante a execução
+// int **graph;
 
-typedef struct vertice
-{
-    int id;
-    struct vertice *next_vertice;
-} vertice;
+// vetor com a árvore geradora mínima
+// int **d;
 
-typedef struct graph
-{
-    struct vertice *vertice_head;
-    struct edge *edge_head;
-} graph;
+int **create_graph();
 
-graph *create_graph();
-vertice *add_vertice(int n);
+int get_col_index(int col);
+int get_row_index(int col_index, int row);
+// vertice *add_vertice(int n);
 
-edge *add_edge(int u, int v);
-int check_edge(edge *edge_head, int vertice);
+void add_edge(int **graph, int u, int v);
+// int check_edge(edge *edge_head, int vertice);
 
 int random_generator(int max, int min);
