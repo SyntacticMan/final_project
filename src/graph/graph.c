@@ -13,128 +13,103 @@ int random_generator(int max, int min)
  * Função create_graph
  * cria um novo grafo, com lista de vértices e arestas
  */
-graph *create_graph()
+int **create_graph(int graph_size)
 {
-    int graph_size = random_generator(GRAPH_SIZE_MAX, GRAPH_SIZE_MIN);
-    graph *graph = malloc(sizeof(graph));
+    // alocar as colunas
+    int **new_graph = (int **)malloc((graph_size + (graph_size - 1)) * sizeof(int *));
 
-    // adicionar os vértices
-    vertice *vertice_head = NULL;
-    vertice *vertice_list = NULL;
-
-    for (int i = 1; i <= graph_size; i++)
+    // como a matriz é triangular superior
+    // apenas aloco os elementos que vão ser utilizados
+    for (int col = 0; col <= graph_size; col++)
     {
-        if (i == 1)
+        for (int row = 0; row < graph_size; row++)
         {
-            vertice_head = add_vertice(i);
-            vertice_list = vertice_head;
-        }
-        else
-        {
-            vertice_list->next_vertice = add_vertice(i);
-            vertice_list = vertice_list->next_vertice;
+            // se linha = coluna o vértice ligar-se-ia a ele mesmo
+            // se linha > coluna estou na triangular inferior
+            // em ambos os casos passo à frente
+            if ((row == col) || (row > col))
+                continue;
+
+            add_edge(new_graph, col, row);
         }
     }
 
-    // adicionar arestas
-    int vertice = 0;
-    vertice_list = vertice_head;
+    return new_graph;
+}
 
-    edge *edge_head = NULL;
-    edge *edge_list = NULL;
+int get_col_index(int col)
+{
+    if (col == 2)
+        return 0;
 
-    while (vertice_list != NULL)
+    int index = 0;
+
+    for (int i = 2; i < col; i++)
     {
-        // escolher um vértice
-        vertice = random_generator(graph_size, 1);
-
-        // se ainda não tiver arestas, simplesmente adicionar
-        if (edge_head == NULL)
-        {
-            edge_head = add_edge(vertice_list->id, vertice);
-            edge_list = edge_head;
-        }
-        else
-        {
-            // avaliar o vértice da lista ao qual vou adicionar uma aresta
-            int vertice_count = check_edge(edge_head, vertice_list->id);
-
-            if (vertice_count <= MAX_EDGE)
-            {
-                // avaliar o vértice escolhido para formar uma aresta
-                vertice_count = check_edge(edge_head, vertice);
-
-                // se nenhum dos dois exceder o limite, adicionar a aresta
-                if (vertice_count <= MAX_EDGE)
-                {
-                    edge_list->next_edge = add_edge(vertice_list->id, vertice);
-                    edge_list = edge_list->next_edge;
-                }
-            }
-        }
-
-        vertice_list = vertice_list->next_vertice;
+        index += i - 1;
     }
 
-    graph->vertice_head = vertice_head;
-    graph->edge_head = edge_head;
+    return index;
+}
 
-    return graph;
+int get_row_index(int col_index, int row)
+{
+    return 0;
 }
 
 /*
  * Função add_edge
- * cria uma aresta com os vértices u e v
+ * cria uma aresta entre os vértices u e v
  */
-edge *add_edge(int u, int v)
+void add_edge(int **graph, int u, int v)
 {
-    edge *new_edge = malloc(sizeof(edge));
-    new_edge->next_edge = NULL;
-    new_edge->u = u;
-    new_edge->v = v;
+    int col_index = get_col_index(u);
+    int row_index = col_index + v;
 
     // o peso é atribuído ao acaso
-    new_edge->weight = random_generator(MAX_WEIGHT, MIN_WEIGHT);
+    int weight = random_generator(MAX_WEIGHT, MIN_WEIGHT);
 
-    return new_edge;
+    printf("col: %d, row: %d, weight: %d\n", u, v, weight);
+    graph[row_index] = (int *)malloc(sizeof(int));
+    graph[row_index] = &weight;
 }
 
-/*
- * Função check_edge
- * devolve o número de arestas que o vertice dado
- * tem na lista de arestas edge
- */
-int check_edge(edge *edge_head, int vertice)
-{
-    // se ainda não tiverem sido criadas arestas
-    // devolver logo contagem a 0
-    if (edge_head == NULL)
-        return 0;
+// /*
+//  * Função check_edge
+//  * devolve o número de arestas que o vertice dado
+//  * tem na lista de arestas edge
+//  */
+// int check_edge(edge *edge_head, int vertice)
+// {
+//     // se ainda não tiverem sido criadas arestas
+//     // devolver logo contagem a 0
+//     if (edge_head == NULL)
+//         return 0;
 
-    edge *edge_list = edge_head;
-    int vertice_count = 0;
+//     edge *edge_list = edge_head;
+//     int vertice_count = 0;
 
-    while (edge_list != NULL)
-    {
-        if (edge_list->u == vertice || edge_list->v == vertice)
-            vertice_count++;
+//     while (edge_list != NULL)
+//     {
+//         if (edge_list->u == vertice || edge_list->v == vertice)
+//             vertice_count++;
 
-        edge_list = edge_list->next_edge;
-    }
+//         edge_list = edge_list->next_edge;
+//     }
 
-    return vertice_count;
-}
+//     return vertice_count;
+// }
 
-/*
- * Função add_vertice
- * adiciona um vértice com id n
- */
-vertice *add_vertice(int n)
-{
-    vertice *new_vertice = malloc(sizeof(vertice));
+// /*
+//  * Função add_vertice
+//  * adiciona um vértice com id n
+//  */
+// vertice *add_vertice(int n)
+// {
+//     vertice *new_vertice = malloc(sizeof(vertice));
 
-    new_vertice->next_vertice = NULL;
-    new_vertice->id = n;
+//     new_vertice->next_vertice = NULL;
+//     new_vertice->id = n;
 
-    return new_vertice;
-}
+//     return new_vertice;
+// }
