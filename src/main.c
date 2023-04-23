@@ -1,5 +1,5 @@
 /********************************************************************
- *  Projecto Final em Engenharia Informática                         *
+ *  Projecto Final em Engenharia Informática                        *
  *                                                                  *
  * Programação Paralela Multi tarefa								*
  * Algoritmo de Prim para obter uma árvore geradora mínima			*
