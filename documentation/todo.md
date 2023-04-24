@@ -1,9 +1,9 @@
 # TODO List
 
 ## Gerador de grafos
-* Restruturar o grafo para uma representação em matriz de adjacência
+* ~~Restruturar o grafo para uma representação em matriz de adjacência~~
+* ~~Mudar o algoritmo de geração para criar uma matriz de adjacência triangular superior~~
 * tamanho do grafo introduzido pelo utilizador
-* Mudar o algoritmo de geração para criar uma matriz de adjacência superior
 * Arestas geradas tem de ter a percentagem relativa ao total máximo para não a exceder
 * Apresentar pequeno relatório no fim a indicar o número de vértices, arestas e percentagem relativa gerada e pedida
 

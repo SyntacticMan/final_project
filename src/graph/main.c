@@ -24,7 +24,7 @@ int main()
 {
 	srand(time NULL);
 
-	int **graph = create_graph(5);
+	int **graph = create_graph(6);
 
 	// impressão do grafo de teste
 	// while (test->edge_head != NULL)

@@ -26,11 +26,9 @@
 
 int **create_graph();
 
-int get_col_index(int col);
-int get_row_index(int col_index, int row);
-// vertice *add_vertice(int n);
+int get_index(int col, int row);
+int get_array_size(int graph_size);
 
 void add_edge(int **graph, int u, int v);
-// int check_edge(edge *edge_head, int vertice);
 
 int random_generator(int max, int min);
