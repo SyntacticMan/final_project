@@ -52,11 +52,15 @@ int main(int argc, char const *argv[])
 	// 	printf("aresta: %d->%d (%d)\n", test->edge_head->u, test->edge_head->v, test->edge_head->weight);
 	// 	test->edge_head = test->edge_head->next_edge;
 	// }
+	// int array_size = get_array_size(graph_size);
 
-	for (int i = 0; i < graph_size; i++)
-	{
-		printf("linha: %d / vertice: %d\n", i, *graph[i]);
-	}
+	// for (int i = 0; i < array_size; i++)
+	// {
+	// 	if (graph[i] != NULL)
+	// 		printf("linha: %d / vertice: %d\n", i, *graph[i]);
+	// 	else
+	// 		printf("linha: %d NULL\n", i);
+	// }
 
 	// // limpeza da memória
 	// while (test->vertice_head != NULL)

@@ -54,17 +54,13 @@ int get_index(int col, int row)
     if (col <= 2)
         return 0;
 
-    int index = 0;
-
-    // obter o indíce da coluna
-    for (int i = 0; i < col; i++)
-    {
-        index += i - 1;
-    }
+    int n = col - 2;
+    int index = (n * (n + 1)) / 2;
 
     // adicionar a linha ao indíce
-    // dá o indíce da coluna/linha
-    index += row;
+    // para obter indíce da coluna/linha
+    if (row > 1)
+        index += row - 1;
 
     return index;
 }
