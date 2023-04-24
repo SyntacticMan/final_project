@@ -13,6 +13,7 @@
  * ******************************************************************/
 
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 #ifndef GRAPH
@@ -20,11 +21,30 @@
 #include "graph.h"
 #endif
 
-int main()
+int main(int argc, char const *argv[])
 {
 	srand(time NULL);
+	int graph_size;
 
-	int **graph = create_graph(6);
+	// necessário indicar o tamanho do grafo
+	if (argc < 3)
+	{
+		printf("Utilização: %s -s <int>\n", argv[0]);
+		return 1;
+	}
+
+	// processar as opções
+	if (strcmp(argv[1], "-s") == 0)
+	{
+		graph_size = atoi(argv[2]);
+	}
+	else
+	{
+		printf("Opção %s desconhecida\n", argv[2]);
+		return 1;
+	}
+
+	int **graph = create_graph(graph_size);
 
 	// impressão do grafo de teste
 	// while (test->edge_head != NULL)
@@ -33,9 +53,9 @@ int main()
 	// 	test->edge_head = test->edge_head->next_edge;
 	// }
 
-	for (int i = 0; i < 9; i++)
+	for (int i = 0; i < graph_size; i++)
 	{
-		printf("vertice: %d\n", *graph[i]);
+		printf("linha: %d / vertice: %d\n", i, *graph[i]);
 	}
 
 	// // limpeza da memória

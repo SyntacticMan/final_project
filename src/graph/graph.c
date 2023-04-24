@@ -93,7 +93,5 @@ void add_edge(int **graph, int u, int v)
     int *weight = (int *)malloc(sizeof(int));
     *weight = random_generator(MAX_WEIGHT, MIN_WEIGHT);
 
-    printf("(%d,%d) -> row_index= %d, weight: %d\n", u, v, index, *weight);
-    // graph[row_index] = (int *)malloc(sizeof(int));
     graph[index] = weight;
 }
