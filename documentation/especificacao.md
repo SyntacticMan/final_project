@@ -10,7 +10,7 @@ Os grafos a ser gerados são densos, ou seja, com múltiplas arestas por vértic
 
 A matriz de adjacência será representada por um vetor de apontadores unidimensional, em que a bidimensionalidade é simulada pelas funções de escrita e leitura. Isto porque utilizar um vetor bidimensional iria resultar na ocupação de memória com entradas que nunca seriam utilizadas. Assim as colunas serão tantas quantas os vértices mas cada coluna terá $n-1$ linhas, ou seja, a coluna $1$ terá $0$ linhas, $2$ terá $1$ linhas e por aí adiante. Este esquema omite os $0$ que existem quando $A(i,j), i=j$.
 
-O número de arestas é estipulado dando uma percentagem, como opção de linha de comandos, do número total de arestas. Independentemente da percentagem, todos os vértices terão de ter, pelo menos, uma aresta. Cada aresta criada terá de ser avaliada contra a percentagem total de arestas que ainda faltam preencher de modo a não exceder o limite indicado. O número total de arestas é dado por $\frac{n\times(n-1)}{2}$.
+O número de arestas é estipulado dando uma percentagem, como opção de linha de comandos, do número total de arestas. Independentemente da percentagem, todos os vértices terão de ter, pelo menos, uma aresta. Cada aresta criada terá de ser avaliada contra a percentagem total de arestas que ainda faltam preencher de modo a não exceder o limite indicado. O número total de arestas é dado por $\frac{n\times(n-1)}{2}$. Estas serão atribuídas segundo uma distribuição normal.
 
 Os pesos a atribuir a cada aresta serão indicados como um intervalo mínimo e máximo de inteiros positivos, com um mínimo absoluto de 0. Cada vértice sem ligação é representado na matriz como um infinito, recorrento a uma biblioteca em C adequada.
 
