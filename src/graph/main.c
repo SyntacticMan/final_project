@@ -21,6 +21,11 @@
 #include "graph.h"
 #endif
 
+#ifndef FILE_MODULE
+#define FILE_MODULE
+#include "../file/file_module.h"
+#endif
+
 int main(int argc, char const *argv[])
 {
 	srand(time NULL);
@@ -45,6 +50,13 @@ int main(int argc, char const *argv[])
 	}
 
 	int **graph = create_graph(graph_size);
+
+	header *graph_header = malloc(sizeof(header));
+
+	graph_header->size = get_array_size(graph_size);
+
+	printf("%ld\n", graph_header->size);
+	write_file(graph_header, graph, "graph.grf");
 
 	// impressão do grafo de teste
 	// while (test->edge_head != NULL)
