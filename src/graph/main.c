@@ -59,21 +59,13 @@ int main(int argc, char const *argv[])
 	printf("%d\n%d\n", graph_header->graph_size, graph_header->array_size);
 	write_file(graph_header, graph, "graph.grf");
 
-	// impressão do grafo de teste
-	// while (test->edge_head != NULL)
-	// {
-	// 	printf("aresta: %d->%d (%d)\n", test->edge_head->u, test->edge_head->v, test->edge_head->weight);
-	// 	test->edge_head = test->edge_head->next_edge;
-	// }
-	// int array_size = get_array_size(graph_size);
-
-	// for (int i = 0; i < array_size; i++)
-	// {
-	// 	if (graph[i] != NULL)
-	// 		printf("linha: %d / vertice: %d\n", i, *graph[i]);
-	// 	else
-	// 		printf("linha: %d NULL\n", i);
-	// }
+	for (int i = 0; i < graph_header->array_size; i++)
+	{
+		if (graph[i] != NULL)
+			printf("linha: %d / vertice: %d\n", i, *graph[i]);
+		else
+			printf("linha: %d NULL\n", i);
+	}
 
 	// // limpeza da memória
 	// while (test->vertice_head != NULL)

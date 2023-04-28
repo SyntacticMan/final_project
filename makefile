@@ -33,4 +33,5 @@ debug: clean all
 
 clean:
 	rm -f $(buildDir)*.o
-	rm -f $(binDir)*.*
+	rm -f $(binDir)$(graphBinaryName)
+	rm -f $(binDir)$(primBinaryName)

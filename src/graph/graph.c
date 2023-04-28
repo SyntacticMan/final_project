@@ -22,7 +22,6 @@ int **create_graph(int graph_size)
     // alocar as colunas
     int **new_graph = (int **)malloc(get_array_size(graph_size) * sizeof(int *));
 
-    printf("Array size: %d\n", get_array_size(graph_size));
     // como a matriz é triangular superior
     // apenas aloco os elementos que vão ser utilizados
     for (int col = 1; col <= graph_size; col++)
