@@ -53,9 +53,10 @@ int main(int argc, char const *argv[])
 
 	header *graph_header = malloc(sizeof(header));
 
-	graph_header->size = get_array_size(graph_size);
+	graph_header->array_size = get_array_size(graph_size);
+	graph_header->graph_size = graph_size;
 
-	printf("%ld\n", graph_header->size);
+	printf("%d\n%d\n", graph_header->graph_size, graph_header->array_size);
 	write_file(graph_header, graph, "graph.grf");
 
 	// impressão do grafo de teste
