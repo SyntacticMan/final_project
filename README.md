@@ -7,3 +7,8 @@ como na versão paralela multi-tarefa de modo. O objetivo é poder quantificar o
 ganhos de desempenho entre a implementação simples e a implementação paralela
 multi-tarefa.
 
+## Documentação
+
+[Especificação](./documentation/especificacao.md) do projecto.
+
+Lista de [tarefas](./documentation/todo.md) a executar.
