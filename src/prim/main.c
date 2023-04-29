@@ -36,18 +36,12 @@ int main(int argc, char const *argv[])
 
     header *graph_header = malloc(sizeof(header));
 
-    int **graph = read_file(graph_filename, graph_header);
+    graph = read_file(graph_filename, graph_header);
 
     if (graph != NULL)
         printf("file loaded\nGraph size-> %d\nArray size-> %d\n", graph_header->graph_size, graph_header->array_size);
 
-    for (int i = 0; i < graph_header->array_size; i++)
-    {
-        if (graph[i] != NULL)
-            printf("linha: %d / vertice: %d\n", i, *graph[i]);
-        else
-            printf("linha: %d NULL\n", i);
-    }
+    print_graph(graph_header->graph_size);
 
     return 0;
 }

@@ -138,3 +138,26 @@ int get_edge(int u, int v)
 
     return *graph[index];
 }
+
+/*
+    print_graph
+
+    imprime a matriz de adjacência do grafo na linha de comandos
+*/
+void print_graph(int graph_size)
+{
+    for (int col = 0; col < graph_size; col++)
+    {
+        for (int row = 0; row < graph_size; row++)
+        {
+            int edge = get_edge(col, row);
+
+            if (edge < 0)
+                printf("|inf");
+            else
+                printf("|%3d", edge);
+        }
+
+        printf("\n");
+    }
+}

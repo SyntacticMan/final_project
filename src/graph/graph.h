@@ -33,4 +33,7 @@ int get_array_size(int graph_size);
 void add_edge(int u, int v);
 void add_null_edge(int u, int v);
 
+int get_edge(int u, int v);
+
 int random_generator(int max, int min);
+void print_graph(int graph_size);

@@ -8,7 +8,7 @@ primSrcDir = $(srcDir)prim/
 buildDir = ./build/
 binDir = ./bin/
 graphObjectFiles = $(buildDir)graph.o $(buildDir)file_module.o
-primObjectFiles = $(buildDir)prim_st.o $(buildDir)file_module.o
+primObjectFiles = $(buildDir)prim_st.o $(buildDir)file_module.o $(buildDir)graph.o
 CCFLAGS = -Wall
  
 all: graph prim
@@ -16,7 +16,7 @@ all: graph prim
 graph: graph.o file_module.o
 	$(CC) $(CCFLAGS) $(graphSrcDir)main.c $(graphObjectFiles) -o $(binDir)$(graphBinaryName)
 
-prim: prim_st.o file_module.o
+prim: prim_st.o file_module.o graph.o
 	$(CC) $(CCFLAGS) $(primSrcDir)main.c $(primObjectFiles) -o $(binDir)$(primBinaryName)
 
 graph.o: $(graphSrcDir)graph.c $(graphSrcDir)graph.h
