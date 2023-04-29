@@ -18,7 +18,7 @@ void write_file(header *file_header, int **graph, char *filename)
 
     for (int i = 0; i < file_header->array_size; i++)
     {
-        fwrite(graph[i], sizeof(int), 1, graph_file);
+        fwrite(graph[i], sizeof(int *), 1, graph_file);
     }
 
     fclose(graph_file);
@@ -42,9 +42,9 @@ int **read_file(char *filename, header *file_header)
 
     for (int i = 0; i < file_header->array_size; i++)
     {
-        graph[i] = (int *)malloc(sizeof(int));
+        graph[i] = (int *)malloc(sizeof(int *));
 
-        fread(graph[i], sizeof(int), 1, graph_file);
+        fread(graph[i], sizeof(int *), 1, graph_file);
     }
 
     fclose(graph_file);

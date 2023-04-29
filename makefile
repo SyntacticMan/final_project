@@ -28,6 +28,10 @@ file_module.o: $(fileSrcDir)file_module.c $(fileSrcDir)file_module.h
 prim_st.o: $(primSrcDir)prim_st.c $(primSrcDir)prim_st.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_st.c -o $(buildDir)prim_st.o
 
+test:
+	$(binDir)$(graphBinaryName) -s 5
+	$(binDir)$(primBinaryName) -f graph.grf
+
 debug: CCFLAGS = -DDEBUG -g
 debug: clean all
 

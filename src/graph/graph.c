@@ -68,7 +68,7 @@ int get_index(int col, int row)
     get_array_size
 
     calcula o tamanho necessário que o array tem de ter
-    obtendo com base no indíce da última coluna
+    com base no indíce da última coluna
 */
 int get_array_size(int graph_size)
 {
