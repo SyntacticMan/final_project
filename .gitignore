@@ -1,3 +1,3 @@
 bin/prim
 *.exe
-*.grf
+**/*.grf
