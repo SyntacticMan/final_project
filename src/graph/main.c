@@ -27,7 +27,7 @@
 #include "../file/file_module.h"
 #endif
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
 	srand(time NULL);
 
@@ -54,7 +54,7 @@ int main(int argc, char const *argv[])
 		}
 	}
 
-	int **graph = create_graph(graph_size);
+	int **graph = create_graph(graph_size, edge_percentage);
 
 	header *graph_header = malloc(sizeof(header));
 

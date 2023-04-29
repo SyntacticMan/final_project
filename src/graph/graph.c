@@ -17,7 +17,7 @@ int random_generator(int max, int min)
 
  * cria um novo grafo, com lista de vértices e arestas
  */
-int **create_graph(int graph_size)
+int **create_graph(int graph_size, int edge_percentage)
 {
     // alocar as colunas
     int **new_graph = (int **)malloc(get_array_size(graph_size) * sizeof(int *));
