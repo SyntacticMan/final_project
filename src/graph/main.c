@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #ifndef GRAPH
 #define GRAPH
@@ -29,24 +30,28 @@
 int main(int argc, char const *argv[])
 {
 	srand(time NULL);
-	int graph_size;
 
-	// necessário indicar o tamanho do grafo
-	if (argc < 3)
-	{
-		printf("Utilização: %s -s <int>\n", argv[0]);
-		return 1;
-	}
+	int graph_size, edge_percentage;
+	char *graph_filename;
 
-	// processar as opções
-	if (strcmp(argv[1], "-s") == 0)
+	int opt;
+	while ((opt = getopt(argc, argv, "s:f:p:")) != -1)
 	{
-		graph_size = atoi(argv[2]);
-	}
-	else
-	{
-		printf("Opção %s desconhecida\n", argv[2]);
-		return 1;
+		switch (opt)
+		{
+		case 's': // tamanho do grafo
+			graph_size = atoi(optarg);
+			break;
+		case 'f': // nome do ficheiro
+			graph_filename = optarg;
+			break;
+		case 'p': // percentagem do máximo de arestas a adicionar
+			edge_percentage = atoi(optarg);
+			break;
+		default:
+			fprintf(stderr, "Usage: %s [-s graph_size] [-f filename] [-p edge_percentage]\n", argv[0]);
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	int **graph = create_graph(graph_size);
@@ -57,7 +62,7 @@ int main(int argc, char const *argv[])
 	graph_header->graph_size = graph_size;
 
 	printf("%d\n%d\n", graph_header->graph_size, graph_header->array_size);
-	write_file(graph_header, graph, "graph.grf");
+	write_file(graph_header, graph, graph_filename);
 
 	for (int i = 0; i < graph_header->array_size; i++)
 	{
@@ -66,23 +71,6 @@ int main(int argc, char const *argv[])
 		else
 			printf("linha: %d NULL\n", i);
 	}
-
-	// // limpeza da memória
-	// while (test->vertice_head != NULL)
-	// {
-	// 	vertice *temp = test->vertice_head->next_vertice;
-	// 	free(test->vertice_head);
-	// 	test->vertice_head = temp;
-	// }
-
-	// while (test->edge_head != NULL)
-	// {
-	// 	edge *temp = test->edge_head->next_edge;
-	// 	free(test->edge_head);
-	// 	test->edge_head = temp;
-	// }
-
-	// free(test);
 
 	return 0;
 }
