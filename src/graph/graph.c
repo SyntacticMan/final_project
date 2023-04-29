@@ -2,6 +2,7 @@
 #define GRAPH
 #include "graph.h"
 #endif
+
 /*
  *   random_generator
 
@@ -34,7 +35,10 @@ void create_graph(int graph_size, int edge_percentage)
             if ((row >= col))
                 continue;
 
-            add_edge(col, row);
+            if (row % 2 == 0)
+                add_edge(col, row);
+            else
+                add_null_edge(col, row);
         }
     }
 }
@@ -87,4 +91,50 @@ void add_edge(int u, int v)
     *weight = random_generator(MAX_WEIGHT, MIN_WEIGHT);
 
     graph[index] = weight;
+}
+
+/*
+    add_null_edge
+
+    adiciona uma "não-ligação" entre os vértices u e v
+    representada por um infinito
+*/
+void add_null_edge(int u, int v)
+{
+    int index = get_index(u, v);
+
+    // como o vetor é de inteiros
+    // uso -1 para representar o infinito
+    int *inf = (int *)malloc(sizeof(int));
+    *inf = -1;
+    graph[index] = inf;
+}
+
+/*
+    get_edge
+
+    obtém a aresta, ou a ausência dela,
+    correspondente à coluna e linha indicada
+*/
+int get_edge(int u, int v)
+{
+
+    // um vértice não tem ligação com ele mesmo
+    // logo a aresta é sempre 0
+    if (u == v)
+        return 0;
+
+    // se a coluna fôr mais pequena que a linha
+    // é porque foi pedida uma aresta da triangular inferior
+    // portanto vou inverter coluna e linha para obter a simétrica
+    if (u < v)
+    {
+        int temp = u;
+        u = v;
+        v = temp;
+    }
+
+    int index = get_index(u, v);
+
+    return *graph[index];
 }

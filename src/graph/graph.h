@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #define MAX_EDGE 3
 #define MIN_EDGE 1
@@ -30,5 +31,6 @@ int get_index(int col, int row);
 int get_array_size(int graph_size);
 
 void add_edge(int u, int v);
+void add_null_edge(int u, int v);
 
 int random_generator(int max, int min);
