@@ -69,6 +69,13 @@ int main(int argc, char *argv[])
 	graph_header->graph_size = graph_size;
 
 	printf("%d\n%d\n", graph_header->graph_size, graph_header->array_size);
+
+	int max_edge_count = get_max_edge_count(graph_size);
+	int edge_count = get_edge_count(graph_size);
+
+	printf("maximo arestas: %d\narestas existentes: %d\n", max_edge_count, edge_count);
+
+	printf("percentagem de arestas: %2f\n", get_edge_percentage(graph_size));
 	write_file(graph_header, graph, graph_filename);
 
 	print_graph(graph_header->graph_size);

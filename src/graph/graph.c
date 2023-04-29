@@ -140,6 +140,50 @@ int get_edge(int u, int v)
 }
 
 /*
+    get_max_edge_count
+
+    obtém o número máximo de arestas que o grafo pode ter
+*/
+int get_max_edge_count(int graph_size)
+{
+    return (graph_size * (graph_size - 1) / 2);
+}
+
+/*
+    get_edge_count
+
+    obtém o número de arestas existentes no grafo
+*/
+int get_edge_count(int graph_size)
+{
+    int edge_count = 0;
+
+    for (int i = 0; i < graph_size; i++)
+    {
+        for (int j = 0; j < graph_size; j++)
+        {
+            int edge = get_edge(i, j);
+
+            if (edge > 0)
+                edge_count++;
+        }
+    }
+
+    return edge_count;
+}
+
+/*
+    get_edge_percentage
+
+    calcula a percentagem de arestas existentes no grafo
+    contra o número máximo de arestas que pode ter
+*/
+float get_edge_percentage(int graph_size)
+{
+    return ((float)get_edge_count(graph_size) / (float)get_max_edge_count(graph_size)) * 100.0;
+}
+
+/*
     print_graph
 
     imprime a matriz de adjacência do grafo na linha de comandos

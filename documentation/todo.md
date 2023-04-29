@@ -6,6 +6,9 @@
 * ~~tamanho do grafo introduzido pelo utilizador~~
 * Arestas geradas tem de ter a percentagem relativa ao total máximo para não a exceder
 * Apresentar pequeno relatório no fim a indicar o número de vértices, arestas e percentagem relativa gerada e pedida
+    * ~~contar número máximo de vértices que o grafo pode ter~~
+    * ~~contar número de vértices atribuídos~~
+    * ~~calcular percentagem de atribuídos vs máxima~~
 
 ## Módulo de ficheiros
 * ~~Determinar o formato do ficheiro do grafo~~
