@@ -17,10 +17,10 @@ int random_generator(int max, int min)
 
  * cria um novo grafo, com lista de vértices e arestas
  */
-int **create_graph(int graph_size, int edge_percentage)
+void create_graph(int graph_size, int edge_percentage)
 {
     // alocar as colunas
-    int **new_graph = (int **)malloc(get_array_size(graph_size) * sizeof(int *));
+    graph = (int **)malloc(get_array_size(graph_size) * sizeof(int *));
 
     // como a matriz é triangular superior
     // apenas aloco os elementos que vão ser utilizados
@@ -34,11 +34,9 @@ int **create_graph(int graph_size, int edge_percentage)
             if ((row >= col))
                 continue;
 
-            add_edge(new_graph, col, row);
+            add_edge(col, row);
         }
     }
-
-    return new_graph;
 }
 
 /*
@@ -80,7 +78,7 @@ int get_array_size(int graph_size)
 
  * cria uma aresta entre os vértices u e v
  */
-void add_edge(int **graph, int u, int v)
+void add_edge(int u, int v)
 {
     int index = get_index(u, v);
 

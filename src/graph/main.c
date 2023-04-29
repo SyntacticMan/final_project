@@ -54,8 +54,15 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	int **graph = create_graph(graph_size, edge_percentage);
+	create_graph(graph_size, edge_percentage);
 
+	if (graph == NULL)
+	{
+		printf("Nao foi possivel criar o grafo.\n");
+		return -1;
+	}
+
+	// preparar o grafo para ser escrito no ficheiro
 	header *graph_header = malloc(sizeof(header));
 
 	graph_header->array_size = get_array_size(graph_size);
