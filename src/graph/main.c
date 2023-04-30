@@ -62,23 +62,24 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	// preparar o grafo para ser escrito no ficheiro
+	// obter as contagens das arestas
+	int max_edge_count = get_max_edge_count(graph_size);
+	int actual_edge_percentage = (int)get_edge_percentage(graph_size);
+
+	// emitir o relatório de criação
+	printf("Grafo criado\n");
+	printf("Tamanho do grafo: %d\n", graph_size);
+	printf("Numero maximo de arestas: %d\n", max_edge_count);
+	printf("Percentagem de arestas pedidas: %d%% | Percentagem de arestas atribuidas: %d%%\n", requested_edge_percentage, actual_edge_percentage);
+
+	// gravar o grafo no ficheiro
 	header *graph_header = malloc(sizeof(header));
 
 	graph_header->array_size = get_array_size(graph_size);
 	graph_header->graph_size = graph_size;
+	graph_header->edge_percentage = actual_edge_percentage;
 
-	printf("%d\n%d\n", graph_header->graph_size, graph_header->array_size);
-
-	int max_edge_count = get_max_edge_count(graph_size);
-	int edge_count = get_edge_count(graph_size);
-	int actual_edge_percentage = (int)get_edge_percentage(graph_size);
-
-	printf("maximo arestas: %d\narestas existentes: %d\n", max_edge_count, edge_count);
-
-	printf("percentagem de arestas: %d%%\n", actual_edge_percentage);
 	write_file(graph_header, graph, graph_filename);
 
-	print_graph(graph_header->graph_size);
 	return 0;
 }
