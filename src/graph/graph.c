@@ -23,8 +23,8 @@ void create_graph(int graph_size, int edge_percentage)
     // alocar as colunas
     graph = (int **)malloc(get_array_size(graph_size) * sizeof(int *));
 
-    // como a matriz é triangular superior
-    // apenas aloco os elementos que vão ser utilizados
+    // uma primeira passagem para assegurar
+    // que todos os vértices têm, pelo menos, uma aresta
     for (int col = 1; col <= graph_size; col++)
     {
         for (int row = 1; row < graph_size; row++)
@@ -35,10 +35,7 @@ void create_graph(int graph_size, int edge_percentage)
             if ((row >= col))
                 continue;
 
-            if (row % 2 == 0)
-                add_edge(col, row);
-            else
-                add_null_edge(col, row);
+            add_edge(col, row);
         }
     }
 }
@@ -146,7 +143,7 @@ int get_edge(int u, int v)
 */
 int get_max_edge_count(int graph_size)
 {
-    return (graph_size * (graph_size - 1) / 2);
+    return ((graph_size * (graph_size - 1)) / 2);
 }
 
 /*
@@ -162,10 +159,13 @@ int get_edge_count(int graph_size)
     {
         for (int j = 0; j < graph_size; j++)
         {
-            int edge = get_edge(i, j);
-
-            if (edge > 0)
+            // para evitar contar duas vezes
+            // apenas pedir da triangular superior
+            // também ignorando i=j
+            if (j < i && get_edge(i, j) > 0)
+            {
                 edge_count++;
+            }
         }
     }
 

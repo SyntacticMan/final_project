@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 {
 	srand(time NULL);
 
-	int graph_size, edge_percentage;
+	int graph_size, requested_edge_percentage;
 	char *graph_filename;
 
 	int opt;
@@ -46,15 +46,15 @@ int main(int argc, char *argv[])
 			graph_filename = optarg;
 			break;
 		case 'p': // percentagem do máximo de arestas a adicionar
-			edge_percentage = atoi(optarg);
+			requested_edge_percentage = atoi(optarg);
 			break;
 		default:
-			fprintf(stderr, "Usage: %s [-s graph_size] [-f filename] [-p edge_percentage]\n", argv[0]);
+			fprintf(stderr, "Usage: %s [-s graph_size] [-f filename] [-p requested_edge_percentage]\n", argv[0]);
 			exit(EXIT_FAILURE);
 		}
 	}
 
-	create_graph(graph_size, edge_percentage);
+	create_graph(graph_size, requested_edge_percentage);
 
 	if (graph == NULL)
 	{
@@ -72,10 +72,11 @@ int main(int argc, char *argv[])
 
 	int max_edge_count = get_max_edge_count(graph_size);
 	int edge_count = get_edge_count(graph_size);
+	int actual_edge_percentage = (int)get_edge_percentage(graph_size);
 
 	printf("maximo arestas: %d\narestas existentes: %d\n", max_edge_count, edge_count);
 
-	printf("percentagem de arestas: %2f\n", get_edge_percentage(graph_size));
+	printf("percentagem de arestas: %d%%\n", actual_edge_percentage);
 	write_file(graph_header, graph, graph_filename);
 
 	print_graph(graph_header->graph_size);

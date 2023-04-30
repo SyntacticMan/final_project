@@ -1,3 +1,4 @@
 bin/prim
 *.exe
 *.grf
+.vscode/settings.json

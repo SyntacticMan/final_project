@@ -12,6 +12,7 @@ typedef struct file_header
 {
     int graph_size;
     int array_size;
+    int edge_percentage;
 } header;
 
 void write_file(header *file_header, int **graph, char *filename);
