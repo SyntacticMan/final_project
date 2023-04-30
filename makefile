@@ -39,3 +39,4 @@ clean:
 	rm -f $(buildDir)*.o
 	rm -f $(binDir)$(graphBinaryName)
 	rm -f $(binDir)$(primBinaryName)
+	rm *.grf
