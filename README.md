@@ -9,6 +9,7 @@ multi-tarefa.
 
 ## Documentação
 
-[Especificação](./documentation/especificacao.md) do projecto.
+### [Especificação](./documentation/especificacao.md) do projecto.
+Este documento contém a especificação dos vários componetnes do projecto.
 
-Lista de [tarefas](./documentation/todo.md) a executar.
+### Lista de [tarefas](./documentation/todo.md) a executar.
