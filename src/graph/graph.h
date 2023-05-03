@@ -20,7 +20,7 @@
 
 // grafo é representado como um vetor de pointeiros dinamicamente alocado de ints
 // uma vez que o tamanho do grafo é determinado durante a execução
-int **graph;
+extern int **graph;
 
 // vetor com a árvore geradora mínima
 // int **d;

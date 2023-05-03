@@ -3,6 +3,10 @@
 #include "graph.h"
 #endif
 
+int **graph;
+
+static double get_edge_probability(int graph_size, double requested_edge_percentage);
+
 /*
  *   random_generator
 
@@ -23,6 +27,9 @@ void create_graph(int graph_size, int edge_percentage)
     // alocar as colunas
     graph = (int **)malloc(get_array_size(graph_size) * sizeof(int *));
 
+    double edge_probability = get_edge_probability(graph_size, edge_percentage);
+    printf("Edge probability %f\n", edge_probability);
+
     // uma primeira passagem para assegurar
     // que todos os vértices têm, pelo menos, uma aresta
     for (int col = 1; col <= graph_size; col++)
@@ -35,7 +42,10 @@ void create_graph(int graph_size, int edge_percentage)
             if ((row >= col))
                 continue;
 
-            add_edge(col, row);
+            if ((double)random_generator(100, 1) < edge_probability)
+                add_edge(col, row);
+            else
+                add_null_edge(col, row);
         }
     }
 }
@@ -181,6 +191,19 @@ int get_edge_count(int graph_size)
 float get_edge_percentage(int graph_size)
 {
     return ((float)get_edge_count(graph_size) / (float)get_max_edge_count(graph_size)) * 100.0;
+}
+
+double get_edge_probability(int graph_size, double requested_edge_percentage)
+{
+
+    double edge_probability = 2.0 * (requested_edge_percentage * get_max_edge_count((double)graph_size)) / ((double)graph_size * ((double)graph_size - 1.0));
+
+    // se o grafo fôr muito grande e a percentagem muito baixa
+    // a probabilidade pode ficar negativa, nesse caso devolvo 1
+    if (edge_probability < 0)
+        edge_probability = 1.0;
+
+    return edge_probability;
 }
 
 /*
