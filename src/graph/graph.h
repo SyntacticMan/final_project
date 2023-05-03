@@ -27,16 +27,11 @@ extern int **graph;
 
 void create_graph(int graph_size, int edge_percentage);
 
-int get_index(int col, int row);
 int get_array_size(int graph_size);
 
-void add_edge(int u, int v);
-void add_null_edge(int u, int v);
-
 int get_edge(int u, int v);
-int get_max_edge_count(int graph_size);
 int get_edge_count();
+int get_max_edge_count(int graph_size);
 float get_edge_percentage(int graph_size);
 
-int random_generator(int max, int min);
 void print_graph(int graph_size);

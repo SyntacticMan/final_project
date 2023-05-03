@@ -5,7 +5,13 @@
 
 int **graph;
 
+static void add_edge(int u, int v);
+static void add_null_edge(int u, int v);
+
+static int get_index(int col, int row);
 static double get_edge_probability(int graph_size, double requested_edge_percentage);
+
+static int random_generator(int max, int min);
 
 /*
  *   random_generator
