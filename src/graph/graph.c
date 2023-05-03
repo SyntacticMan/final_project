@@ -27,6 +27,10 @@ void create_graph(int graph_size, int edge_percentage)
     // alocar as colunas
     graph = (int **)malloc(get_array_size(graph_size) * sizeof(int *));
 
+    if (graph == NULL)
+    {
+        return;
+    }
     double edge_probability = get_edge_probability(graph_size, edge_percentage);
     printf("Edge probability %f\n", edge_probability);
 

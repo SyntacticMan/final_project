@@ -54,6 +54,21 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	// no imediato vou limitar o grafo a um máximo de 23000 vértices
+	// mais do que isso e começa a ter problemas em alocar memória
+	if (graph_size <= 1 || graph_size > 23000)
+	{
+		printf("Grafo tem de ter um tamanho entre 2 e 23000\n");
+		return -1;
+	}
+
+	// percentagens a 0 ou negativas
+	if (requested_edge_percentage < 0)
+	{
+		printf("Percentagem de arestas deve ser escolhida entre 0 e 100\n");
+		return -1;
+	}
+
 	create_graph(graph_size, requested_edge_percentage);
 
 	if (graph == NULL)
