@@ -15,21 +15,28 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
-    if (argc < 3)
-    {
-        printf("prim \n Implementação do Algoritmo de Prim\n-f <nome> : carrega grafo do ficheiro");
-        return 0;
-    }
 
     char *graph_filename;
+    int opt, threads;
 
-    if (strcmp(argv[1], "-f") == 0)
+    while ((opt = getopt(argc, argv, "f:t")) != -1)
     {
-        graph_filename = malloc(sizeof(char) * (strlen(argv[2]) + 1));
-        strcpy(graph_filename, argv[2]);
+        switch (opt)
+        {
+        case 'f':
+            graph_filename = optarg;
+            break;
+        case 't':
+            threads = atoi(optarg);
+        default:
+            fprintf(stderr, "Algoritmo de Prim\n");
+            fprintf(stderr, "Usage: %s [-f filename] [-t number of threads]\n", argv[0]);
+            exit(EXIT_FAILURE);
+        }
     }
 
     printf("grafo-> %s\n", graph_filename);
@@ -37,11 +44,4 @@ int main(int argc, char const *argv[])
     header *graph_header = malloc(sizeof(header));
 
     graph = read_file(graph_filename, graph_header);
-
-    if (graph != NULL)
-        printf("file loaded\nGraph size-> %d\nArray size-> %d\n", graph_header->graph_size, graph_header->array_size);
-
-    print_graph(graph_header->graph_size);
-
-    return 0;
 }
