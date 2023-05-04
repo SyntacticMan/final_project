@@ -77,7 +77,7 @@ void create_graph(int graph_size, int edge_percentage)
 /*
     get_index
 
-    converte a coluna e linha no indíce correspondente
+    converte a coluna e linha no índice correspondente
     no vetor que guarda o grafo
 */
 int get_index(int col, int row)
@@ -89,8 +89,8 @@ int get_index(int col, int row)
     int n = col - 2;
     int index = (n * (n + 1)) / 2;
 
-    // adicionar a linha ao indíce
-    // para obter indíce da coluna/linha
+    // adicionar a linha ao índice
+    // para obter índice da coluna/linha
     if (row > 1)
         index += row - 1;
 
@@ -101,7 +101,7 @@ int get_index(int col, int row)
     get_array_size
 
     calcula o tamanho necessário que o array tem de ter
-    com base no indíce da última coluna
+    com base no índice da última coluna
 */
 int get_array_size(int graph_size)
 {
