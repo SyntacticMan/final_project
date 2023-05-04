@@ -1,8 +1,15 @@
 /********************************************************************
- *  Módulo file_module                                              *
+ *  Projecto Final em Engenharia Informática                        *
  *                                                                  *
- *  Biblioteca para ler e gravar os grafos em disco 				*
- *                                                                  *
+ * Programação Paralela Multi tarefa								*
+ * Algoritmo de Prim para obter uma árvore geradora mínima			*
+ * 																	*
+ * Biblioteca para a gravação e leitura de grafos em ficheiro       *
+ * 																	*
+ * Nuno Méren														*
+ * 1902937															*
+ * 																	*
+ * Orientador: Paulo Shirley										*
  * ******************************************************************/
 
 #include <stdio.h>

@@ -1,3 +1,17 @@
+/********************************************************************
+ *  Projecto Final em Engenharia Informática                        *
+ *                                                                  *
+ * Programação Paralela Multi tarefa								*
+ * Algoritmo de Prim para obter uma árvore geradora mínima			*
+ * 																	*
+ * Biblioteca para a gravação e leitura de grafos em ficheiro       *
+ * 																	*
+ * Nuno Méren														*
+ * 1902937															*
+ * 																	*
+ * Orientador: Paulo Shirley										*
+ * ******************************************************************/
+
 #ifndef FILE_MODULE
 #define FILE_MODULE
 #include "file_module.h"

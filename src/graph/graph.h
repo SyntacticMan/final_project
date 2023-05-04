@@ -1,8 +1,15 @@
 /********************************************************************
- *  Módulo graph                                                    *
+ *  Projecto Final em Engenharia Informática                        *
  *                                                                  *
- *  Constrói um grafo com base nos valores    						*
- *  indicados nos #define                                           *
+ * Programação Paralela Multi tarefa								*
+ * Algoritmo de Prim para obter uma árvore geradora mínima			*
+ * 																	*
+ * Biblioteca de grafos												*
+ * 																	*
+ * Nuno Méren														*
+ * 1902937															*
+ * 																	*
+ * Orientador: Paulo Shirley										*
  * ******************************************************************/
 
 #include <stdlib.h>
