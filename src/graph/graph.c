@@ -231,6 +231,16 @@ double get_edge_probability(int graph_size, double requested_edge_percentage)
 }
 
 /*
+    pick_graph_root
+
+    escolhe um vértice ao acaso como raíz do grafo
+*/
+int pick_graph_root(int graph_size)
+{
+    return random_generator(graph_size, 1);
+}
+
+/*
     print_graph
 
     imprime a matriz de adjacência do grafo na linha de comandos
@@ -239,10 +249,12 @@ void print_graph(int graph_size)
 {
     for (int col = 0; col < graph_size; col++)
     {
+        // printf("%d\n", col);
+
         for (int row = 0; row < graph_size; row++)
         {
             int edge = get_edge(col, row);
-
+            // printf("%d", row);
             if (edge < 0)
                 printf("|inf");
             else

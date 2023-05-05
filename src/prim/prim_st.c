@@ -16,3 +16,7 @@
 #define PRIM_ST
 #include "prim_st.h"
 #endif
+
+void prim_mst()
+{
+}

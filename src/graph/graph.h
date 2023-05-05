@@ -29,8 +29,10 @@
 // uma vez que o tamanho do grafo é determinado durante a execução
 extern int **graph;
 
+extern int **v_t;
+
 // vetor com a árvore geradora mínima
-// int **d;
+extern int **d;
 
 void create_graph(int graph_size, int edge_percentage);
 
@@ -40,5 +42,7 @@ int get_edge(int u, int v);
 int get_edge_count();
 int get_max_edge_count(int graph_size);
 float get_edge_percentage(int graph_size);
+
+int pick_graph_root(int graph_size);
 
 void print_graph(int graph_size);

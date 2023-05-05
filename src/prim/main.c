@@ -30,14 +30,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 int main(int argc, char *argv[])
 {
 
-    char *graph_filename;
-    int opt, threads;
+    srand(time NULL);
 
-    while ((opt = getopt(argc, argv, "f:t")) != -1)
+    char *graph_filename;
+    int opt;
+    int threads = 0;
+
+    while ((opt = getopt(argc, argv, "f:t:")) != -1)
     {
         switch (opt)
         {
@@ -46,16 +50,35 @@ int main(int argc, char *argv[])
             break;
         case 't':
             threads = atoi(optarg);
+            break;
         default:
             fprintf(stderr, "Algoritmo de Prim\n");
             fprintf(stderr, "Usage: %s [-f filename] [-t number of threads]\n", argv[0]);
             exit(EXIT_FAILURE);
+            break;
         }
     }
-
-    printf("grafo-> %s\n", graph_filename);
 
     header *graph_header = malloc(sizeof(header));
 
     graph = read_file(graph_filename, graph_header);
+
+    int graph_root;
+
+    if (threads <= 1)
+    {
+        // lançar single thread
+        printf("graph_size -> %d", graph_header->graph_size);
+        graph_root = pick_graph_root(graph_header->graph_size);
+    }
+    else
+    {
+        // lançar o número de threads pedidas
+        printf("Multi thread\n");
+    }
+    printf("grafo-> %s\n", graph_filename);
+    printf("graph root-> %d\n", graph_root);
+
+    if (graph_header->graph_size <= 30)
+        print_graph(graph_header->graph_size);
 }
