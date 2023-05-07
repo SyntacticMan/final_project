@@ -12,4 +12,9 @@
  * Orientador: Paulo Shirley										*
  * ******************************************************************/
 
+#ifndef GRAPH
+#define GRAPH
+#include "../graph/graph.h"
+#endif
+
 void prim_mst();
