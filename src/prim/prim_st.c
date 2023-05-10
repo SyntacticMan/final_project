@@ -81,12 +81,14 @@ void prim_mst(int array_size, int graph_size, int graph_root)
     }
 
     // emitir a árvore geradora mínima
-    printf("%d", graph_root);
+    // printf("%d", graph_root);
 
+    printf("\nÁrvore mínima ");
     for (int i = 0; i < graph_size; i++)
     {
         if (*d[i] > 0)
-            printf("=>%dw(%d)", i, *d[i]);
+            // printf("=>%dw(%d)", i, *d[i]); // debug
+            printf("=> %d", i);
     }
     printf("\n");
 }
