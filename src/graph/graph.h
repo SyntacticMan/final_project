@@ -39,11 +39,11 @@ void create_graph(int graph_size, int edge_percentage);
 int get_array_size(int graph_size);
 
 int get_edge(int u, int v);
-// qq coisa get_all_edges(int v) -> provavelmente um array
-// move_vertive(int u) -> move vertice v from graph to v_t
 int get_edge_count();
 int get_max_edge_count(int graph_size);
 float get_edge_percentage(int graph_size);
+
+void remove_edge(int u, int v);
 
 int pick_graph_root(int graph_size);
 

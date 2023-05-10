@@ -141,6 +141,11 @@ void add_null_edge(int u, int v)
     graph[index] = inf;
 }
 
+int **allocate_v_t(int graph_size)
+{
+    return NULL; // v_t = calloc(graph_size, sizeof(int *));
+}
+
 /*
     get_edge
 
@@ -215,6 +220,14 @@ int get_edge_count(int graph_size)
 float get_edge_percentage(int graph_size)
 {
     return ((float)get_edge_count(graph_size) / (float)get_max_edge_count(graph_size)) * 100.0;
+}
+
+void remove_edge(int u, int v)
+{
+    int index = get_index(u, v);
+
+    int infinite = -1;
+    graph[index] = &infinite;
 }
 
 double get_edge_probability(int graph_size, double requested_edge_percentage)

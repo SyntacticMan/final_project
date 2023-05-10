@@ -17,11 +17,6 @@
 #include "prim_st.h"
 #endif
 
-#ifndef GRAPH
-#define GRAPH
-#include "../graph/graph.h"
-#endif
-
 #ifndef FILE_MODULE
 #define FILE_MODULE
 #include "../file/file_module.h"
@@ -63,13 +58,17 @@ int main(int argc, char *argv[])
 
     graph = read_file(graph_filename, graph_header);
 
-    int graph_root;
+    if (graph == NULL)
+    {
+        return -1;
+    }
+
+    int graph_root = pick_graph_root(graph_header->graph_size);
 
     if (threads <= 1)
     {
         // lançar single thread
-        printf("graph_size -> %d", graph_header->graph_size);
-        graph_root = pick_graph_root(graph_header->graph_size);
+        printf("graph_size -> %d\n", graph_header->graph_size);
     }
     else
     {
@@ -81,4 +80,6 @@ int main(int argc, char *argv[])
 
     if (graph_header->graph_size <= 30)
         print_graph(graph_header->graph_size);
+
+    prim_mst(graph_header->array_size, graph_header->graph_size, graph_root);
 }

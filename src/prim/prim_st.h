@@ -17,4 +17,4 @@
 #include "../graph/graph.h"
 #endif
 
-void prim_mst();
+void prim_mst(int array_size, int graph_size, int graph_root);

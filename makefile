@@ -29,7 +29,7 @@ prim_st.o: $(primSrcDir)prim_st.c $(primSrcDir)prim_st.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_st.c -o $(buildDir)prim_st.o
 
 test:
-	$(binDir)$(graphBinaryName) -s 10 -f graph.grf -p 70
+	$(binDir)$(graphBinaryName) -s 5 -f graph.grf -p 70
 	$(binDir)$(primBinaryName) -f graph.grf
 
 debug: CCFLAGS = -DDEBUG -g

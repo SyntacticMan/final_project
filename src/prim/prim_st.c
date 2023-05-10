@@ -17,17 +17,76 @@
 #include "prim_st.h"
 #endif
 
-void prim_mst()
+void prim_mst(int array_size, int graph_size, int graph_root)
 {
     // v_t = root_node
-    // d -> inicializado totalmente a 0, d[r] = 0;
+    // vetor d é inicializado com o tamanho do grafo
+    // e o vértice raíz igual a zero
+    int **d = (int **)malloc(graph_size * sizeof(int *));
 
-    /*
-        graph -> v_t tem de se passar de graph para v_t e libertar para o v_t para não queimar a memória toda
+    int root_weight = 0;
+    d[graph_root] = &root_weight;
 
-        d retêm o menor peso da aresta para o vértice v
+    // v_t tem o mesmo tamanho de graph
+    int **v_t = calloc(graph_size, sizeof(int *));
 
-        tem de percorrer todo o grafo para um dado vértice para se obter a aresta com o menor peso desse vértice
-        esse vértice depois é removido
-    */
+    // marcar vértice com tendo sido visitado
+    int visited = 1;
+    v_t[graph_root] = &visited;
+
+    // obter todas as arestas que pertencem à raíz
+    int infinite = -1;
+    for (int v = 0; v < graph_size; v++)
+    {
+        int edge_weight = get_edge(graph_root, v);
+        if (edge_weight > 0)
+        {
+            d[v] = &edge_weight;
+        }
+        else
+        {
+            d[v] = &infinite;
+        }
+    }
+
+    int visited_count = 1;
+    while (visited_count < graph_size - 1)
+    {
+        int u = 0;
+
+        for (int v = 0; v < visited_count; v++)
+        {
+            int edge_weight = get_edge(u, v);
+
+            if ((*d[v] < edge_weight))
+            {
+                d[v] = &edge_weight;
+                remove_edge(u, v);
+            }
+        }
+
+        // v_t[u] = &visited;
+        u++;
+        visited_count++;
+
+        for (int v = 0; v < visited_count; v++)
+        {
+            int weight = get_edge(u, v);
+
+            if ((u == -1 || weight < *d[v]))
+            {
+                d[v] = &weight;
+            }
+        }
+    }
+
+    // emitir a árvore geradora mínima
+    printf("%d", graph_root);
+
+    for (int i = 0; i < graph_size; i++)
+    {
+        if (*d[i] > 0)
+            printf("=>%dw(%d)", i, *d[i]);
+    }
+    printf("\n");
 }
