@@ -19,16 +19,13 @@
 
 void prim_mst(int array_size, int graph_size, int graph_root)
 {
-    // v_t = root_node
-    // vetor d é inicializado com o tamanho do grafo
-    // e o vértice raíz igual a zero
+    // vetor d e v_t são inicializados com o mesmo tamanho que o grafo
     int **d = (int **)malloc(graph_size * sizeof(int *));
+    int **v_t = calloc(graph_size, sizeof(int *));
 
+    // raíz do grafo começa com peso 0
     int root_weight = 0;
     d[graph_root] = &root_weight;
-
-    // v_t tem o mesmo tamanho de graph
-    int **v_t = calloc(graph_size, sizeof(int *));
 
     // marcar vértice com tendo sido visitado
     int visited = 1;
@@ -81,8 +78,6 @@ void prim_mst(int array_size, int graph_size, int graph_root)
     }
 
     // emitir a árvore geradora mínima
-    // printf("%d", graph_root);
-
     printf("\nÁrvore mínima ");
     for (int i = 0; i < graph_size; i++)
     {
