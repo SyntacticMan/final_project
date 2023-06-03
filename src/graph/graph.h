@@ -50,4 +50,4 @@ int pick_graph_root(int graph_size);
 
 void print_graph(int graph_size);
 
-void draw_graph(void);
+void draw_graph(int graph_size);

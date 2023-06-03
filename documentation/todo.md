@@ -24,5 +24,5 @@
     * Função para separar o array da árvore em blocos
     * Função para consolidar os resultados dos processos individuais
 * Implementar sistema para cronometrar a execução
-* Gerar um .png do grafo
+* ~~Gerar um .png do grafo~~
 * Gerar um .png da árvore mínima

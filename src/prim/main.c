@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    // int graph_root = pick_graph_root(graph_header->graph_size);
-    int graph_root = 5;
+    int graph_root = pick_graph_root(graph_header->graph_size);
+    // int graph_root = 5;
 
     if (threads <= 1)
     {

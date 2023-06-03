@@ -268,7 +268,7 @@ void print_graph(int graph_size)
         {
             int edge = get_edge(col, row);
             // printf("%d", row);
-            if (edge < 0)
+            if (edge <= 0)
                 printf("|inf");
             else
                 printf("|%3d", edge);
@@ -278,31 +278,48 @@ void print_graph(int graph_size)
     }
 }
 
-void draw_graph(void)
+void draw_graph(int graph_size)
 {
     Agraph_t *g;
     Agnode_t *n, *m;
     Agedge_t *e;
     // Agsym_t *a;
+    char str[20]; // Assuming the maximum length of the resulting string
 
     printf("draw_graph\n");
     /* set up a graphviz context */
     gvc = gvContext();
 
     char *args[] = {
-        "dot",
+        "fdp",
         /* gif output */
         "-Tpng",
         /* output to file abc.gif */
         "-oabc.png"};
 
-    int p = gvParseArgs(gvc, sizeof(args) / sizeof(char *), args);
+    gvParseArgs(gvc, sizeof(args) / sizeof(char *), args);
 
-    /* Create a simple digraph */
     g = agopen("g", Agundirected, NULL);
-    n = agnode(g, "p", 1);
-    m = agnode(g, "m", 1);
-    e = agedge(g, n, m, 0, 1);
+    for (int col = 0; col < graph_size; col++)
+    {
+        for (int row = 0; row < graph_size; row++)
+        {
+            sprintf(str, "%d", col);
+            n = agnode(g, str, 1);
+
+            sprintf(str, "%d", row);
+            m = agnode(g, str, 1);
+
+            int weight = get_edge(col, row);
+            if (col < row && weight > 0)
+            {
+                e = agedge(g, n, m, 0, 1);
+                sprintf(str, "%d", weight);
+                agsafeset(e, "label", str, "");
+            }
+        }
+    }
+    /* Create a simple digraph */
 
     /* Set an attribute - in this case one that affects the visible rendering */
     // agsafeset(n, "color", "red", "");
