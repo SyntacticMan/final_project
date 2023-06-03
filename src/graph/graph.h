@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "gvc.h"
 
 #define MAX_EDGE 3
 #define MIN_EDGE 1
@@ -28,7 +29,7 @@
 // grafo é representado como um vetor de pointeiros dinamicamente alocado de ints
 // uma vez que o tamanho do grafo é determinado durante a execução
 extern int **graph;
-
+GVC_t *gvc;
 extern int **v_t;
 
 // vetor com a árvore geradora mínima
@@ -48,3 +49,5 @@ void remove_edge(int u, int v);
 int pick_graph_root(int graph_size);
 
 void print_graph(int graph_size);
+
+void draw_graph(void);

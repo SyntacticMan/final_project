@@ -2,3 +2,7 @@ bin/prim
 *.exe
 *.grf
 .vscode/settings.json
+.vscode/c_cpp_properties.json
+include/*
+*breakpoints*
+*.png

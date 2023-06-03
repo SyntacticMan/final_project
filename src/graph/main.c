@@ -96,5 +96,7 @@ int main(int argc, char *argv[])
 
 	write_file(graph_header, graph, graph_filename);
 
+	draw_graph();
+
 	return 0;
 }
