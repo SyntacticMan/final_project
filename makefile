@@ -27,10 +27,7 @@ prim: prim_st.o file_module.o graph.o
 
 graph.o: $(graphSrcDir)graph.c $(graphSrcDir)graph.h
 	$(CC) $(CCFLAGS) -c $(graphSrcDir)graph.c -o $(buildDir)graph.o
-
-draw_graph.o: $(graphSrcDir)draw_graph.c $(graphSrcDir)draw_graph.h
-	$(CC) $(CCFLAGS) -c $(graphSrcDir)draw_graph.c  -o $(buildDir)draw_graph.o
-
+	
 file_module.o: $(fileSrcDir)file_module.c $(fileSrcDir)file_module.h
 	$(CC) $(CCFLAGS) -c $(fileSrcDir)file_module.c -o $(buildDir)file_module.o
 

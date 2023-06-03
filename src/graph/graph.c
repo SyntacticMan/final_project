@@ -278,7 +278,7 @@ void print_graph(int graph_size)
     }
 }
 
-void draw_graph(int graph_size)
+void draw_graph(int graph_size, const char *filename)
 {
     Agraph_t *g;
     Agnode_t *n, *m;
@@ -290,12 +290,16 @@ void draw_graph(int graph_size)
     /* set up a graphviz context */
     gvc = gvContext();
 
+    // preparar a opção com o nome do ficheiro a gerar
+    char image_name[100] = "-o";
+    strcat(image_name, filename);
+
     char *args[] = {
         "fdp",
         /* gif output */
         "-Tpng",
         /* output to file abc.gif */
-        "-oabc.png"};
+        image_name};
 
     gvParseArgs(gvc, sizeof(args) / sizeof(char *), args);
 
@@ -320,9 +324,6 @@ void draw_graph(int graph_size)
         }
     }
     /* Create a simple digraph */
-
-    /* Set an attribute - in this case one that affects the visible rendering */
-    // agsafeset(n, "color", "red", "");
 
     /* Compute a layout using layout engine from command line args */
     gvLayoutJobs(gvc, g);

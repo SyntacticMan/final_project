@@ -97,8 +97,7 @@ int main(int argc, char *argv[])
 
 	write_file(graph_header, graph, graph_filename);
 
-	print_graph(graph_size);
-	draw_graph(graph_size);
+	draw_graph(graph_size, "grafo.png");
 
 	return 0;
 }
