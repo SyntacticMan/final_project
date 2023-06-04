@@ -297,11 +297,12 @@ void print_graph(int graph_size)
 
     cria uma representação gráfica do grafo em contexto
 */
-void draw_graph(int graph_size, const char *filename)
+void draw_graph(int graph_size, const char *filename, const char *graph_title)
 {
     Agraph_t *g;
     Agnode_t *n, *m;
     Agedge_t *e;
+    char string_temp[50];
 
     // criar o contexto de visualização
     gvc = gvContext();
@@ -321,14 +322,7 @@ void draw_graph(int graph_size, const char *filename)
     // criar o grafo, com disciplina por omissão
     g = agopen("g", Agundirected, NULL);
 
-    char str[50] = "Grafo (";
-    char string_temp[50];
-
-    sprintf(string_temp, "%d", graph_size);
-    strcat(str, string_temp);
-    strcat(str, " vértices)");
-
-    agsafeset(g, "label", str, "");
+    agsafeset(g, "label", graph_title, "");
     agsafeset(g, "labelloc", "t", "");
 
     for (int col = 0; col < graph_size; col++)

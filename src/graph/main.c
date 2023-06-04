@@ -97,7 +97,16 @@ int main(int argc, char *argv[])
 
 	write_file(graph_header, graph, graph_filename);
 
-	draw_graph(graph_size, "grafo.png");
+	// preparar o título do grafo
+	char graph_title[50] = "Grafo (";
+	char string_temp[50];
+
+	sprintf(string_temp, "%d", graph_size);
+	strcat(graph_title, string_temp);
+	strcat(graph_title, " vértices)");
+
+	// desenhar o grafo
+	draw_graph(graph_size, "grafo.png", graph_title);
 
 	return 0;
 }
