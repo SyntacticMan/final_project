@@ -58,6 +58,14 @@ void create_graph(int graph_size, int edge_percentage)
     // que todos os vértices têm, pelo menos, uma aresta
     for (int col = 1; col <= graph_size; col++)
     {
+        for (int row = 1; row <= graph_size; row++)
+        {
+            add_edge(col, row);
+        }
+    }
+
+    for (int col = 1; col <= graph_size; col++)
+    {
         for (int row = 1; row < graph_size; row++)
         {
             // se linha = coluna o vértice ligar-se-ia a ele mesmo

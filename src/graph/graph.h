@@ -20,7 +20,7 @@
 #define MAX_EDGE 3
 #define MIN_EDGE 1
 
-#define MAX_WEIGHT 15
+#define MAX_WEIGHT 8
 #define MIN_WEIGHT 1
 
 #define GRAPH_SIZE_MIN 10
