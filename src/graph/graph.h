@@ -39,7 +39,7 @@ void create_graph(int graph_size, int edge_percentage);
 
 int get_array_size(int graph_size);
 
-int get_edge(int u, int v);
+int get_edge(int **graph, int u, int v);
 int get_edge_count();
 int get_max_edge_count(int graph_size);
 float get_edge_percentage(int graph_size);
@@ -50,4 +50,4 @@ int pick_graph_root(int graph_size);
 
 void print_graph(int graph_size);
 
-void draw_graph(int graph_size, const char *filename, const char *graph_title);
+void draw_graph(int **graph_to_draw, int graph_size, const char *filename, char *graph_title);

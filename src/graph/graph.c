@@ -160,7 +160,7 @@ int **allocate_v_t(int graph_size)
     obtém a aresta, ou a ausência dela,
     correspondente à coluna e linha indicada
 */
-int get_edge(int u, int v)
+int get_edge(int **graph, int u, int v)
 {
 
     // um vértice não tem ligação com ele mesmo
@@ -209,7 +209,7 @@ int get_edge_count(int graph_size)
             // para evitar contar duas vezes
             // apenas pedir da triangular superior
             // também ignorando i=j
-            if (j < i && get_edge(i, j) > 0)
+            if (j < i && get_edge(graph, i, j) > 0)
             {
                 edge_count++;
             }
@@ -280,7 +280,7 @@ void print_graph(int graph_size)
 
         for (int row = 0; row < graph_size; row++)
         {
-            int edge = get_edge(col, row);
+            int edge = get_edge(graph, col, row);
             // printf("%d", row);
             if (edge <= 0)
                 printf("|inf");
@@ -297,7 +297,7 @@ void print_graph(int graph_size)
 
     cria uma representação gráfica do grafo em contexto
 */
-void draw_graph(int graph_size, const char *filename, const char *graph_title)
+void draw_graph(int **graph_to_draw, int graph_size, const char *filename, char *graph_title)
 {
     Agraph_t *g;
     Agnode_t *n, *m;
@@ -337,7 +337,7 @@ void draw_graph(int graph_size, const char *filename, const char *graph_title)
             m = agnode(g, string_temp, 1);
             agsafeset(m, "shape", "circle", "");
 
-            int weight = get_edge(col, row);
+            int weight = get_edge(graph_to_draw, col, row);
             if (col < row && weight > 0)
             {
                 e = agedge(g, n, m, 0, 1);

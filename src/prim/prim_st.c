@@ -35,14 +35,17 @@ void prim_mst(int array_size, int graph_size, int graph_root)
     int infinite = -1;
     for (int v = 0; v < graph_size; v++)
     {
-        int edge_weight = get_edge(graph_root, v);
-        if (edge_weight > 0)
+        if (v != graph_root)
         {
-            d[v] = &edge_weight;
-        }
-        else
-        {
-            d[v] = &infinite;
+            int edge_weight = get_edge(graph, graph_root, v);
+            if (edge_weight > 0)
+            {
+                d[v] = &edge_weight;
+            }
+            else
+            {
+                d[v] = &infinite;
+            }
         }
     }
 
@@ -53,7 +56,7 @@ void prim_mst(int array_size, int graph_size, int graph_root)
 
         for (int v = 0; v < visited_count; v++)
         {
-            int edge_weight = get_edge(u, v);
+            int edge_weight = get_edge(graph, u, v);
 
             if ((*d[v] < edge_weight))
             {
@@ -68,7 +71,7 @@ void prim_mst(int array_size, int graph_size, int graph_root)
 
         for (int v = 0; v < visited_count; v++)
         {
-            int weight = get_edge(u, v);
+            int weight = get_edge(graph, u, v);
 
             if ((u == -1 || weight < *d[v]))
             {

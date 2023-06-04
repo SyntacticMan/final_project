@@ -44,6 +44,9 @@ test_graph:
 debug_graph:
 	 gdb --args $(binDir)$(graphBinaryName) -s 5 -f graph.grf -p 70
 
+debug_prim:
+	gdb --args $(binDir)$(primBinaryName) -f graph.grf
+
 debug: CCFLAGS += -DDEBUG -g
 debug: clean all
 
