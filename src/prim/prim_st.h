@@ -19,4 +19,4 @@
 
 int **v_t;
 
-void prim_mst(int array_size, int graph_size, int graph_root);
+int **prim_mst(int array_size, int graph_size, int graph_root);

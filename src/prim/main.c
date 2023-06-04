@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     // if (graph_header->graph_size <= 30)
     //     print_graph(graph_header->graph_size);
 
-    prim_mst(graph_header->array_size, graph_header->graph_size, graph_root);
+    v_t = prim_mst(graph_header->array_size, graph_header->graph_size, graph_root);
 
     // desenhar a árvore mínima
     draw_graph(v_t, graph_header->graph_size, "arvore_minima.png", "Árvore mínima");

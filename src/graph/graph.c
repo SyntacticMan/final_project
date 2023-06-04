@@ -180,7 +180,14 @@ int get_edge(int **graph, int u, int v)
 
     int index = get_index(u, v);
 
-    return *graph[index];
+    if (graph[index] == NULL)
+    {
+        return 0;
+    }
+    else
+    {
+        return *graph[index];
+    }
 }
 
 /*

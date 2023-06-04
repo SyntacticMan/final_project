@@ -17,7 +17,7 @@
 #include "prim_st.h"
 #endif
 
-void prim_mst(int array_size, int graph_size, int graph_root)
+int **prim_mst(int array_size, int graph_size, int graph_root)
 {
     // vetor d e v_t são inicializados com o mesmo tamanho que o grafo
     int **d = (int **)malloc(graph_size * sizeof(int *));
@@ -89,4 +89,6 @@ void prim_mst(int array_size, int graph_size, int graph_root)
             printf("=> %d", i);
     }
     printf("\n");
+
+    return v_t;
 }
