@@ -230,6 +230,12 @@ void remove_edge(int u, int v)
     graph[index] = &infinite;
 }
 
+/*
+    get_edge_probability
+
+    Calcula a possibilidade de uma aresta ser criada, tendo em conta
+    a percentagem de arestas pedidas e o tamanho do grafo
+*/
 double get_edge_probability(int graph_size, double requested_edge_percentage)
 {
 
@@ -278,64 +284,77 @@ void print_graph(int graph_size)
     }
 }
 
+/*
+    draw_graph
+
+    cria uma representação gráfica do grafo em contexto
+*/
 void draw_graph(int graph_size, const char *filename)
 {
     Agraph_t *g;
     Agnode_t *n, *m;
     Agedge_t *e;
-    // Agsym_t *a;
-    char str[20]; // Assuming the maximum length of the resulting string
 
-    printf("draw_graph\n");
-    /* set up a graphviz context */
+    // criar o contexto de visualização
     gvc = gvContext();
 
     // preparar a opção com o nome do ficheiro a gerar
-    char image_name[100] = "-o";
+    char image_name[50] = "-o";
     strcat(image_name, filename);
 
+    // definir algoritmo de colocação, tipo e nome da imagem a gerar
     char *args[] = {
-        "fdp",
-        /* gif output */
+        "dot",
         "-Tpng",
-        /* output to file abc.gif */
         image_name};
 
     gvParseArgs(gvc, sizeof(args) / sizeof(char *), args);
 
+    // criar o grafo, com disciplina por omissão
     g = agopen("g", Agundirected, NULL);
+
+    char str[50] = "Grafo (";
+    char string_temp[50];
+
+    sprintf(string_temp, "%d", graph_size);
+    strcat(str, string_temp);
+    strcat(str, " vértices)");
+
+    agsafeset(g, "label", str, "");
+    agsafeset(g, "labelloc", "t", "");
+
     for (int col = 0; col < graph_size; col++)
     {
         for (int row = 0; row < graph_size; row++)
         {
-            sprintf(str, "%d", col);
-            n = agnode(g, str, 1);
+            sprintf(string_temp, "%d", col);
+            n = agnode(g, string_temp, 1);
+            agsafeset(n, "shape", "circle", "");
 
-            sprintf(str, "%d", row);
-            m = agnode(g, str, 1);
+            sprintf(string_temp, "%d", row);
+            m = agnode(g, string_temp, 1);
+            agsafeset(m, "shape", "circle", "");
 
             int weight = get_edge(col, row);
             if (col < row && weight > 0)
             {
                 e = agedge(g, n, m, 0, 1);
-                sprintf(str, "%d", weight);
-                agsafeset(e, "label", str, "");
+                sprintf(string_temp, "%d", weight);
+                agsafeset(e, "label", string_temp, "");
             }
         }
     }
-    /* Create a simple digraph */
 
-    /* Compute a layout using layout engine from command line args */
+    // calcular disposição
     gvLayoutJobs(gvc, g);
 
-    /* Write the graph according to -T and -o options */
+    // criar o grafo
     gvRenderJobs(gvc, g);
 
-    /* Free layout data */
+    // libertar memória
     gvFreeLayout(gvc, g);
-
-    /* Free graph structures */
     agclose(g);
-    /* close output file, free context, and return number of errors */
+
+    // encerrar e terminar o contexto
     gvFreeContext(gvc);
 }

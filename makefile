@@ -19,7 +19,7 @@ CCFLAGS = -Wall $(includeFlags)
  
 all: graph prim
 
-graph: graph.o file_module.o draw_graph.o
+graph: graph.o file_module.o
 	$(CC) $(CCFLAGS) $(linkDir) $(graphSrcDir)main.c $(graphObjectFiles) $(linkLibraries) -o $(binDir)$(graphBinaryName)
 
 prim: prim_st.o file_module.o graph.o
@@ -39,6 +39,9 @@ test:
 	$(binDir)$(primBinaryName) -f graph.grf
 
 test_graph:
+	$(binDir)$(graphBinaryName) -s 10 -f graph.grf -p 70
+
+debug_graph:
 	 gdb --args $(binDir)$(graphBinaryName) -s 5 -f graph.grf -p 70
 
 debug: CCFLAGS += -DDEBUG -g
