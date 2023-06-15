@@ -6,3 +6,4 @@ bin/prim
 include/*
 *breakpoints*
 *.png
+*.as
