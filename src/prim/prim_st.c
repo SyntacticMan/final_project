@@ -37,7 +37,7 @@ int **prim_mst(int array_size, int graph_size, int graph_root)
     {
         if (v != graph_root)
         {
-            int edge_weight = get_edge(graph, graph_root, v);
+            int edge_weight = get_edge(graph, v, graph_root);
             if (edge_weight > 0)
             {
                 d[v] = &edge_weight;
@@ -49,44 +49,44 @@ int **prim_mst(int array_size, int graph_size, int graph_root)
         }
     }
 
-    int visited_count = 1;
-    while (visited_count < graph_size - 1)
-    {
-        int u = 0;
+    // int visited_count = 1;
+    // while (visited_count < graph_size - 1)
+    // {
+    //     int u = 0;
 
-        for (int v = 0; v < visited_count; v++)
-        {
-            int edge_weight = get_edge(graph, u, v);
+    //     for (int v = 0; v < visited_count; v++)
+    //     {
+    //         int edge_weight = get_edge(graph, u, v);
 
-            if ((*d[v] < edge_weight))
-            {
-                d[v] = &edge_weight;
-                remove_edge(u, v);
-            }
-        }
+    //         if ((*d[v] < edge_weight))
+    //         {
+    //             d[v] = &edge_weight;
+    //             remove_edge(u, v);
+    //         }
+    //     }
 
-        // v_t[u] = &visited;
-        u++;
-        visited_count++;
+    //     // v_t[u] = &visited;
+    //     u++;
+    //     visited_count++;
 
-        for (int v = 0; v < visited_count; v++)
-        {
-            int weight = get_edge(graph, u, v);
+    //     for (int v = 0; v < visited_count; v++)
+    //     {
+    //         int weight = get_edge(graph, u, v);
 
-            if ((u == -1 || weight < *d[v]))
-            {
-                d[v] = &weight;
-            }
-        }
-    }
+    //         if ((u == -1 || weight < *d[v]))
+    //         {
+    //             d[v] = &weight;
+    //         }
+    //     }
+    // }
 
     // emitir a árvore geradora mínima
     printf("\nÁrvore mínima ");
     for (int i = 0; i < graph_size; i++)
     {
-        if (*d[i] > 0)
-            // printf("=>%dw(%d)", i, *d[i]); // debug
-            printf("=> %d", i);
+        // if (*d[i] > 0)
+        printf(" vertice: %d peso: %d | ", i, *d[i]); // debug
+                                                      // printf("=> %d", i);
     }
     printf("\n");
 

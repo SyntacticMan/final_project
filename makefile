@@ -42,11 +42,11 @@ test_graph:
 	$(binDir)$(graphBinaryName) -s 5 -f graph.grf -p 70
 
 debug_graph:
-	 gdb --args $(binDir)$(graphBinaryName) -s 5 -f graph.grf -p 70
+	 gdb -x prim_st_breakpoints --args $(binDir)$(graphBinaryName) -s 5 -f graph.grf -p 70
 
 debug_prim:
 	$(binDir)$(graphBinaryName) -s 5 -f graph.grf -p 70
-	gdb --args $(binDir)$(primBinaryName) -f graph.grf
+	gdb --args $(binDir)$(primBinaryName) -f graph.grf 
 
 debug: CCFLAGS += -DDEBUG -g
 debug: clean all
@@ -55,3 +55,4 @@ clean:
 	rm -f $(buildDir)*.o
 	rm -f $(binDir)*
 	rm -f *.grf
+	rm -f *.png

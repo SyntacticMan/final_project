@@ -7,3 +7,4 @@ include/*
 *breakpoints*
 *.png
 *.as
+src/.vs/*

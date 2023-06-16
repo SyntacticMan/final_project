@@ -179,6 +179,7 @@ int get_edge(int **graph, int u, int v)
     }
 
     int index = get_index(u, v);
+    printf("Index for (%d,%d) = %d\n", u, v, index);
 
     if (graph[index] == NULL)
     {
@@ -186,6 +187,7 @@ int get_edge(int **graph, int u, int v)
     }
     else
     {
+        printf("Weight: %d\n", *graph[index]);
         return *graph[index];
     }
 }
@@ -271,7 +273,7 @@ double get_edge_probability(int graph_size, double requested_edge_percentage)
 */
 int pick_graph_root(int graph_size)
 {
-    return random_generator(graph_size, 1);
+    return random_generator(graph_size - 1, 1);
 }
 
 /*
