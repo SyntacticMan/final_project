@@ -129,6 +129,14 @@ void add_edge(int u, int v)
     int *weight = (int *)malloc(sizeof(int));
     *weight = random_generator(MAX_WEIGHT, MIN_WEIGHT);
 
+    // ocasionalmente gera vértices isolados
+    // o código seguinte é para garantir que isso não acontece
+    if (*weight < 1)
+        *weight = 1;
+
+    if (*weight > 8)
+        *weight = 8;
+
     graph[index] = weight;
 }
 
