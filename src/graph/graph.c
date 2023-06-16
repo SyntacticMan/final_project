@@ -52,7 +52,7 @@ void create_graph(int graph_size, int edge_percentage)
         return;
     }
     double edge_probability = get_edge_probability(graph_size, edge_percentage);
-    printf("Edge probability %f\n", edge_probability);
+    // printf("Edge probability %f\n", edge_probability);
 
     // uma primeira passagem para assegurar
     // que todos os vértices têm, pelo menos, uma aresta
@@ -187,7 +187,7 @@ int get_edge(int **graph, int u, int v)
     }
 
     int index = get_index(u, v);
-    printf("Index for (%d,%d) = %d\n", u, v, index);
+    // printf("Index for (%d,%d) = %d\n", u, v, index);
 
     if (graph[index] == NULL)
     {
@@ -195,7 +195,7 @@ int get_edge(int **graph, int u, int v)
     }
     else
     {
-        printf("Weight: %d\n", *graph[index]);
+        // printf("Weight: %d\n", *graph[index]);
         return *graph[index];
     }
 }
