@@ -37,10 +37,13 @@ int **prim_mst(int array_size, int graph_size, int graph_root)
     {
         if (v != graph_root)
         {
-            int edge_weight = get_edge(graph, v, graph_root);
-            if (edge_weight > 0)
+            // cada peso tem de ser novamente alocado
+            int *edge_weight = (int *)malloc(sizeof(int));
+            *edge_weight = get_edge(graph, graph_root, v);
+
+            if (*edge_weight > 0)
             {
-                d[v] = &edge_weight;
+                d[v] = edge_weight;
             }
             else
             {
