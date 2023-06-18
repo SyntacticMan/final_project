@@ -361,20 +361,26 @@ void draw_graph(int **graph_to_draw, int graph_size, const char *filename, char 
     {
         for (int row = 0; row < graph_size; row++)
         {
-            sprintf(string_temp, "%d", col);
-            n = agnode(g, string_temp, 1);
-            agsafeset(n, "shape", "circle", "");
-
-            sprintf(string_temp, "%d", row);
-            m = agnode(g, string_temp, 1);
-            agsafeset(m, "shape", "circle", "");
-
-            int weight = get_edge(graph_to_draw, col, row);
-            if (weight != INFINITE && col < row && weight > 0)
+            // apenas desenhar a triangular superior
+            // para evitar duplicação de ligações
+            if (row > col)
             {
-                e = agedge(g, n, m, 0, 1);
-                sprintf(string_temp, "%d", weight);
-                agsafeset(e, "label", string_temp, "");
+
+                sprintf(string_temp, "%d", col);
+                n = agnode(g, string_temp, 1);
+                agsafeset(n, "shape", "circle", "");
+
+                sprintf(string_temp, "%d", row);
+                m = agnode(g, string_temp, 1);
+                agsafeset(m, "shape", "circle", "");
+
+                int weight = get_edge(graph_to_draw, col, row);
+                if (weight != INFINITE && weight > 0)
+                {
+                    e = agedge(g, n, m, 0, 1);
+                    sprintf(string_temp, "%d", weight);
+                    agsafeset(e, "label", string_temp, "");
+                }
             }
         }
     }
