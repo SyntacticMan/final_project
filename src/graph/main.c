@@ -81,11 +81,11 @@ int main(int argc, char *argv[])
 	int actual_edge_percentage = (int)get_edge_percentage(graph_size);
 
 	// é preciso garantir o cumprimento da percentagem pedida em +-5%
-	while (actual_edge_percentage < requested_edge_percentage - 5 || actual_edge_percentage > requested_edge_percentage + 5)
-	{
-		create_graph(graph_size, requested_edge_percentage);
-		actual_edge_percentage = (int)get_edge_percentage(graph_size);
-	}
+	// while (actual_edge_percentage < requested_edge_percentage - 5 || actual_edge_percentage > requested_edge_percentage + 5)
+	// {
+	// 	create_graph(graph_size, requested_edge_percentage);
+	// 	actual_edge_percentage = (int)get_edge_percentage(graph_size);
+	// }
 
 	// emitir o relatório de criação
 	printf("Grafo criado\n");

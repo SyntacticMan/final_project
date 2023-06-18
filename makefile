@@ -35,7 +35,7 @@ prim_st.o: $(primSrcDir)prim_st.c $(primSrcDir)prim_st.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_st.c -o $(buildDir)prim_st.o
 
 test:
-	$(binDir)$(graphBinaryName) -s 5 -f graph.grf -p 70
+	$(binDir)$(graphBinaryName) -s 6 -f graph.grf -p 70
 	$(binDir)$(primBinaryName) -f graph.grf
 
 test_graph:
@@ -45,8 +45,8 @@ debug_graph:
 	 gdb -x prim_st_breakpoints --args $(binDir)$(graphBinaryName) -s 5 -f graph.grf -p 70
 
 debug_prim:
-	$(binDir)$(graphBinaryName) -s 5 -f graph.grf -p 70
-	gdb --args $(binDir)$(primBinaryName) -f graph.grf 
+	$(binDir)$(graphBinaryName) -s 6 -f graph.grf -p 70
+	gdb -ex 'b prim_st.c:45' --args $(binDir)$(primBinaryName) -f graph.grf 
 
 debug: CCFLAGS += -DDEBUG -g
 debug: clean all

@@ -168,7 +168,7 @@ void add_null_edge(int **graph, int u, int v)
     // como o vetor é de inteiros
     // uso -1 para representar o infinito
     int *inf = (int *)malloc(sizeof(int));
-    *inf = -1;
+    *inf = INFINITE;
     graph[index] = inf;
 }
 
@@ -189,7 +189,7 @@ int get_edge(int **graph, int u, int v)
     // um vértice não tem ligação com ele mesmo
     // logo a aresta é sempre 0
     if (u == v)
-        return -1;
+        return 0;
 
     // se a coluna fôr mais pequena que a linha
     // é porque foi pedida uma aresta da triangular inferior
@@ -266,7 +266,7 @@ void remove_edge(int u, int v)
 {
     int index = get_index(u, v);
 
-    int infinite = -1;
+    int infinite = INFINITE;
     graph[index] = &infinite;
 }
 
@@ -314,7 +314,7 @@ void print_graph(int graph_size)
         {
             int edge = get_edge(graph, col, row);
             // printf("%d", row);
-            if (edge <= 0)
+            if (edge == INFINITE)
                 printf("|inf");
             else
                 printf("|%3d", edge);
@@ -370,7 +370,7 @@ void draw_graph(int **graph_to_draw, int graph_size, const char *filename, char 
             agsafeset(m, "shape", "circle", "");
 
             int weight = get_edge(graph_to_draw, col, row);
-            if (col < row && weight > 0)
+            if (weight != INFINITE && col < row && weight > 0)
             {
                 e = agedge(g, n, m, 0, 1);
                 sprintf(string_temp, "%d", weight);
