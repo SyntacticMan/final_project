@@ -20,12 +20,10 @@
 int **prim_mst(int array_size, int graph_size, int graph_root)
 {
     // vetor d e v_t são inicializados com o mesmo tamanho que o grafo
-    int **d = (int **)malloc(graph_size * sizeof(int *));
-    int **v_t = calloc(graph_size, sizeof(int *));
+    int **v_t = (int **)malloc(get_array_size(graph_size) * sizeof(int *));
 
     // raíz do grafo começa com peso 0
     int root_weight = 0;
-    d[graph_root] = &root_weight;
 
     // marcar vértice com tendo sido visitado
     int visited = 1;
@@ -43,54 +41,67 @@ int **prim_mst(int array_size, int graph_size, int graph_root)
 
             if (*edge_weight > 0)
             {
-                d[v] = edge_weight;
+                add_edge(v_t, graph_root, v, *edge_weight);
             }
             else
             {
-                d[v] = &infinite;
+                add_null_edge(v_t, graph_root, v);
             }
         }
     }
 
     // int visited_count = 1;
-    // while (visited_count < graph_size - 1)
+    // for (int u = 0; u < graph_size; u++)
     // {
-    //     int u = 0;
+    //     // passar a raíz à frente
+    //     if (u == graph_root)
+    //         continue;
 
-    //     for (int v = 0; v < visited_count; v++)
+    //     int min_edge_weight = MAX_WEIGHT + 1;
+    //     for (int v = 0; v < graph_size; v++)
     //     {
+
     //         int edge_weight = get_edge(graph, u, v);
 
-    //         if ((*d[v] < edge_weight))
+    //         if (edge_weight != infinite && edge_weight < min_edge_weight)
     //         {
-    //             d[v] = &edge_weight;
-    //             remove_edge(u, v);
+    //             min_edge_weight = edge_weight;
     //         }
     //     }
+    //     // add_edge(v_t, u, v, edge_weight);
+    //     printf("g> %d\n", *graph[u]);
+    //     // printf("v_t> %d\n", *v_t[u]);
 
-    //     // v_t[u] = &visited;
-    //     u++;
-    //     visited_count++;
+    //     // int u = 0;
 
-    //     for (int v = 0; v < visited_count; v++)
-    //     {
-    //         int weight = get_edge(graph, u, v);
+    //     // // v_t[u] = &visited;
+    //     // u++;
+    //     // visited_count++;
 
-    //         if ((u == -1 || weight < *d[v]))
-    //         {
-    //             d[v] = &weight;
-    //         }
-    //     }
+    //     // for (int v = 0; v < visited_count; v++)
+    //     // {
+    //     //     int weight = get_edge(graph, u, v);
+
+    //     //     if ((u == -1 || weight < *d[v]))
+    //     //     {
+    //     //         d[v] = &weight;
+    //     //     }
+    //     // }
     // }
 
     // emitir a árvore geradora mínima
-    printf("\nÁrvore mínima ");
-    for (int i = 0; i < graph_size; i++)
-    {
-        // if (*d[i] > 0)
-        printf(" vertice: %d peso: %d | ", i, *d[i]); // debug
-                                                      // printf("=> %d", i);
-    }
+
+    print_graph(graph_size);
+    printf("\nÁrvore mínima \n");
+
+    graph = v_t;
+    print_graph(graph_size);
+    // for (int i = 0; i < graph_size; i++)
+    // {
+    //     // if (*d[i] > 0)
+    //     printf(" vertice: %d peso: %d | ", i, *d[i]); // debug
+    //                                                   // printf("=> %d", i);
+    // }
     printf("\n");
 
     return v_t;

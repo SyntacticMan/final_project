@@ -14,7 +14,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #ifndef GRAPH
@@ -29,7 +28,6 @@
 
 int main(int argc, char *argv[])
 {
-	srand(time NULL);
 
 	int graph_size, requested_edge_percentage;
 	char *graph_filename;

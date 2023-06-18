@@ -19,8 +19,7 @@
 
 int **graph;
 
-static void add_edge(int u, int v);
-static void add_null_edge(int u, int v);
+void add_random_edge(int u, int v);
 
 static int get_index(int col, int row);
 static double get_edge_probability(int graph_size, double requested_edge_percentage);
@@ -44,6 +43,8 @@ int random_generator(int max, int min)
  */
 void create_graph(int graph_size, int edge_percentage)
 {
+    srand(time(NULL));
+
     // alocar as colunas
     graph = (int **)malloc(get_array_size(graph_size) * sizeof(int *));
 
@@ -60,7 +61,7 @@ void create_graph(int graph_size, int edge_percentage)
     {
         for (int row = 1; row <= graph_size; row++)
         {
-            add_edge(col, row);
+            add_random_edge(col, row);
         }
     }
 
@@ -75,9 +76,9 @@ void create_graph(int graph_size, int edge_percentage)
                 continue;
 
             if ((double)random_generator(100, 1) < edge_probability)
-                add_edge(col, row);
+                add_random_edge(col, row);
             else
-                add_null_edge(col, row);
+                add_null_edge(graph, col, row);
         }
     }
 }
@@ -117,11 +118,11 @@ int get_array_size(int graph_size)
 }
 
 /*
- * add_edge
+ * add_random_edge
 
- * cria uma aresta entre os vértices u e v
+ * cria uma aresta entre os vértices u e v com um peso aleatório
  */
-void add_edge(int u, int v)
+void add_random_edge(int u, int v)
 {
     int index = get_index(u, v);
 
@@ -141,12 +142,26 @@ void add_edge(int u, int v)
 }
 
 /*
+ * add_edge
+
+ * cria uma aresta entre os vértices u e v com o peso indicado
+ */
+void add_edge(int **graph, int u, int v, int weight)
+{
+    int index = get_index(u, v);
+    int *allocated_weight = (int *)malloc(sizeof(int));
+    *allocated_weight = weight;
+
+    graph[index] = allocated_weight;
+}
+
+/*
     add_null_edge
 
     adiciona uma "não-ligação" entre os vértices u e v
     representada por um infinito
 */
-void add_null_edge(int u, int v)
+void add_null_edge(int **graph, int u, int v)
 {
     int index = get_index(u, v);
 
@@ -174,7 +189,7 @@ int get_edge(int **graph, int u, int v)
     // um vértice não tem ligação com ele mesmo
     // logo a aresta é sempre 0
     if (u == v)
-        return 0;
+        return -1;
 
     // se a coluna fôr mais pequena que a linha
     // é porque foi pedida uma aresta da triangular inferior
