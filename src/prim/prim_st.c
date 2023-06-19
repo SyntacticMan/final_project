@@ -46,66 +46,33 @@ int **prim_mst(int array_size, int graph_size, int graph_root)
         {
             d[v] = edge_weight;
         }
-        // não é preciso aqui pq já foi inicializado
     }
 
-    // int min_edge_weight = MAX_WEIGHT + 1;
-    // int u = -1;
+    // encontrar u
+    for (int u = 0; u < graph_size; u++)
+    {
+        // passar a raíz à frente
+        if (u == graph_root)
+            continue;
 
-    // for (int i = 0; i < graph_size; i++)
-    // {
-    //     if (!v_t[v] && d[i] < min_edge_weight)
-    //     {
-    //         min_edge_weight =
-    //             int edge_weight = get_edge(graph, graph_root, v);
+        // processar apenas se ainda não tiver sido visitado
+        if (!v_t[u])
+        {
+            for (int v = 0; v < graph_size; v++)
+            {
+                if (v == u)
+                    continue;
 
-    //         // se tiver uma ligação, adicionar
-    //         if (edge_weight > 0)
-    //         {
-    //             d[v] = edge_weight;
-    //             // add_edge(v_t, graph_root, v, edge_weight);
-    //         }
-    //         else
-    //         {
-    //             d[v] = INFINITE;
-    //             // add_null_edge(v_t, graph_root, v);
-    //         }
-    //     }
-    // }
-    // }
+                int edge_weight = get_edge(graph, u, v);
 
-    // for (int u = v; u < graph_size; u++)
-    // {
-    //     // passar a raíz à frente
-    //     if (u == graph_root)
-    //         continue;
-
-    //     // if (u == v)
-    //     // {
-    //     //     // add_edge(v_t, u, v, 0);
-    //     //     continue;
-    //     // }
-
-    //     // if (visited[u] == 1)
-    //     //     continue;
-
-    //     int edge_weight = get_edge(graph, v, u);
-
-    //     if (edge_weight != INFINITE)
-    //     {
-    //         if (edge_weight > 0 && edge_weight < d[u])
-    //         {
-    //             min_vertex = u;
-    //             d[u] = edge_weight;
-    //         }
-    //     }
-    //     else
-    //     {
-    //         add_null_edge(v_t, v, u);
-    //     }
-    // }
-    // visited[v] = 1;
-    // add_edge(v_t, min_vertex, v, d[min_vertex]);
+                if (edge_weight < d[v])
+                {
+                    d[v] = edge_weight;
+                    v_t[u] = true;
+                }
+            }
+        }
+    }
 
     // emitir a árvore geradora mínima
     printf("\nÁrvore mínima \n");
