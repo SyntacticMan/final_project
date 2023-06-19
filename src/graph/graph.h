@@ -39,6 +39,7 @@ extern int **v_t;
 extern int **d;
 
 void create_graph(int graph_size, int edge_percentage);
+void create_locked_graph(int graph_size, int edge_percentage);
 void add_edge(int **graph, int u, int v, int weight);
 void add_null_edge(int **graph, int u, int v);
 int get_array_size(int graph_size);

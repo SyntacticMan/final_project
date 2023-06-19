@@ -83,6 +83,45 @@ void create_graph(int graph_size, int edge_percentage)
     }
 }
 
+void create_locked_graph(int graph_size, int edge_percentage)
+{
+    srand(time(NULL));
+
+    // alocar as colunas
+    graph = (int **)malloc(graph_size * sizeof(int *));
+
+    for (int i = 0; i <= graph_size; i++)
+    {
+        graph[i] = (int *)malloc(sizeof(int));
+    }
+
+    if (graph == NULL)
+    {
+        return;
+    }
+
+    for (int col = 1; col <= graph_size; col++)
+    {
+        for (int row = 1; row < graph_size; row++)
+        {
+            add_null_edge(graph, col, row);
+        }
+    }
+
+    // graph[1][0] = 1;
+
+    //            --c  r
+    add_edge(graph, 1, 0, 1);
+    add_edge(graph, 2, 0, 3);
+    add_edge(graph, 5, 0, 3);
+    add_edge(graph, 2, 1, 5);
+    add_edge(graph, 3, 1, 1);
+    add_edge(graph, 3, 2, 2);
+    add_edge(graph, 4, 2, 1);
+    add_edge(graph, 4, 3, 4);
+    add_edge(graph, 5, 4, 5);
+}
+
 /*
     get_index
 
@@ -92,16 +131,18 @@ void create_graph(int graph_size, int edge_percentage)
 int get_index(int col, int row)
 {
     // o array apenas guarda colunas a partir da 2
-    if (col <= 2)
-        return 0;
+    // if (col <= 1)
+    //     return 0;
 
-    int n = col - 2;
+    int n = col - 1;
     int index = (n * (n + 1)) / 2;
 
     // adicionar a linha ao índice
     // para obter índice da coluna/linha
-    if (row > 1)
-        index += row - 1;
+    if (row > 0)
+        index += row;
+    // else
+    //     index--;
 
     return index;
 }
@@ -148,6 +189,7 @@ void add_random_edge(int u, int v)
  */
 void add_edge(int **graph, int u, int v, int weight)
 {
+    // graph[u][v] = weight;
     int index = get_index(u, v);
     int *allocated_weight = (int *)malloc(sizeof(int));
     *allocated_weight = weight;
@@ -165,8 +207,6 @@ void add_null_edge(int **graph, int u, int v)
 {
     int index = get_index(u, v);
 
-    // como o vetor é de inteiros
-    // uso -1 para representar o infinito
     int *inf = (int *)malloc(sizeof(int));
     *inf = INFINITE;
     graph[index] = inf;
@@ -201,8 +241,9 @@ int get_edge(int **graph, int u, int v)
         v = temp;
     }
 
+    // return graph[u][v];
     int index = get_index(u, v);
-    // printf("Index for (%d,%d) = %d\n", u, v, index);
+    // printf("(%d,%d) => index = %d || weight = %d\n", u, v, index, *graph[index]);
 
     if (graph[index] == NULL)
     {
@@ -308,7 +349,7 @@ void print_graph(int graph_size)
 {
     for (int col = 0; col < graph_size; col++)
     {
-
+        // cabeçalho
         if (col == 0)
         {
             printf(" ");
