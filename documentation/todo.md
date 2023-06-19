@@ -18,11 +18,11 @@
 * ~~Disponibilizar função para ler o ficheiro~~
 
 ## Algoritmo Prim
-* Implementar módulo singlethread
-* Implementar módulo multithread
-    * Função para separar o array do grafo em blocos
-    * Função para separar o array da árvore em blocos
-    * Função para consolidar os resultados dos processos individuais
+* ~~Implementar módulo singlethread~~
+* ~~Implementar módulo multithread~~
+    ~~* Função para separar o array do grafo em blocos~~
+    ~~* Função para separar o array da árvore em blocos~~
+    ~~* Função para consolidar os resultados dos processos individuais~~
 * Implementar sistema para cronometrar a execução
 * ~~Gerar um .png do grafo~~
-* ~~Gerar um .png da árvore mínima~~
+* Gerar um .png da árvore mínima

@@ -105,8 +105,6 @@ int *prim_mt_mst(int array_size, int graph_size, int graph_root, int num_threads
     pthread_t threads[num_threads];
     ThreadData thread_data[num_threads];
 
-    // int num_threads = (graph_size < MAX_THREADS) ? graph_size : MAX_THREADS;
-
     for (int i = 0; i < num_threads; i++)
     {
         thread_data[i].thread_id = i;
