@@ -46,7 +46,7 @@ debug_graph:
 
 debug_prim:
 	$(binDir)$(graphBinaryName) -s 6 -f graph.grf -p 70
-	gdb -ex 'b prim_st.c:45' --args $(binDir)$(primBinaryName) -f graph.grf 
+	gdb -ex 'b prim_st.c:71' --args $(binDir)$(primBinaryName) -f graph.grf 
 
 debug: CCFLAGS += -DDEBUG -g
 debug: clean all

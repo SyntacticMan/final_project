@@ -308,12 +308,22 @@ void print_graph(int graph_size)
 {
     for (int col = 0; col < graph_size; col++)
     {
-        // printf("%d\n", col);
+
+        if (col == 0)
+        {
+            printf(" ");
+
+            for (int row = 0; row < graph_size; row++)
+            {
+                printf("|%3d", row);
+            }
+            printf("\n");
+        }
+        printf("%d", col);
 
         for (int row = 0; row < graph_size; row++)
         {
             int edge = get_edge(graph, col, row);
-            // printf("%d", row);
             if (edge == INFINITE)
                 printf("|inf");
             else

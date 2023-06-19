@@ -12,6 +12,8 @@
  * Orientador: Paulo Shirley										*
  * ******************************************************************/
 
+#include <stdbool.h>
+
 #ifndef GRAPH
 #define GRAPH
 #include "../graph/graph.h"

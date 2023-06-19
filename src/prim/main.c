@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     printf("graph root-> %d\n", graph_root);
 
     // if (graph_header->graph_size <= 30)
-    // print_graph(graph_header->graph_size);
+    print_graph(graph_header->graph_size);
 
     v_t = prim_mst(graph_header->array_size, graph_header->graph_size, graph_root);
 
