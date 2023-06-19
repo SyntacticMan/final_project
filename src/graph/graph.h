@@ -34,9 +34,6 @@
 extern int **graph;
 GVC_t *gvc;
 
-// vetor com a árvore geradora mínima
-extern int **d;
-
 void create_graph(int graph_size, int edge_percentage);
 void create_locked_graph(int graph_size, int edge_percentage);
 void add_edge(int **graph, int u, int v, int weight);

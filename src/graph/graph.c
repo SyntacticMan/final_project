@@ -234,7 +234,6 @@ int get_edge(int **graph, int u, int v)
         v = temp;
     }
 
-    // return graph[u][v];
     int index = get_index(u, v);
 
     /* DEBUG */

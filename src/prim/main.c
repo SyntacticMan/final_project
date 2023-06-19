@@ -17,6 +17,11 @@
 #include "prim_st.h"
 #endif
 
+#ifndef PRIM_MT
+#define PRIM_MT
+#include "prim_mt.h"
+#endif
+
 #ifndef FILE_MODULE
 #define FILE_MODULE
 #include "../file/file_module.h"
@@ -27,12 +32,15 @@
 #include <unistd.h>
 #include <time.h>
 
+void print_mst(int *d, int graph_size);
+
 int main(int argc, char *argv[])
 {
 
     srand(time NULL);
 
     char *graph_filename;
+    int *d;
     int opt;
     int threads = 0;
 
@@ -66,24 +74,44 @@ int main(int argc, char *argv[])
     int graph_root = pick_graph_root(graph_header->graph_size);
     // int graph_root = 1;
 
+    print_graph(graph_header->graph_size);
+    printf("\n");
+
     if (threads <= 1)
     {
         // lançar single thread
-        printf("graph_size -> %d\n", graph_header->graph_size);
+        printf("Lançando Algoritmo de Prim em tarefa simples\n");
+        d = prim_mst(graph_header->array_size, graph_header->graph_size, graph_root);
     }
     else
     {
-        // lançar o número de threads pedidas
-        printf("Multi thread\n");
+        printf("Lançando Algoritmo de Prim com %d threads\n", threads);
+        d = prim_mt_mst(graph_header->array_size, graph_header->graph_size, graph_root, threads);
     }
+
     printf("grafo-> %s\n", graph_filename);
     printf("graph root-> %d\n", graph_root);
 
-    // if (graph_header->graph_size <= 30)
-    print_graph(graph_header->graph_size);
+    print_mst(d, graph_header->graph_size);
 
-    int *d = prim_mst(graph_header->array_size, graph_header->graph_size, graph_root);
+    // if (graph_header->graph_size <= 30)
 
     // desenhar a árvore mínima
     // draw_graph(graph, graph_header->graph_size, "arvore_minima.png", "Árvore mínima");
+}
+
+void print_mst(int *d, int graph_size)
+{
+    printf("\n");
+    printf("    ");
+    for (int i = 0; i < graph_size; i++)
+    {
+        printf("%2d|", i);
+    }
+    printf("\nd[] ");
+    for (int i = 0; i < graph_size; i++)
+    {
+        printf("%2d|", d[i]);
+    }
+    printf("\n");
 }

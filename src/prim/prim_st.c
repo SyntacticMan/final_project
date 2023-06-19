@@ -72,24 +72,6 @@ int *prim_mst(int array_size, int graph_size, int graph_root)
         }
     }
 
-    // DEBUG -- imprimir MST
-    printf("\n");
-
-    printf("    ");
-
-    for (int i = 0; i < graph_size; i++)
-    {
-        printf("%2d|", i);
-    }
-
-    printf("\nd[] ");
-
-    for (int i = 0; i < graph_size; i++)
-    {
-        printf("%2d|", d[i]);
-    }
-    printf("\n");
-
-    // free(visited);
+    free(visited);
     return d;
 }
