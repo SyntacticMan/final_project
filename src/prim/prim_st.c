@@ -68,7 +68,7 @@ int **prim_mst(int array_size, int graph_size, int graph_root)
                 if (edge_weight < d[v])
                 {
                     d[v] = edge_weight;
-                    visited[u] = true;
+                    visited[v] = true;
                 }
             }
         }
