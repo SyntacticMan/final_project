@@ -19,6 +19,4 @@
 #include "../graph/graph.h"
 #endif
 
-int **v_t;
-
-int **prim_mst(int array_size, int graph_size, int graph_root);
+int *prim_mst(int array_size, int graph_size, int graph_root);

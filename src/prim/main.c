@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    // int graph_root = pick_graph_root(graph_header->graph_size);
-    int graph_root = 1;
+    int graph_root = pick_graph_root(graph_header->graph_size);
+    // int graph_root = 1;
 
     if (threads <= 1)
     {
@@ -82,8 +82,8 @@ int main(int argc, char *argv[])
     // if (graph_header->graph_size <= 30)
     print_graph(graph_header->graph_size);
 
-    v_t = prim_mst(graph_header->array_size, graph_header->graph_size, graph_root);
+    int *d = prim_mst(graph_header->array_size, graph_header->graph_size, graph_root);
 
     // desenhar a árvore mínima
-    draw_graph(v_t, graph_header->graph_size, "arvore_minima.png", "Árvore mínima");
+    // draw_graph(graph, graph_header->graph_size, "arvore_minima.png", "Árvore mínima");
 }

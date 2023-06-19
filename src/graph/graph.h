@@ -33,7 +33,6 @@
 // uma vez que o tamanho do grafo é determinado durante a execução
 extern int **graph;
 GVC_t *gvc;
-extern int **v_t;
 
 // vetor com a árvore geradora mínima
 extern int **d;

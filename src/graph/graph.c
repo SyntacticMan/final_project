@@ -65,9 +65,9 @@ void create_graph(int graph_size, int edge_percentage)
         }
     }
 
-    for (int col = 1; col <= graph_size; col++)
+    for (int col = 0; col <= graph_size; col++)
     {
-        for (int row = 1; row < graph_size; row++)
+        for (int row = 0; row < graph_size; row++)
         {
             // se linha = coluna o vértice ligar-se-ia a ele mesmo
             // se linha > coluna estou na triangular inferior
@@ -83,6 +83,11 @@ void create_graph(int graph_size, int edge_percentage)
     }
 }
 
+/*
+    create_locked_graph
+
+    cria um grafo fixo para facilitar testes
+*/
 void create_locked_graph(int graph_size, int edge_percentage)
 {
     srand(time(NULL));
@@ -130,10 +135,6 @@ void create_locked_graph(int graph_size, int edge_percentage)
 */
 int get_index(int col, int row)
 {
-    // o array apenas guarda colunas a partir da 2
-    // if (col <= 1)
-    //     return 0;
-
     int n = col - 1;
     int index = (n * (n + 1)) / 2;
 
@@ -141,8 +142,6 @@ int get_index(int col, int row)
     // para obter índice da coluna/linha
     if (row > 0)
         index += row;
-    // else
-    //     index--;
 
     return index;
 }
@@ -189,7 +188,6 @@ void add_random_edge(int u, int v)
  */
 void add_edge(int **graph, int u, int v, int weight)
 {
-    // graph[u][v] = weight;
     int index = get_index(u, v);
     int *allocated_weight = (int *)malloc(sizeof(int));
     *allocated_weight = weight;
@@ -210,11 +208,6 @@ void add_null_edge(int **graph, int u, int v)
     int *inf = (int *)malloc(sizeof(int));
     *inf = INFINITE;
     graph[index] = inf;
-}
-
-int **allocate_v_t(int graph_size)
-{
-    return NULL; // v_t = calloc(graph_size, sizeof(int *));
 }
 
 /*
@@ -243,6 +236,8 @@ int get_edge(int **graph, int u, int v)
 
     // return graph[u][v];
     int index = get_index(u, v);
+
+    /* DEBUG */
     // printf("(%d,%d) => index = %d || weight = %d\n", u, v, index, *graph[index]);
 
     if (graph[index] == NULL)
@@ -251,7 +246,6 @@ int get_edge(int **graph, int u, int v)
     }
     else
     {
-        // printf("Weight: %d\n", *graph[index]);
         return *graph[index];
     }
 }

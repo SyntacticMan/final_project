@@ -17,10 +17,8 @@
 #include "prim_st.h"
 #endif
 
-int **prim_mst(int array_size, int graph_size, int graph_root)
+int *prim_mst(int array_size, int graph_size, int graph_root)
 {
-    // vetor d e v_t são inicializados com o mesmo tamanho que o grafo
-    int **v_t = (int **)malloc(get_array_size(graph_size) * sizeof(int *));
     int *visited = malloc(graph_size * sizeof(int *));
     int *d = malloc(graph_size * sizeof(int *));
 
@@ -49,69 +47,38 @@ int **prim_mst(int array_size, int graph_size, int graph_root)
     }
 
     // encontrar u
-    for (int u = 0; u < graph_size; u++)
+    for (int v = 0; v < graph_size; v++)
     {
         // passar a raíz à frente
-        if (u == graph_root)
+        if (v == graph_root)
             continue;
 
         // processar apenas se ainda não tiver sido visitado
-        if (!visited[u])
+        if (!visited[v])
         {
-            for (int v = 0; v < graph_size; v++)
+            for (int u = 0; u < graph_size; u++)
             {
                 if (v == u)
                     continue;
 
-                int edge_weight = get_edge(graph, u, v);
+                int edge_weight = get_edge(graph, v, u);
 
-                if (edge_weight < d[v])
+                if (edge_weight < d[u])
                 {
-                    d[v] = edge_weight;
-                    visited[v] = true;
+                    d[u] = edge_weight;
+                    visited[u] = true;
                 }
             }
         }
     }
 
-    // emitir a árvore geradora mínima
-    printf("\nÁrvore mínima \n");
-
-    for (int col = 0; col < graph_size; col++)
-    {
-        for (int row = 0; row < graph_size; row++)
-        {
-            if (row == col)
-            {
-                add_edge(v_t, col, row, 0);
-                continue;
-            }
-
-            int edge = get_edge(graph, col, row);
-
-            if (edge == INFINITE)
-                add_null_edge(v_t, col, row);
-            else
-            {
-                if (edge == d[col])
-                {
-                    add_edge(v_t, col, row, edge);
-                }
-                else
-                    add_null_edge(v_t, col, row);
-            }
-        }
-    }
-
-    graph = v_t;
-    print_graph(graph_size);
+    // DEBUG -- imprimir MST
     printf("\n");
 
     printf("    ");
 
     for (int i = 0; i < graph_size; i++)
     {
-        // if (*d[i] > 0)
         printf("%2d|", i);
     }
 
@@ -119,15 +86,10 @@ int **prim_mst(int array_size, int graph_size, int graph_root)
 
     for (int i = 0; i < graph_size; i++)
     {
-        printf("%2d|", d[i]); // debug
+        printf("%2d|", d[i]);
     }
     printf("\n");
 
-    // for (int i = 0; i < graph_size; i++)
-    // {
-    //     printf("%2d|", visited[i]);
-    // }
-    // printf("\n");
-
-    return v_t;
+    // free(visited);
+    return d;
 }
