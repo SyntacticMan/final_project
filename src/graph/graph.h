@@ -45,8 +45,6 @@ int get_edge_count();
 int get_max_edge_count(int graph_size);
 float get_edge_percentage(int graph_size);
 
-void remove_edge(int u, int v);
-
 int pick_graph_root(int graph_size);
 
 void print_graph(int graph_size);

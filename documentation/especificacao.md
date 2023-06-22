@@ -12,7 +12,7 @@ A matriz de adjacência será representada por um vetor de apontadores unidimens
 
 O número de arestas é estipulado dando uma percentagem, como opção de linha de comandos, do número total de arestas. Independentemente da percentagem, todos os vértices terão de ter, pelo menos, uma aresta. Cada aresta criada terá de ser avaliada contra a percentagem total de arestas que ainda faltam preencher de modo a não exceder o limite indicado. O número total de arestas é dado por $\frac{n\times(n-1)}{2}$. Estas serão atribuídas segundo uma distribuição normal.
 
-Os pesos a atribuir a cada aresta serão indicados como um intervalo mínimo e máximo de inteiros positivos, com um mínimo absoluto de 0. Cada vértice sem ligação é representado na matriz como um infinito, recorrento a uma biblioteca em C adequada.
+Os pesos a atribuir a cada aresta serão indicados como um intervalo mínimo e máximo de inteiros positivos, com um mínimo absoluto de 0. Cada vértice sem ligação é representado na matriz como um infinito, recorrendo a uma biblioteca em C adequada.
 
 Depois de criado o grafo este é emitido para o disco num ficheiro binário que o executável do algoritmo depois irá carregar.
 

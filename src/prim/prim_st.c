@@ -71,7 +71,7 @@ int *prim_mst(int array_size, int graph_size, int graph_root)
             }
         }
     }
-
+    /* TODO: pôr aqui um array que guarde os nós a que correspondem os d[u]*/
     free(visited);
     return d;
 }

@@ -296,14 +296,6 @@ float get_edge_percentage(int graph_size)
     return ((float)get_edge_count(graph_size) / (float)get_max_edge_count(graph_size)) * 100.0;
 }
 
-void remove_edge(int u, int v)
-{
-    int index = get_index(u, v);
-
-    int infinite = INFINITE;
-    graph[index] = &infinite;
-}
-
 /*
     get_edge_probability
 
