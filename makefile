@@ -38,12 +38,12 @@ prim_mt.o: $(primSrcDir)prim_mt.c $(primSrcDir)prim_mt.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_mt.c -o $(buildDir)prim_mt.o
 
 test:
-	$(binDir)$(graphBinaryName) -s 6 -f graph.grf -p 70
+	$(binDir)$(graphBinaryName) -s 30 -f graph.grf -p 70
 	$(binDir)$(primBinaryName) -f graph.grf
 
 test_mt:
-	$(binDir)$(graphBinaryName) -s 6 -f graph.grf -p 70
-	$(binDir)$(primBinaryName) -f graph.grf -t 4
+	$(binDir)$(graphBinaryName) -s 30 -f graph.grf -p 70
+	$(binDir)$(primBinaryName) -f graph.grf -t 2
 
 test_graph:
 	$(binDir)$(graphBinaryName) -s 5 -f graph.grf -p 70

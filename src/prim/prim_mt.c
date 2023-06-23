@@ -39,10 +39,13 @@ void *process_edges(void *arg)
 
     int start = thread_id == 0 ? 0 : thread_id * (graph_size / num_threads);
 
-    // printf("thread %d: start = %d\n", thread_id, start);
+    // recalcular o tamanho do grafo a ser processado
+    int graph_columns = start + (graph_size / num_threads);
+
+    printf("thread %d: start = %d || graph_columns = %d\n", thread_id, start, graph_columns);
 
     // processar a raíz, se ela estiver na parte que foi alocada
-    if (graph_root > start)
+    if (graph_root >= start && graph_root <= graph_columns)
     {
         for (int v = 0; v < graph_size; v++)
         {
@@ -55,8 +58,10 @@ void *process_edges(void *arg)
     }
 
     // encontrar u
-    for (int v = start; v < graph_size; v++)
+    for (int v = start; v < graph_columns; v++)
     {
+        printf("v = %d\n", v);
+
         // passar a raíz à frente
         if (v == graph_root)
             continue;
@@ -64,13 +69,14 @@ void *process_edges(void *arg)
         // processar apenas se ainda não tiver sido visitado
         if (!visited[v])
         {
-            for (int u = start; u < graph_size; u++)
+            for (int u = 0; u < graph_size; u++)
             {
                 if (v == u)
                     continue;
 
                 int edge_weight = get_edge(graph, v, u);
 
+                printf("u = %d > weight = %d\n", u, edge_weight);
                 if (edge_weight < d[u])
                 {
                     d[u] = edge_weight;
@@ -101,6 +107,11 @@ int *prim_mt_mst(int array_size, int graph_size, int graph_root, int num_threads
             d[v] = INT_MAX;
         }
     }
+
+    if (num_threads > graph_size)
+        num_threads = graph_size;
+
+    printf("num_threads %d\n", num_threads);
 
     pthread_t threads[num_threads];
     ThreadData thread_data[num_threads];

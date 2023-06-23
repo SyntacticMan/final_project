@@ -68,8 +68,10 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	create_graph(graph_size, requested_edge_percentage);
-	// create_locked_graph(graph_size, requested_edge_percentage);
+	// create_graph(graph_size, requested_edge_percentage);
+
+	graph_size = 6;
+	create_locked_graph(graph_size, requested_edge_percentage);
 
 	if (graph == NULL)
 	{

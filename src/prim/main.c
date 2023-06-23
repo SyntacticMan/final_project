@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <time.h>
+#include <sys/time.h>
 
 void print_mst(int *d, int graph_size);
 
@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
 {
 
     srand(time NULL);
+    struct timeval start, end;
 
     char *graph_filename;
     int *d;
@@ -71,12 +72,13 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    int graph_root = pick_graph_root(graph_header->graph_size);
-    // int graph_root = 1;
+    // int graph_root = pick_graph_root(graph_header->graph_size);
+    int graph_root = 1;
 
     print_graph(graph_header->graph_size);
     printf("\n");
 
+    gettimeofday(&start, NULL);
     if (threads <= 1)
     {
         // lançar single thread
@@ -88,11 +90,19 @@ int main(int argc, char *argv[])
         printf("Lançando Algoritmo de Prim com %d threads\n", threads);
         d = prim_mt_mst(graph_header->array_size, graph_header->graph_size, graph_root, threads);
     }
+    gettimeofday(&end, NULL);
 
     printf("grafo-> %s\n", graph_filename);
     printf("graph root-> %d\n", graph_root);
 
     print_mst(d, graph_header->graph_size);
+
+    // Calculate the elapsed time in seconds and microseconds
+    double seconds = (double)(end.tv_sec - start.tv_sec);
+    double microseconds = (double)(end.tv_usec - start.tv_usec);
+    double elapsed_time = seconds + microseconds / 1e6;
+
+    printf("Execution time: %.6f seconds\n", elapsed_time);
 
     // if (graph_header->graph_size <= 30)
 
