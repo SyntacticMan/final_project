@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
-#include "gvc.h"
 
 #define MAX_EDGE 3
 #define MIN_EDGE 1
@@ -32,7 +31,6 @@
 // grafo é representado como um vetor de pointeiros dinamicamente alocado de ints
 // uma vez que o tamanho do grafo é determinado durante a execução
 extern int **graph;
-GVC_t *gvc;
 
 void create_graph(int graph_size, int edge_percentage);
 void create_locked_graph(int graph_size, int edge_percentage);
@@ -48,5 +46,3 @@ float get_edge_percentage(int graph_size);
 int pick_graph_root(int graph_size);
 
 void print_graph(int graph_size);
-
-void draw_graph(int **graph_to_draw, int graph_size, const char *filename, char *graph_title);

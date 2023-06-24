@@ -5,12 +5,14 @@ srcDir = ./src/
 graphSrcDir = $(srcDir)graph/
 fileSrcDir = $(srcDir)file/
 primSrcDir = $(srcDir)prim/
+drawSrcDir = $(srcDir)draw/
 buildDir = ./build/
 binDir = ./bin/
 
 includeFlags = -I /usr/include/graphviz
 linkDir = -L /usr/lib/x86_64-linux-gnu/graphviz/
-linkLibraries = -lgvc -lcgraph -lpthread
+linkLibraries = 
+#-lgvc -lcgraph -lpthread
 
 graphObjectFiles = $(buildDir)graph.o $(buildDir)file_module.o
 primObjectFiles = $(buildDir)prim_st.o $(buildDir)prim_mt.o $(buildDir)file_module.o $(buildDir)graph.o
@@ -24,6 +26,9 @@ graph: graph.o file_module.o
 
 prim: prim_st.o prim_mt.o file_module.o graph.o
 	$(CC) $(CCFLAGS) $(linkDir) $(primSrcDir)main.c $(primObjectFiles) $(linkLibraries) -o $(binDir)$(primBinaryName)
+
+draw.o: $ $(drawSrcDir)draw_graph.c $(drawSrcDir)draw_graph.h
+	$(CC) $(CCFLAGS) -c $(drawSrcDir)draw_graph.c -o $(buildDir)draw_graph.o
 
 graph.o: $(graphSrcDir)graph.c $(graphSrcDir)graph.h
 	$(CC) $(CCFLAGS) -c $(graphSrcDir)graph.c -o $(buildDir)graph.o

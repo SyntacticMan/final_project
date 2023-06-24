@@ -119,8 +119,5 @@ int main(int argc, char *argv[])
 	strcat(graph_title, string_temp);
 	strcat(graph_title, " vértices)");
 
-	// desenhar o grafo
-	// draw_graph(graph, graph_size, "grafo.png", graph_title);
-
 	return 0;
 }
