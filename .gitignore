@@ -7,4 +7,5 @@ include/*
 *breakpoints*
 *.png
 *.as
+documentation/IPC2e-graphs.pdf
 src/.vs/*

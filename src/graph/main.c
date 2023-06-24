@@ -55,11 +55,11 @@ int main(int argc, char *argv[])
 	// no imediato vou limitar o grafo a um máximo de 23000 vértices
 	// mais do que isso e começa a ter problemas em alocar memória
 	// adicionalmente limitado a 30 vértices pois graphviz tem um máximo de 400 arestas
-	if (graph_size <= 1 || graph_size > 30)
-	{
-		printf("Grafo tem de ter um tamanho entre 2 e 30\n");
-		return -1;
-	}
+	// if (graph_size <= 1 || graph_size > 30)
+	// {
+	// 	printf("Grafo tem de ter um tamanho entre 2 e 30\n");
+	// 	return -1;
+	// }
 
 	// percentagens a 0 ou negativas
 	if (requested_edge_percentage < 0 || requested_edge_percentage > 100)
@@ -68,10 +68,12 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	// create_graph(graph_size, requested_edge_percentage);
-
+#ifdef DEBUG
 	graph_size = 6;
 	create_locked_graph(graph_size, requested_edge_percentage);
+#else
+	create_graph(graph_size, requested_edge_percentage);
+#endif
 
 	if (graph == NULL)
 	{
@@ -118,7 +120,7 @@ int main(int argc, char *argv[])
 	strcat(graph_title, " vértices)");
 
 	// desenhar o grafo
-	draw_graph(graph, graph_size, "grafo.png", graph_title);
+	// draw_graph(graph, graph_size, "grafo.png", graph_title);
 
 	return 0;
 }

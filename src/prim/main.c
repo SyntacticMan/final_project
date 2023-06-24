@@ -72,11 +72,13 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    // int graph_root = pick_graph_root(graph_header->graph_size);
+#ifdef DEBUG
     int graph_root = 1;
-
     print_graph(graph_header->graph_size);
     printf("\n");
+#else
+    int graph_root = pick_graph_root(graph_header->graph_size);
+#endif
 
     gettimeofday(&start, NULL);
     if (threads <= 1)

@@ -37,15 +37,15 @@ void *process_edges(void *arg)
     int *visited = data->visited;
     int *d = data->d;
 
-    int start = thread_id == 0 ? 0 : thread_id * (graph_size / num_threads);
+    // calcular n/p
+    int n_p = graph_size / num_threads;
+    int start = thread_id == 0 ? 0 : thread_id * n_p;
+    int number_columns = start + n_p;
 
-    // recalcular o tamanho do grafo a ser processado
-    int graph_columns = start + (graph_size / num_threads);
-
-    printf("thread %d: start = %d || graph_columns = %d\n", thread_id, start, graph_columns);
+    printf("thread %d: start = %d || n_p = %d\n", thread_id, start, n_p);
 
     // processar a raíz, se ela estiver na parte que foi alocada
-    if (graph_root >= start && graph_root <= graph_columns)
+    if (graph_root >= start && graph_root <= n_p)
     {
         for (int v = 0; v < graph_size; v++)
         {
@@ -58,9 +58,11 @@ void *process_edges(void *arg)
     }
 
     // encontrar u
-    for (int v = start; v < graph_columns; v++)
+    for (int v = start; v < number_columns; v++)
     {
+#ifdef DEBUG
         printf("v = %d\n", v);
+#endif
 
         // passar a raíz à frente
         if (v == graph_root)
@@ -76,7 +78,9 @@ void *process_edges(void *arg)
 
                 int edge_weight = get_edge(graph, v, u);
 
+#ifdef DEBUG
                 printf("u = %d > weight = %d\n", u, edge_weight);
+#endif
                 if (edge_weight < d[u])
                 {
                     d[u] = edge_weight;
@@ -111,7 +115,9 @@ int *prim_mt_mst(int array_size, int graph_size, int graph_root, int num_threads
     if (num_threads > graph_size)
         num_threads = graph_size;
 
+#ifdef DEBUG
     printf("num_threads %d\n", num_threads);
+#endif
 
     pthread_t threads[num_threads];
     ThreadData thread_data[num_threads];
