@@ -17,7 +17,7 @@
 #include "file_module.h"
 #endif
 
-void write_file(header *file_header, int **graph, char *filename)
+void write_file(header *file_header, float *graph, char *filename)
 {
     // abrir o ficheiro em modo de escrita binária
     // assim certifico-me que, se ele já existir, é apagado
@@ -44,13 +44,13 @@ void write_file(header *file_header, int **graph, char *filename)
 
     for (int i = 0; i < file_header->array_size; i++)
     {
-        fwrite(graph[i], sizeof(int *), 1, graph_file);
+        fwrite(&graph[i], sizeof(int *), 1, graph_file);
     }
 
     fclose(graph_file);
 }
 
-int **read_file(char *filename, header *file_header)
+float *read_file(char *filename, header *file_header)
 {
     FILE *graph_file = fopen(filename, "rb");
 
@@ -64,13 +64,11 @@ int **read_file(char *filename, header *file_header)
     fread(file_header, sizeof(header), 1, graph_file);
 
     // carregar o array
-    int **graph = (int **)malloc(file_header->array_size * sizeof(int *));
+    float *graph = (float *)malloc(file_header->array_size * sizeof(float));
 
     for (int i = 0; i < file_header->array_size; i++)
     {
-        graph[i] = (int *)malloc(sizeof(int *));
-
-        fread(graph[i], sizeof(int *), 1, graph_file);
+        fread(&graph[i], sizeof(float), 1, graph_file);
     }
 
     fclose(graph_file);

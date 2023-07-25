@@ -20,8 +20,8 @@
 #define MAX_EDGE 3
 #define MIN_EDGE 1
 
-#define MAX_WEIGHT 8
-#define MIN_WEIGHT 1
+#define MAX_WEIGHT 8.0
+#define MIN_WEIGHT 1.0
 
 #define GRAPH_SIZE_MIN 10
 #define GRAPH_SIZE_MAX 50
@@ -30,15 +30,15 @@
 
 // grafo é representado como um vetor de pointeiros dinamicamente alocado de ints
 // uma vez que o tamanho do grafo é determinado durante a execução
-extern int **graph;
+extern float *graph;
 
 void create_graph(int graph_size, int edge_percentage);
 void create_locked_graph(int graph_size, int edge_percentage);
-void add_edge(int **graph, int u, int v, int weight);
-void add_null_edge(int **graph, int u, int v);
+void add_edge(float *graph, int u, int v, float weight);
+void add_null_edge(float *graph, int u, int v);
 int get_array_size(int graph_size);
 
-int get_edge(int **graph, int u, int v);
+float get_edge(float *graph, int u, int v);
 int get_edge_count();
 int get_max_edge_count(int graph_size);
 float get_edge_percentage(int graph_size);

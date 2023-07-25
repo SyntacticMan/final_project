@@ -17,7 +17,7 @@
 #include "graph.h"
 #endif
 
-int **graph;
+float *graph;
 
 void add_random_edge(int u, int v);
 
@@ -25,6 +25,7 @@ static int get_index(int col, int row);
 static double get_edge_probability(int graph_size, double requested_edge_percentage);
 
 static int random_generator(int max, int min);
+static float random_float_generator(float max, float min);
 
 /*
  *   random_generator
@@ -34,6 +35,11 @@ static int random_generator(int max, int min);
 int random_generator(int max, int min)
 {
     return (rand() % (max - min + 1)) + min;
+}
+
+float random_float_generator(float max, float min)
+{
+    return (float)rand() / RAND_MAX * (max - min) + min;
 }
 
 /*
@@ -46,7 +52,7 @@ void create_graph(int graph_size, int edge_percentage)
     srand(time(NULL));
 
     // alocar as colunas
-    graph = (int **)malloc(get_array_size(graph_size) * sizeof(int *));
+    graph = (float *)malloc(get_array_size(graph_size) * sizeof(float));
 
     if (graph == NULL)
     {
@@ -93,12 +99,7 @@ void create_locked_graph(int graph_size, int edge_percentage)
     srand(time(NULL));
 
     // alocar as colunas
-    graph = (int **)malloc(graph_size * sizeof(int *));
-
-    for (int i = 0; i <= graph_size; i++)
-    {
-        graph[i] = (int *)malloc(sizeof(int));
-    }
+    graph = (float *)malloc(graph_size * sizeof(float));
 
     if (graph == NULL)
     {
@@ -112,8 +113,6 @@ void create_locked_graph(int graph_size, int edge_percentage)
             add_null_edge(graph, col, row);
         }
     }
-
-    // graph[1][0] = 1;
 
     //            --c  r
     add_edge(graph, 1, 0, 1);
@@ -167,16 +166,15 @@ void add_random_edge(int u, int v)
     int index = get_index(u, v);
 
     // o peso é atribuído ao acaso
-    int *weight = (int *)malloc(sizeof(int));
-    *weight = random_generator(MAX_WEIGHT, MIN_WEIGHT);
+    float weight = random_float_generator(MAX_WEIGHT, MIN_WEIGHT);
 
     // ocasionalmente gera vértices isolados
     // o código seguinte é para garantir que isso não acontece
-    if (*weight < 1)
-        *weight = 1;
+    if (weight < 1.0)
+        weight = 1.0;
 
-    if (*weight > 8)
-        *weight = 8;
+    if (weight > 8.0)
+        weight = 8.0;
 
     graph[index] = weight;
 }
@@ -186,13 +184,10 @@ void add_random_edge(int u, int v)
 
  * cria uma aresta entre os vértices u e v com o peso indicado
  */
-void add_edge(int **graph, int u, int v, int weight)
+void add_edge(float *graph, int u, int v, float weight)
 {
     int index = get_index(u, v);
-    int *allocated_weight = (int *)malloc(sizeof(int));
-    *allocated_weight = weight;
-
-    graph[index] = allocated_weight;
+    graph[index] = weight;
 }
 
 /*
@@ -201,13 +196,10 @@ void add_edge(int **graph, int u, int v, int weight)
     adiciona uma "não-ligação" entre os vértices u e v
     representada por um infinito
 */
-void add_null_edge(int **graph, int u, int v)
+void add_null_edge(float *graph, int u, int v)
 {
     int index = get_index(u, v);
-
-    int *inf = (int *)malloc(sizeof(int));
-    *inf = INFINITE;
-    graph[index] = inf;
+    graph[index] = INFINITE;
 }
 
 /*
@@ -216,7 +208,7 @@ void add_null_edge(int **graph, int u, int v)
     obtém a aresta, ou a ausência dela,
     correspondente à coluna e linha indicada
 */
-int get_edge(int **graph, int u, int v)
+float get_edge(float *graph, int u, int v)
 {
 
     // um vértice não tem ligação com ele mesmo
@@ -239,14 +231,7 @@ int get_edge(int **graph, int u, int v)
     /* DEBUG */
     // printf("(%d,%d) => index = %d || weight = %d\n", u, v, index, *graph[index]);
 
-    if (graph[index] == NULL)
-    {
-        return 0;
-    }
-    else
-    {
-        return *graph[index];
-    }
+    return graph[index];
 }
 
 /*

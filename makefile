@@ -49,7 +49,7 @@ compare:
 
 
 test:
-	$(binDir)$(graphBinaryName) -s 30 -f graph.grf -p 70
+	$(binDir)$(graphBinaryName) -s 300 -f graph.grf -p 70
 	$(binDir)$(primBinaryName) -f graph.grf
 
 test_mt:
@@ -57,7 +57,7 @@ test_mt:
 	$(binDir)$(primBinaryName) -f graph.grf -t 2
 
 test_graph:
-	$(binDir)$(graphBinaryName) -s 23000 -f graph.grf -p 70
+	$(binDir)$(graphBinaryName) -s 230000 -f graph.grf -p 70
 
 debug_graph:
 	 gdb -x prim_st_breakpoints --args $(binDir)$(graphBinaryName) -s 5 -f graph.grf -p 70

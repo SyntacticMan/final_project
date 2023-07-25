@@ -92,10 +92,10 @@ int main(int argc, char *argv[])
 	// 	actual_edge_percentage = (int)get_edge_percentage(graph_size);
 	// }
 
-	// for (int i = 0; i < get_array_size(graph_size); i++)
-	// {
-	// 	printf("%2d|", *graph[i]);
-	// }
+	for (int i = 0; i < get_array_size(graph_size); i++)
+	{
+		printf("%2f|", graph[i]);
+	}
 	// emitir o relatório de criação
 	printf("Grafo criado\n");
 	printf("Tamanho do grafo: %d\n", graph_size);

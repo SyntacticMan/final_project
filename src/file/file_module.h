@@ -22,5 +22,5 @@ typedef struct file_header
     int edge_percentage;
 } header;
 
-void write_file(header *file_header, int **graph, char *filename);
-int **read_file(char *filename, header *file_header);
+void write_file(header *file_header, float *graph, char *filename);
+float *read_file(char *filename, header *file_header);
