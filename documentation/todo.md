@@ -14,6 +14,7 @@
 * Adicionar suporte para florestas de grafos
     * Gerar e processar florestas de grafos (nice to have)
 * array_size deve ser calculado e não guardado no cabeçalho do ficheiro
+* corrigir o não estar a respeitar a percentagem de arestas pedida
 
 ## Módulo de ficheiros
 * ~~Determinar o formato do ficheiro do grafo~~

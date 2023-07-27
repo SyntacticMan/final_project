@@ -68,6 +68,8 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	printf("Array RAM size: %lu kb (%d)\n", ((get_array_size(graph_size) * sizeof(float)) / 1024), get_array_size(graph_size));
+
 #ifdef DEBUG
 	graph_size = 6;
 	create_locked_graph(graph_size, requested_edge_percentage);
@@ -80,6 +82,7 @@ int main(int argc, char *argv[])
 		printf("Nao foi possivel criar o grafo.\n");
 		return -1;
 	}
+	printf("Graph created\n");
 
 	// obter as contagens das arestas
 	int max_edge_count = get_max_edge_count(graph_size);
@@ -92,10 +95,10 @@ int main(int argc, char *argv[])
 	// 	actual_edge_percentage = (int)get_edge_percentage(graph_size);
 	// }
 
-	for (int i = 0; i < get_array_size(graph_size); i++)
-	{
-		printf("%2f|", graph[i]);
-	}
+#ifdef DEBUG
+	print_graph(graph_size);
+#endif
+
 	// emitir o relatório de criação
 	printf("Grafo criado\n");
 	printf("Tamanho do grafo: %d\n", graph_size);

@@ -26,6 +26,7 @@ static double get_edge_probability(int graph_size, double requested_edge_percent
 
 static int random_generator(int max, int min);
 static float random_float_generator(float max, float min);
+static void print_progress_bar(int progress, int total, int barWidth);
 
 /*
  *   random_generator
@@ -52,15 +53,18 @@ void create_graph(int graph_size, int edge_percentage)
     srand(time(NULL));
 
     // alocar as colunas
-    graph = (float *)malloc(get_array_size(graph_size) * sizeof(float));
+    graph = malloc(get_array_size(graph_size) * sizeof(float));
 
     if (graph == NULL)
     {
         return;
     }
+    printf("Memory alocated\n");
+
     double edge_probability = get_edge_probability(graph_size, edge_percentage);
     // printf("Edge probability %f\n", edge_probability);
 
+    printf("First pass\n");
     // uma primeira passagem para assegurar
     // que todos os vértices têm, pelo menos, uma aresta
     for (int col = 1; col <= graph_size; col++)
@@ -69,8 +73,10 @@ void create_graph(int graph_size, int edge_percentage)
         {
             add_random_edge(col, row);
         }
+        print_progress_bar(col, graph_size, 50);
     }
 
+    printf("Second pass\n");
     for (int col = 0; col <= graph_size; col++)
     {
         for (int row = 0; row < graph_size; row++)
@@ -86,7 +92,10 @@ void create_graph(int graph_size, int edge_percentage)
             else
                 add_null_edge(graph, col, row);
         }
+        print_progress_bar(col, graph_size, 50);
     }
+
+    printf("Graph created\n");
 }
 
 /*
@@ -99,7 +108,7 @@ void create_locked_graph(int graph_size, int edge_percentage)
     srand(time(NULL));
 
     // alocar as colunas
-    graph = (float *)malloc(graph_size * sizeof(float));
+    graph = (float *)malloc(get_array_size(graph_size) * sizeof(float));
 
     if (graph == NULL)
     {
@@ -153,7 +162,13 @@ int get_index(int col, int row)
 */
 int get_array_size(int graph_size)
 {
-    return get_index(graph_size, 0) + (graph_size - 1);
+    int array_size = 0;
+    for (int i = 2; i <= graph_size; i++)
+    {
+        array_size += i - 1;
+    }
+
+    return array_size;
 }
 
 /*
@@ -343,4 +358,25 @@ void print_graph(int graph_size)
 
         printf("\n");
     }
+}
+
+void print_progress_bar(int progress, int total, int barWidth)
+{
+    float percentage = (float)progress / total;
+    int numBarToPrint = percentage * barWidth;
+
+    printf("[");
+    for (int i = 0; i < barWidth; i++)
+    {
+        if (i < numBarToPrint)
+        {
+            printf("=");
+        }
+        else
+        {
+            printf(" ");
+        }
+    }
+    printf("] %.1f%%\r", percentage * 100);
+    fflush(stdout);
 }
