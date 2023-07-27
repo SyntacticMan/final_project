@@ -9,3 +9,4 @@ include/*
 *.as
 documentation/IPC2e-graphs.pdf
 src/.vs/*
+*.stackdump
