@@ -70,12 +70,12 @@ int main(int argc, char *argv[])
 
 	printf("Array RAM size: %lu kb (%d)\n", ((get_array_size(graph_size) * sizeof(float)) / 1024), get_array_size(graph_size));
 
-#ifdef DEBUG
-	graph_size = 6;
-	create_locked_graph(graph_size, requested_edge_percentage);
-#else
+	// #ifdef DEBUG
+	// 	graph_size = 6;
+	// 	create_locked_graph(graph_size, requested_edge_percentage);
+	// #else
 	create_graph(graph_size, requested_edge_percentage);
-#endif
+	// #endif
 
 	if (graph == NULL)
 	{
@@ -113,6 +113,8 @@ int main(int argc, char *argv[])
 	graph_header->edge_percentage = actual_edge_percentage;
 
 	write_file(graph_header, graph, graph_filename);
+
+	free(graph);
 
 	// preparar o título do grafo
 	char graph_title[50] = "Grafo (";

@@ -57,10 +57,10 @@ test_mt:
 	$(binDir)$(primBinaryName) -f graph.grf -t 2
 
 test_graph:
-	$(binDir)$(graphBinaryName) -s 50000 -f graph.grf -p 70
+	$(binDir)$(graphBinaryName) -s 4000 -f graph.grf -p 70
 
 gdb_graph:
-	 gdb -x prim_st_breakpoints --args $(binDir)$(graphBinaryName) -s 5 -f graph.grf -p 70
+	 gdb --args $(binDir)$(graphBinaryName) -s 40000 -f graph.grf -p 70
 
 debug_prim:
 	$(binDir)$(graphBinaryName) -s 6 -f graph.grf -p 70

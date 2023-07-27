@@ -44,7 +44,7 @@ void write_file(header *file_header, float *graph, char *filename)
 
     for (int i = 0; i < file_header->array_size; i++)
     {
-        fwrite(&graph[i], sizeof(int *), 1, graph_file);
+        fwrite(&graph[i], sizeof(float), 1, graph_file);
     }
 
     fclose(graph_file);

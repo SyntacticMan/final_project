@@ -67,19 +67,25 @@ void create_graph(int graph_size, int edge_percentage)
     printf("First pass\n");
     // uma primeira passagem para assegurar
     // que todos os vértices têm, pelo menos, uma aresta
-    for (int col = 1; col <= graph_size; col++)
+    for (int col = 2; col <= graph_size; col++)
     {
-        for (int row = 1; row <= graph_size; row++)
+        for (int row = 1; row < col; row++)
         {
+            // se linha = coluna o vértice ligar-se-ia a ele mesmo
+            // se linha > coluna estou na triangular inferior
+            // em ambos os casos passo à frente
+            if ((row >= col))
+                continue;
+
             add_random_edge(col, row);
         }
         print_progress_bar(col, graph_size, 50);
     }
 
     printf("Second pass\n");
-    for (int col = 0; col <= graph_size; col++)
+    for (int col = 2; col <= graph_size; col++)
     {
-        for (int row = 0; row < graph_size; row++)
+        for (int row = 1; row < col; row++)
         {
             // se linha = coluna o vértice ligar-se-ia a ele mesmo
             // se linha > coluna estou na triangular inferior
