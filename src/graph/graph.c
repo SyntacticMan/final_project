@@ -53,7 +53,7 @@ void create_graph(int graph_size, int edge_percentage)
     srand(time(NULL));
 
     // alocar as colunas
-    graph = malloc(get_array_size(graph_size) * sizeof(float));
+    graph = malloc(get_matrix_size(graph_size) * sizeof(float));
 
     if (graph == NULL)
     {
@@ -114,7 +114,7 @@ void create_locked_graph(int graph_size, int edge_percentage)
     srand(time(NULL));
 
     // alocar as colunas
-    graph = (float *)malloc(get_array_size(graph_size) * sizeof(float));
+    graph = (float *)malloc(get_matrix_size(graph_size) * sizeof(float));
 
     if (graph == NULL)
     {
@@ -161,20 +161,14 @@ int get_index(int col, int row)
 }
 
 /*
-    get_array_size
+    get_matrix_size
 
-    calcula o tamanho necessário que o array tem de ter
-    com base no índice da última coluna
+    calcula o número de elementos da matriz de adjacência
+
 */
-int get_array_size(int graph_size)
+int get_matrix_size(int graph_size)
 {
-    int array_size = 0;
-    for (int i = 2; i <= graph_size; i++)
-    {
-        array_size += i - 1;
-    }
-
-    return array_size;
+    return ((graph_size * (graph_size - 1)) / 2);
 }
 
 /*
@@ -256,16 +250,6 @@ float get_edge(float *graph, int u, int v)
 }
 
 /*
-    get_max_edge_count
-
-    obtém o número máximo de arestas que o grafo pode ter
-*/
-int get_max_edge_count(int graph_size)
-{
-    return ((graph_size * (graph_size - 1)) / 2);
-}
-
-/*
     get_edge_count
 
     obtém o número de arestas existentes no grafo
@@ -274,14 +258,13 @@ int get_edge_count(int graph_size)
 {
     int edge_count = 0;
 
-    for (int i = 0; i < graph_size; i++)
+    for (int i = 0; i <= graph_size; i++)
     {
         for (int j = 0; j < graph_size; j++)
         {
-            // para evitar contar duas vezes
-            // apenas pedir da triangular superior
-            // também ignorando i=j
-            if (j < i && get_edge(graph, i, j) > 0)
+            float edge = get_edge(graph, i, j);
+
+            if (edge > 0 && edge <= MAX_WEIGHT)
             {
                 edge_count++;
             }
@@ -299,7 +282,7 @@ int get_edge_count(int graph_size)
 */
 float get_edge_percentage(int graph_size)
 {
-    return ((float)get_edge_count(graph_size) / (float)get_max_edge_count(graph_size)) * 100.0;
+    return ((float)get_edge_count(graph_size) / (float)get_matrix_size(graph_size)) * 100.0;
 }
 
 /*
@@ -311,7 +294,7 @@ float get_edge_percentage(int graph_size)
 double get_edge_probability(int graph_size, double requested_edge_percentage)
 {
 
-    double edge_probability = 2.0 * (requested_edge_percentage * get_max_edge_count((double)graph_size)) / ((double)graph_size * ((double)graph_size - 1.0));
+    double edge_probability = 2.0 * (requested_edge_percentage * get_matrix_size((double)graph_size)) / ((double)graph_size * ((double)graph_size - 1.0));
 
     // se o grafo fôr muito grande e a percentagem muito baixa
     // a probabilidade pode ficar negativa, nesse caso devolvo 1

@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	printf("Array RAM size: %lu kb (%d)\n", ((get_array_size(graph_size) * sizeof(float)) / 1024), get_array_size(graph_size));
+	printf("Array RAM size: %lu kb (%d)\n", ((get_matrix_size(graph_size) * sizeof(float)) / 1024), get_matrix_size(graph_size));
 
 	// #ifdef DEBUG
 	// 	graph_size = 6;
@@ -85,7 +85,8 @@ int main(int argc, char *argv[])
 	printf("Graph created\n");
 
 	// obter as contagens das arestas
-	int max_edge_count = get_max_edge_count(graph_size);
+	// número máximo de arestas é simplesmente o número de elementos da matriz de adjacência
+	int max_edge_count = get_matrix_size(graph_size);
 	int actual_edge_percentage = (int)get_edge_percentage(graph_size);
 
 	// é preciso garantir o cumprimento da percentagem pedida em +-5%
@@ -108,7 +109,7 @@ int main(int argc, char *argv[])
 	// gravar o grafo no ficheiro
 	header *graph_header = malloc(sizeof(header));
 
-	graph_header->array_size = get_array_size(graph_size);
+	graph_header->array_size = get_matrix_size(graph_size);
 	graph_header->graph_size = graph_size;
 	graph_header->edge_percentage = actual_edge_percentage;
 
