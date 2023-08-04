@@ -11,7 +11,7 @@ binDir = ./bin/
 
 includeFlags = -I /usr/include/graphviz
 linkDir = -L /usr/lib/x86_64-linux-gnu/graphviz/
-linkLibraries = 
+linkLibraries = -lm
 #-lgvc -lcgraph -lpthread
 
 graphObjectFiles = $(buildDir)graph.o $(buildDir)file_module.o
@@ -22,7 +22,7 @@ CCFLAGS = -Wall $(includeFlags)
 all: graph prim
 
 graph: graph.o file_module.o
-	$(CC) $(CCFLAGS) $(linkDir) $(graphSrcDir)main.c $(graphObjectFiles) $(linkLibraries) -o $(binDir)$(graphBinaryName)
+	$(CC) $(CCFLAGS) $(linkDir) $(graphSrcDir)main.c $(graphObjectFiles) $(linkLibraries) -o $(binDir)$(graphBinaryName) $(linkLibraries)
 
 prim: prim_st.o prim_mt.o file_module.o graph.o
 	$(CC) $(CCFLAGS) $(linkDir) $(primSrcDir)main.c $(primObjectFiles) $(linkLibraries) -o $(binDir)$(primBinaryName)
@@ -57,10 +57,10 @@ test_mt:
 	$(binDir)$(primBinaryName) -f graph.grf -t 2
 
 test_graph:
-	$(binDir)$(graphBinaryName) -s 4000 -f graph.grf -p 70
+	$(binDir)$(graphBinaryName) -s 6 -f graph.grf -p 70 -m
 
 gdb_graph:
-	 gdb --args $(binDir)$(graphBinaryName) -s 40000 -f graph.grf -p 70
+	 gdb --args $(binDir)$(graphBinaryName) -s 10 -f graph.grf -p 70
 
 debug_prim:
 	$(binDir)$(graphBinaryName) -s 6 -f graph.grf -p 70

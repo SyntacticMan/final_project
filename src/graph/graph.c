@@ -27,6 +27,7 @@ static double get_edge_probability(int graph_size, double requested_edge_percent
 static int random_generator(int max, int min);
 static float random_float_generator(float max, float min);
 static void print_progress_bar(int progress, int total, int barWidth);
+double random_coordinate_generator(int graph_size);
 
 /*
  *   random_generator
@@ -44,6 +45,37 @@ float random_float_generator(float max, float min)
 }
 
 /*
+ *  random_coordinate_generator
+
+ * implementa o método Box-Muller para gerar uma coordenada aleatoriamente
+ * tendendo para uma distribuição normal
+*/
+double random_coordinate_generator(int graph_size)
+{
+    double u1, u2, z0, z1;
+    static int generate = 0;
+    generate = 1 - generate;
+
+    if (!generate)
+        return z1;
+
+    do
+    {
+        u1 = (double)rand() / RAND_MAX;
+        u2 = (double)rand() / RAND_MAX;
+    } while (u1 <= 1e-7);
+
+    z0 = sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
+    z1 = sqrt(-2.0 * log(u1)) * sin(2.0 * M_PI * u2);
+
+    // ajustar os valores para ficarem entre 1 e graph_size
+    z0 = ((z0 + 2.0) * (graph_size - 1) / 4.0) + 1;
+    z1 = ((z1 + 2.0) * (graph_size - 1) / 4.0) + 2;
+
+    return z0;
+}
+
+/*
  * create_graph
 
  * cria um novo grafo, com lista de vértices e arestas
@@ -53,20 +85,19 @@ void create_graph(int graph_size, int edge_percentage)
     srand(time(NULL));
 
     // alocar as colunas
-    graph = malloc(get_matrix_size(graph_size) * sizeof(float));
+    int matrix_size = get_matrix_size(graph_size);
+    printf("matrix size: %d", matrix_size);
+    graph = malloc(matrix_size * sizeof(float));
 
     if (graph == NULL)
     {
         return;
     }
+
     printf("Memory alocated\n");
 
-    double edge_probability = get_edge_probability(graph_size, edge_percentage);
-    // printf("Edge probability %f\n", edge_probability);
-
     printf("First pass\n");
-    // uma primeira passagem para assegurar
-    // que todos os vértices têm, pelo menos, uma aresta
+    // uma primeira passagem para preencher a matriz com infinitos
     for (int col = 2; col <= graph_size; col++)
     {
         for (int row = 1; row < col; row++)
@@ -76,29 +107,56 @@ void create_graph(int graph_size, int edge_percentage)
             // em ambos os casos passo à frente
             if ((row >= col))
                 continue;
+            // printf("col:%d\nrow:%d\n", col, row);
 
-            add_random_edge(col, row);
+            add_null_edge(graph, col, row);
         }
-        print_progress_bar(col, graph_size, 50);
+        // print_progress_bar(col, graph_size, 50);
     }
 
-    printf("Second pass\n");
-    for (int col = 2; col <= graph_size; col++)
-    {
-        for (int row = 1; row < col; row++)
-        {
-            // se linha = coluna o vértice ligar-se-ia a ele mesmo
-            // se linha > coluna estou na triangular inferior
-            // em ambos os casos passo à frente
-            if ((row >= col))
-                continue;
+    get_edge_count(graph_size);
 
-            if ((double)random_generator(100, 1) < edge_probability)
-                add_random_edge(col, row);
-            else
-                add_null_edge(graph, col, row);
+    printf("Second pass\n");
+
+    // obter o número de arestas correspondentes à percentagem pedida
+    float num_edges = (float)matrix_size * (edge_percentage / 100.0);
+
+    printf("%f number of edges to allocate\n", num_edges);
+
+    int col, row;
+
+    for (int i = 0; i < num_edges; i++)
+    {
+
+        col = random_coordinate_generator(graph_size);
+        row = random_coordinate_generator(graph_size);
+
+        if (col > graph_size)
+            col = graph_size;
+
+        if (col < 1)
+            col = 1;
+        if (row >= graph_size)
+            row = graph_size - 1;
+
+        if (row < 1)
+            row = 1;
+
+        while (get_edge(graph, col, row) != INFINITE)
+        {
+            col = random_coordinate_generator(graph_size);
+            row = random_coordinate_generator(graph_size);
+
+            if (col > graph_size)
+                col = graph_size;
+
+            if (row >= graph_size)
+                row = graph_size - 1;
         }
-        print_progress_bar(col, graph_size, 50);
+
+        printf("col:%d\nrow:%d\n", col, row);
+        add_random_edge(col, row);
+        // print_progress_bar(i, num_edges - 1, 50);
     }
 
     printf("Graph created\n");
@@ -149,13 +207,12 @@ void create_locked_graph(int graph_size, int edge_percentage)
 */
 int get_index(int col, int row)
 {
-    int n = col - 1;
-    int index = (n * (n + 1)) / 2;
+    int index = ((col - 1) * (col - 2)) / 2;
 
     // adicionar a linha ao índice
     // para obter índice da coluna/linha
-    if (row > 0)
-        index += row;
+    if (row > 1)
+        index += row - 1;
 
     return index;
 }
@@ -176,9 +233,9 @@ int get_matrix_size(int graph_size)
 
  * cria uma aresta entre os vértices u e v com um peso aleatório
  */
-void add_random_edge(int u, int v)
+void add_random_edge(int col, int row)
 {
-    int index = get_index(u, v);
+    int index = get_index(col, row);
 
     // o peso é atribuído ao acaso
     float weight = random_float_generator(MAX_WEIGHT, MIN_WEIGHT);
@@ -199,9 +256,9 @@ void add_random_edge(int u, int v)
 
  * cria uma aresta entre os vértices u e v com o peso indicado
  */
-void add_edge(float *graph, int u, int v, float weight)
+void add_edge(float *graph, int col, int row, float weight)
 {
-    int index = get_index(u, v);
+    int index = get_index(col, row);
     graph[index] = weight;
 }
 
@@ -211,10 +268,9 @@ void add_edge(float *graph, int u, int v, float weight)
     adiciona uma "não-ligação" entre os vértices u e v
     representada por um infinito
 */
-void add_null_edge(float *graph, int u, int v)
+void add_null_edge(float *graph, int col, int row)
 {
-    int index = get_index(u, v);
-    graph[index] = INFINITE;
+    graph[get_index(col, row)] = INFINITE;
 }
 
 /*
@@ -223,28 +279,28 @@ void add_null_edge(float *graph, int u, int v)
     obtém a aresta, ou a ausência dela,
     correspondente à coluna e linha indicada
 */
-float get_edge(float *graph, int u, int v)
+float get_edge(float *graph, int col, int row)
 {
 
     // um vértice não tem ligação com ele mesmo
     // logo a aresta é sempre 0
-    if (u == v)
+    if (col == row)
         return 0;
 
     // se a coluna fôr mais pequena que a linha
     // é porque foi pedida uma aresta da triangular inferior
     // portanto vou inverter coluna e linha para obter a simétrica
-    if (u < v)
+    if (col < row)
     {
-        int temp = u;
-        u = v;
-        v = temp;
+        int temp = col;
+        col = row;
+        row = temp;
     }
 
-    int index = get_index(u, v);
+    int index = get_index(col, row);
 
     /* DEBUG */
-    // printf("(%d,%d) => index = %d || weight = %d\n", u, v, index, *graph[index]);
+    printf("(%d,%d) => index = %d || weight = %f\n", col, row, index, graph[index]);
 
     return graph[index];
 }
@@ -258,9 +314,9 @@ int get_edge_count(int graph_size)
 {
     int edge_count = 0;
 
-    for (int i = 0; i <= graph_size; i++)
+    for (int i = 2; i <= graph_size; i++)
     {
-        for (int j = 0; j < graph_size; j++)
+        for (int j = 1; j < i; j++)
         {
             float edge = get_edge(graph, i, j);
 
@@ -270,6 +326,8 @@ int get_edge_count(int graph_size)
             }
         }
     }
+
+    printf("edge count: %d\n", edge_count);
 
     return edge_count;
 }
@@ -330,19 +388,19 @@ void print_graph(int graph_size)
 
             for (int row = 0; row < graph_size; row++)
             {
-                printf("|%3d", row);
+                printf("|%5d", row + 1);
             }
             printf("\n");
         }
-        printf("%d", col);
+        printf("%2d", col + 1);
 
         for (int row = 0; row < graph_size; row++)
         {
-            int edge = get_edge(graph, col, row);
+            float edge = get_edge(graph, col, row);
             if (edge == INFINITE)
-                printf("|inf");
+                printf("|  inf");
             else
-                printf("|%3d", edge);
+                printf("|%3.3f", edge);
         }
 
         printf("\n");

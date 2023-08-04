@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #ifndef GRAPH
 #define GRAPH
@@ -31,9 +32,10 @@ int main(int argc, char *argv[])
 
 	int graph_size, requested_edge_percentage;
 	char *graph_filename;
+	bool print_matrix = false;
 
 	int opt;
-	while ((opt = getopt(argc, argv, "s:f:p:")) != -1)
+	while ((opt = getopt(argc, argv, "s:f:p:m")) != -1)
 	{
 		switch (opt)
 		{
@@ -45,6 +47,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'p': // percentagem do máximo de arestas a adicionar
 			requested_edge_percentage = atoi(optarg);
+			break;
+		case 'm': // imprimir a matriz de adjacência
+			print_matrix = true;
 			break;
 		default:
 			fprintf(stderr, "Usage: %s [-s graph_size] [-f filename] [-p requested_edge_percentage]\n", argv[0]);
@@ -97,7 +102,8 @@ int main(int argc, char *argv[])
 	// }
 
 #ifdef DEBUG
-	print_graph(graph_size);
+	if (print_matrix)
+		print_graph(graph_size);
 #endif
 
 	// emitir o relatório de criação
@@ -109,21 +115,21 @@ int main(int argc, char *argv[])
 	// gravar o grafo no ficheiro
 	header *graph_header = malloc(sizeof(header));
 
-	graph_header->array_size = get_matrix_size(graph_size);
-	graph_header->graph_size = graph_size;
-	graph_header->edge_percentage = actual_edge_percentage;
+	// graph_header->array_size = get_matrix_size(graph_size);
+	// graph_header->graph_size = graph_size;
+	// graph_header->edge_percentage = actual_edge_percentage;
 
-	write_file(graph_header, graph, graph_filename);
+	// // write_file(graph_header, graph, graph_filename);
 
 	free(graph);
 
-	// preparar o título do grafo
-	char graph_title[50] = "Grafo (";
-	char string_temp[50];
+	// // preparar o título do grafo
+	// char graph_title[50] = "Grafo (";
+	// char string_temp[50];
 
-	sprintf(string_temp, "%d", graph_size);
-	strcat(graph_title, string_temp);
-	strcat(graph_title, " vértices)");
+	// sprintf(string_temp, "%d", graph_size);
+	// strcat(graph_title, string_temp);
+	// strcat(graph_title, " vértices)");
 
 	return 0;
 }
