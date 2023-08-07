@@ -169,7 +169,8 @@ void create_valid_edge(int graph_size)
     // o máximo da linha é sempre col - 1
     row = random_coordinate_generator(col);
 
-    if (get_edge(graph, col, row) == INFINITE)
+    // apenas aceitar coordenadas de forem válidas
+    if (col <= graph_size && row < col && get_edge(graph, col, row) == INFINITE)
     {
         add_random_edge(col, row);
     }
@@ -203,7 +204,7 @@ int get_index(int col, int row)
     calcula o número de elementos da matriz de adjacência
 
 */
-int get_matrix_size(int graph_size)
+unsigned int get_matrix_size(int graph_size)
 {
     return ((graph_size * (graph_size - 1)) / 2);
 }
