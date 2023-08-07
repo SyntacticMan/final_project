@@ -11,10 +11,10 @@
     * ~~calcular percentagem de atribuídos vs máxima~~
 * ~~Converter o grafo para array simples~~
 * ~~__graph__ passa de _int_ para _float_~~
-* array_size deve ser calculado e não guardado no cabeçalho do ficheiro
-* implementar o método Box Muller para gerar números aleatórios
-* corrigir o não estar a respeitar a percentagem de arestas pedida
-* iterar n vezes, n = número de arestas a adicionar, adicionado arestas com vértices determinados pelo Box Muller
+* ~~array_size deve ser calculado e não guardado no cabeçalho do ficheiro~~
+* ~~implementar o método Box Muller para gerar números aleatórios~~
+* ~~corrigir o não estar a respeitar a percentagem de arestas pedida~~
+* ~~iterar n vezes, n = número de arestas a adicionar, adicionado arestas com vértices determinados pelo Box Muller~~
 * Adicionar suporte para florestas de grafos
     * Gerar e processar florestas de grafos (nice to have)
 

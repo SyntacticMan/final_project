@@ -110,7 +110,6 @@ int main(int argc, char *argv[])
 	// gravar o grafo no ficheiro
 	header *graph_header = malloc(sizeof(header));
 
-	graph_header->array_size = get_matrix_size(graph_size);
 	graph_header->graph_size = graph_size;
 	graph_header->edge_percentage = actual_edge_percentage;
 

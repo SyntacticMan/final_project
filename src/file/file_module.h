@@ -18,7 +18,6 @@
 typedef struct file_header
 {
     int graph_size;
-    int array_size;
     int edge_percentage;
 } header;
 

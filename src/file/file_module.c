@@ -42,7 +42,9 @@ void write_file(header *file_header, float *graph, char *filename)
         return;
     }
 
-    for (int i = 0; i < file_header->array_size; i++)
+    unsigned int array_size = (file_header->graph_size * (file_header->graph_size - 1)) / 2;
+
+    for (unsigned int i = 0; i < array_size; i++)
     {
         fwrite(&graph[i], sizeof(float), 1, graph_file);
     }
@@ -63,10 +65,12 @@ float *read_file(char *filename, header *file_header)
     // carregar o cabeçalho
     fread(file_header, sizeof(header), 1, graph_file);
 
-    // carregar o array
-    float *graph = (float *)malloc(file_header->array_size * sizeof(float));
+    unsigned int array_size = (file_header->graph_size * (file_header->graph_size - 1)) / 2;
 
-    for (int i = 0; i < file_header->array_size; i++)
+    // carregar o array
+    float *graph = (float *)malloc(array_size * sizeof(float));
+
+    for (unsigned int i = 0; i < array_size; i++)
     {
         fread(&graph[i], sizeof(float), 1, graph_file);
     }
