@@ -22,7 +22,6 @@ float *graph;
 void add_random_edge(int u, int v);
 
 static int get_index(int col, int row);
-static double get_edge_probability(int graph_size, double requested_edge_percentage);
 static void create_valid_edge(int graph_size);
 
 static int random_generator(int max, int min);
@@ -322,25 +321,6 @@ int get_edge_count(int graph_size)
 float get_edge_percentage(int graph_size)
 {
     return ((float)get_edge_count(graph_size) / (float)get_matrix_size(graph_size)) * 100.0;
-}
-
-/*
-    get_edge_probability
-
-    Calcula a possibilidade de uma aresta ser criada, tendo em conta
-    a percentagem de arestas pedidas e o tamanho do grafo
-*/
-double get_edge_probability(int graph_size, double requested_edge_percentage)
-{
-
-    double edge_probability = 2.0 * (requested_edge_percentage * get_matrix_size((double)graph_size)) / ((double)graph_size * ((double)graph_size - 1.0));
-
-    // se o grafo fôr muito grande e a percentagem muito baixa
-    // a probabilidade pode ficar negativa, nesse caso devolvo 1
-    if (edge_probability < 0)
-        edge_probability = 1.0;
-
-    return edge_probability;
 }
 
 /*
