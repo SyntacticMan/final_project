@@ -23,6 +23,7 @@ void add_random_edge(int u, int v);
 
 static int get_index(int col, int row);
 static double get_edge_probability(int graph_size, double requested_edge_percentage);
+static void create_valid_edge(int graph_size);
 
 static int random_generator(int max, int min);
 static float random_float_generator(float max, float min);
@@ -86,7 +87,6 @@ void create_graph(int graph_size, int edge_percentage)
 
     // alocar as colunas
     int matrix_size = get_matrix_size(graph_size);
-    printf("matrix size: %d", matrix_size);
     graph = malloc(matrix_size * sizeof(float));
 
     if (graph == NULL)
@@ -94,9 +94,6 @@ void create_graph(int graph_size, int edge_percentage)
         return;
     }
 
-    printf("Memory alocated\n");
-
-    printf("First pass\n");
     // uma primeira passagem para preencher a matriz com infinitos
     for (int col = 2; col <= graph_size; col++)
     {
@@ -107,59 +104,18 @@ void create_graph(int graph_size, int edge_percentage)
             // em ambos os casos passo à frente
             if ((row >= col))
                 continue;
-            // printf("col:%d\nrow:%d\n", col, row);
 
             add_null_edge(graph, col, row);
         }
-        // print_progress_bar(col, graph_size, 50);
     }
-
-    get_edge_count(graph_size);
-
-    printf("Second pass\n");
 
     // obter o número de arestas correspondentes à percentagem pedida
     float num_edges = (float)matrix_size * (edge_percentage / 100.0);
 
-    printf("%f number of edges to allocate\n", num_edges);
-
-    int col, row;
-
     for (int i = 0; i < num_edges; i++)
     {
-
-        col = random_coordinate_generator(graph_size);
-        row = random_coordinate_generator(graph_size);
-
-        if (col > graph_size)
-            col = graph_size;
-
-        if (col < 1)
-            col = 1;
-        if (row >= graph_size)
-            row = graph_size - 1;
-
-        if (row < 1)
-            row = 1;
-
-        while (get_edge(graph, col, row) != INFINITE)
-        {
-            col = random_coordinate_generator(graph_size);
-            row = random_coordinate_generator(graph_size);
-
-            if (col > graph_size)
-                col = graph_size;
-
-            if (row >= graph_size)
-                row = graph_size - 1;
-        }
-
-        printf("col:%d\nrow:%d\n", col, row);
-        add_random_edge(col, row);
-        // print_progress_bar(i, num_edges - 1, 50);
+        create_valid_edge(graph_size);
     }
-
-    printf("Graph created\n");
 }
 
 /*
@@ -197,6 +153,30 @@ void create_locked_graph(int graph_size, int edge_percentage)
     add_edge(graph, 4, 2, 1);
     add_edge(graph, 4, 3, 4);
     add_edge(graph, 5, 4, 5);
+}
+
+/*
+    create_valid_edge
+
+    função recursiva para atribuir uma aresta
+    no vértice válido que ainda não tenha aresta
+*/
+void create_valid_edge(int graph_size)
+{
+    int col, row;
+
+    col = random_coordinate_generator(graph_size);
+    // o máximo da linha é sempre col - 1
+    row = random_coordinate_generator(col);
+
+    if (get_edge(graph, col, row) == INFINITE)
+    {
+        add_random_edge(col, row);
+    }
+    else
+    {
+        create_valid_edge(graph_size);
+    }
 }
 
 /*
@@ -300,7 +280,7 @@ float get_edge(float *graph, int col, int row)
     int index = get_index(col, row);
 
     /* DEBUG */
-    printf("(%d,%d) => index = %d || weight = %f\n", col, row, index, graph[index]);
+    // printf("(%d,%d) => index = %d || weight = %f\n", col, row, index, graph[index]);
 
     return graph[index];
 }
@@ -327,7 +307,7 @@ int get_edge_count(int graph_size)
         }
     }
 
-    printf("edge count: %d\n", edge_count);
+    // printf("edge count: %d\n", edge_count);
 
     return edge_count;
 }

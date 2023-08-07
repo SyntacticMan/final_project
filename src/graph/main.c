@@ -94,13 +94,6 @@ int main(int argc, char *argv[])
 	int max_edge_count = get_matrix_size(graph_size);
 	int actual_edge_percentage = (int)get_edge_percentage(graph_size);
 
-	// é preciso garantir o cumprimento da percentagem pedida em +-5%
-	// while (actual_edge_percentage < requested_edge_percentage - 5 || actual_edge_percentage > requested_edge_percentage + 5)
-	// {
-	// 	create_graph(graph_size, requested_edge_percentage);
-	// 	actual_edge_percentage = (int)get_edge_percentage(graph_size);
-	// }
-
 #ifdef DEBUG
 	if (print_matrix)
 		print_graph(graph_size);
@@ -115,11 +108,11 @@ int main(int argc, char *argv[])
 	// gravar o grafo no ficheiro
 	header *graph_header = malloc(sizeof(header));
 
-	// graph_header->array_size = get_matrix_size(graph_size);
-	// graph_header->graph_size = graph_size;
-	// graph_header->edge_percentage = actual_edge_percentage;
+	graph_header->array_size = get_matrix_size(graph_size);
+	graph_header->graph_size = graph_size;
+	graph_header->edge_percentage = actual_edge_percentage;
 
-	// // write_file(graph_header, graph, graph_filename);
+	write_file(graph_header, graph, graph_filename);
 
 	free(graph);
 
