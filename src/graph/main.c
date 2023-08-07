@@ -73,7 +73,9 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	printf("Array RAM size: %lu kb (%d)\n", ((get_matrix_size(graph_size) * sizeof(float)) / 1024), get_matrix_size(graph_size));
+	int matrix_size = get_matrix_size(graph_size);
+	printf("%d\n", matrix_size);
+	printf("Array RAM size: %lu kb (%d)\n", ((matrix_size * sizeof(float)) / 1024), matrix_size);
 
 	// #ifdef DEBUG
 	// 	graph_size = 6;
@@ -91,7 +93,7 @@ int main(int argc, char *argv[])
 
 	// obter as contagens das arestas
 	// número máximo de arestas é simplesmente o número de elementos da matriz de adjacência
-	int max_edge_count = get_matrix_size(graph_size);
+	unsigned int max_edge_count = get_matrix_size(graph_size);
 	int actual_edge_percentage = (int)get_edge_percentage(graph_size);
 
 #ifdef DEBUG
