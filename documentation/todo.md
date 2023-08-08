@@ -15,6 +15,7 @@
 * ~~implementar o método Box Muller para gerar números aleatórios~~
 * ~~corrigir o não estar a respeitar a percentagem de arestas pedida~~
 * ~~iterar n vezes, n = número de arestas a adicionar, adicionado arestas com vértices determinados pelo Box Muller~~
+* desenhar os grafos
 * Adicionar suporte para florestas de grafos
     * Gerar e processar florestas de grafos (nice to have)
 

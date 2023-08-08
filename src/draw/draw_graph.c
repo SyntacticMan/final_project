@@ -1,13 +1,16 @@
 #ifndef DRAW_GRAPH
+#define DRAW_GRAPH
 #include "draw_graph.h"
 #endif
+
+GVC_t *gvc;
 
 /*
     draw_graph
 
     cria uma representação gráfica do grafo em contexto
 */
-void draw_graph(int **graph_to_draw, int graph_size, const char *filename, char *graph_title)
+void draw_graph(float *graph_to_draw, unsigned int graph_size, const char *filename, char *graph_title)
 {
     Agraph_t *g;
     Agnode_t *n, *m;
@@ -35,30 +38,28 @@ void draw_graph(int **graph_to_draw, int graph_size, const char *filename, char 
     agsafeset(g, "label", graph_title, "");
     agsafeset(g, "labelloc", "t", "");
 
-    for (int col = 0; col < graph_size; col++)
+    for (int col = 1; col <= graph_size; col++)
     {
-        for (int row = 0; row < graph_size; row++)
+        for (int row = 1; row < col; row++)
         {
-            // apenas desenhar a triangular superior
-            // para evitar duplicação de ligações
-            if (row > col)
+            // printf("col: %d, row: %d\n", col, row);
+
+            sprintf(string_temp, "%d", col);
+            n = agnode(g, string_temp, 1);
+            agsafeset(n, "shape", "circle", "");
+
+            sprintf(string_temp, "%d", row);
+            m = agnode(g, string_temp, 1);
+            agsafeset(m, "shape", "circle", "");
+
+            float weight = get_edge(graph_to_draw, col, row);
+            if (weight != INFINITE && weight > 0)
             {
+                // printf("weight: %3.3f\n", weight);
 
-                sprintf(string_temp, "%d", col);
-                n = agnode(g, string_temp, 1);
-                agsafeset(n, "shape", "circle", "");
-
-                sprintf(string_temp, "%d", row);
-                m = agnode(g, string_temp, 1);
-                agsafeset(m, "shape", "circle", "");
-
-                int weight = get_edge(graph_to_draw, col, row);
-                if (weight != INFINITE && weight > 0)
-                {
-                    e = agedge(g, n, m, 0, 1);
-                    sprintf(string_temp, "%d", weight);
-                    agsafeset(e, "label", string_temp, "");
-                }
+                e = agedge(g, n, m, 0, 1);
+                sprintf(string_temp, "%3.3f", weight);
+                agsafeset(e, "label", string_temp, "");
             }
         }
     }

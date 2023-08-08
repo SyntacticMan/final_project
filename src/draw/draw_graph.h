@@ -6,6 +6,6 @@
 
 #include "gvc.h"
 
-GVC_t *gvc;
+extern GVC_t *gvc;
 
-void draw_graph(int **graph_to_draw, int graph_size, const char *filename, char *graph_title);
+void draw_graph(float *graph_to_draw, unsigned int graph_size, const char *filename, char *graph_title);
