@@ -26,7 +26,7 @@ void draw_graph(float *graph_to_draw, unsigned int graph_size, const char *filen
 
     // definir algoritmo de colocação, tipo e nome da imagem a gerar
     char *args[] = {
-        "dot",
+        "sfdp",
         "-Tpng",
         image_name};
 
