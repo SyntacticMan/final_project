@@ -19,7 +19,7 @@
 
 float *graph;
 
-void add_random_edge(int u, int v);
+static void add_random_edge(int u, int v);
 
 static int get_index(int col, int row);
 static void create_valid_edge(int graph_size);
@@ -27,7 +27,7 @@ static void create_valid_edge(int graph_size);
 static int random_generator(int max, int min);
 static float random_float_generator(float max, float min);
 static void print_progress_bar(int progress, int total, int barWidth);
-double random_coordinate_generator(int graph_size);
+static double random_coordinate_generator(int graph_size);
 
 /*
  *   random_generator
