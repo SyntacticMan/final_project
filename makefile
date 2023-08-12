@@ -1,6 +1,7 @@
 binaryName = prim
-graphBinaryName = graph_generator
+graphBinaryName = gengraph
 primBinaryName = prim
+drawBinaryName = drawgraph
 srcDir = ./src/
 graphSrcDir = $(srcDir)graph/
 fileSrcDir = $(srcDir)file/
@@ -14,11 +15,15 @@ linkDir = -L /usr/lib/x86_64-linux-gnu/graphviz/
 linkLibraries = -lm -lgvc -lcgraph -lpthread
 
 graphObjectFiles = $(buildDir)graph.o $(buildDir)file_module.o $(buildDir)draw_graph.o
+drawObjectFiles = $(buildDir)graph.o $(buildDir)file_module.o $(buildDir)draw_graph.o
 primObjectFiles = $(buildDir)prim_st.o $(buildDir)prim_mt.o $(buildDir)file_module.o $(buildDir)graph.o
 
 CCFLAGS = -Wall $(includeFlags)
  
 all: graph prim
+
+draw: draw.o graph.o file_module.o
+	$(CC) $(CCFLAGS) $(linkDir) $(drawSrcDir)main.c $(drawObjectFiles) $(linkLibraries) -o $(binDir)$(drawBinaryName)	
 
 graph: graph.o file_module.o draw.o
 	$(CC) $(CCFLAGS) $(linkDir) $(graphSrcDir)main.c $(graphObjectFiles) $(linkLibraries) -o $(binDir)$(graphBinaryName) $(linkLibraries)
@@ -56,7 +61,7 @@ test_mt:
 	$(binDir)$(primBinaryName) -f graph.grf -t 2
 
 test_graph:
-	$(binDir)$(graphBinaryName) -s 5000 -f graph.grf -p 70 -m
+	$(binDir)$(graphBinaryName) -s 50 -f graph.grf -p 70 -m
 
 gdb_graph:
 	 gdb --args $(binDir)$(graphBinaryName) -s 600 -f graph.grf -p 70

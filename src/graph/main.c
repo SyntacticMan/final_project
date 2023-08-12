@@ -22,11 +22,6 @@
 #include "graph.h"
 #endif
 
-#ifndef DRAW_GRAPH
-#define DRAW_GRAPH
-#include "../draw/draw_graph.h"
-#endif
-
 #ifndef FILE_MODULE
 #define FILE_MODULE
 #include "../file/file_module.h"
@@ -118,16 +113,6 @@ int main(int argc, char *argv[])
 	graph_header->edge_percentage = actual_edge_percentage;
 
 	write_file(graph_header, graph, graph_filename);
-
-	// preparar o título do grafo
-	char graph_title[50] = "Grafo (";
-	char string_temp[50];
-
-	sprintf(string_temp, "%d", graph_size);
-	strcat(graph_title, string_temp);
-	strcat(graph_title, " vértices)");
-
-	draw_graph(graph, graph_size, "graph_draw.png", graph_title);
 
 	free(graph);
 	return 0;

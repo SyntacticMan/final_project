@@ -85,12 +85,12 @@ int main(int argc, char *argv[])
     {
         // lançar single thread
         printf("Lançando Algoritmo de Prim em tarefa simples\n");
-        d = prim_mst(graph_header->array_size, graph_header->graph_size, graph_root);
+        d = prim_mst(get_matrix_size(graph_header->graph_size), graph_header->graph_size, graph_root);
     }
     else
     {
         printf("Lançando Algoritmo de Prim com %d threads\n", threads);
-        d = prim_mt_mst(graph_header->array_size, graph_header->graph_size, graph_root, threads);
+        d = prim_mt_mst(get_matrix_size(graph_header->graph_size), graph_header->graph_size, graph_root, threads);
     }
     gettimeofday(&end, NULL);
 
