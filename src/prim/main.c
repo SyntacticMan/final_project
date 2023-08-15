@@ -32,7 +32,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-void print_mst(int *d, int graph_size);
+void print_mst(float *d, int graph_size);
 
 int main(int argc, char *argv[])
 {
@@ -41,9 +41,9 @@ int main(int argc, char *argv[])
     struct timeval start, end;
 
     char *graph_filename;
-    int *d;
+    float *d;
     int opt;
-    int threads = 0;
+    int threads = 1; // por omissão correr apenas numa thread
 
     while ((opt = getopt(argc, argv, "f:t:")) != -1)
     {
@@ -97,6 +97,8 @@ int main(int argc, char *argv[])
     printf("grafo-> %s\n", graph_filename);
     printf("graph root-> %d\n", graph_root);
 
+    print_graph(graph_header->graph_size);
+
     print_mst(d, graph_header->graph_size);
 
     // Calculate the elapsed time in seconds and microseconds
@@ -105,25 +107,20 @@ int main(int argc, char *argv[])
     double elapsed_time = seconds + microseconds / 1e6;
 
     printf("Execution time: %.6f seconds\n", elapsed_time);
-
-    // if (graph_header->graph_size <= 30)
-
-    // desenhar a árvore mínima
-    // draw_graph(graph, graph_header->graph_size, "arvore_minima.png", "Árvore mínima");
 }
 
-void print_mst(int *d, int graph_size)
+void print_mst(float *d, int graph_size)
 {
     printf("\n");
     printf("    ");
-    for (int i = 0; i < graph_size; i++)
+    for (int i = 1; i <= graph_size; i++)
     {
         printf("%2d|", i);
     }
     printf("\nd[] ");
-    for (int i = 0; i < graph_size; i++)
+    for (int i = 1; i <= graph_size; i++)
     {
-        printf("%2d|", d[i]);
+        printf("%2f|", d[i]);
     }
     printf("\n");
 }

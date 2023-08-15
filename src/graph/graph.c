@@ -136,22 +136,22 @@ void create_locked_graph(int graph_size, int edge_percentage)
 
     for (int col = 1; col <= graph_size; col++)
     {
-        for (int row = 1; row < graph_size; row++)
+        for (int row = 1; row < col; row++)
         {
             add_null_edge(graph, col, row);
         }
     }
 
     //            --c  r
-    add_edge(graph, 1, 0, 1);
-    add_edge(graph, 2, 0, 3);
-    add_edge(graph, 5, 0, 3);
-    add_edge(graph, 2, 1, 5);
-    add_edge(graph, 3, 1, 1);
-    add_edge(graph, 3, 2, 2);
+    add_edge(graph, 2, 1, 1);
+    add_edge(graph, 3, 1, 3);
+    add_edge(graph, 6, 1, 3);
+    add_edge(graph, 3, 2, 5);
     add_edge(graph, 4, 2, 1);
-    add_edge(graph, 4, 3, 4);
-    add_edge(graph, 5, 4, 5);
+    add_edge(graph, 4, 3, 2);
+    add_edge(graph, 5, 3, 1);
+    add_edge(graph, 5, 4, 4);
+    add_edge(graph, 6, 5, 5);
 }
 
 /*
@@ -333,6 +333,18 @@ int pick_graph_root(int graph_size)
     return random_generator(graph_size - 1, 1);
 }
 
+void print_array(float *graph, int graph_size)
+{
+    int array_size = get_matrix_size(graph_size);
+
+    for (int i = 0; i < array_size; i++)
+    {
+        printf(" i: %d -> %3.3f", i, graph[i]);
+    }
+
+    printf("\n");
+}
+
 /*
     print_graph
 
@@ -340,22 +352,22 @@ int pick_graph_root(int graph_size)
 */
 void print_graph(int graph_size)
 {
-    for (int col = 0; col < graph_size; col++)
+    for (int col = 1; col <= graph_size; col++)
     {
         // cabeçalho
-        if (col == 0)
+        if (col == 1)
         {
             printf(" ");
 
-            for (int row = 0; row < graph_size; row++)
+            for (int row = 1; row <= graph_size; row++)
             {
-                printf("|%5d", row + 1);
+                printf("|%5d", row);
             }
             printf("\n");
         }
-        printf("%2d", col + 1);
+        printf("%2d", col);
 
-        for (int row = 0; row < graph_size; row++)
+        for (int row = 1; row <= graph_size; row++)
         {
             float edge = get_edge(graph, col, row);
             if (edge == INFINITE)

@@ -26,7 +26,7 @@
 #define GRAPH_SIZE_MIN 10
 #define GRAPH_SIZE_MAX 50
 
-#define INFINITE MAX_WEIGHT + 2
+#define INFINITE MAX_WEIGHT + 2.0
 
 // grafo é representado como um vetor de pointeiros dinamicamente alocado de ints
 // uma vez que o tamanho do grafo é determinado durante a execução
@@ -45,3 +45,4 @@ float get_edge_percentage(int graph_size);
 int pick_graph_root(int graph_size);
 
 void print_graph(int graph_size);
+void print_array(float *graph, int graph_size);

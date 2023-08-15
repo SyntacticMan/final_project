@@ -78,10 +78,10 @@ int main(int argc, char *argv[])
 	printf("Array RAM size: %lu kb (%d)\n", ((matrix_size * sizeof(float)) / 1024), matrix_size);
 
 	// #ifdef DEBUG
-	// 	graph_size = 6;
-	// 	create_locked_graph(graph_size, requested_edge_percentage);
+	graph_size = 6;
+	create_locked_graph(graph_size, requested_edge_percentage);
 	// #else
-	create_graph(graph_size, requested_edge_percentage);
+	// create_graph(graph_size, requested_edge_percentage);
 	// #endif
 
 	if (graph == NULL)
