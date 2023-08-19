@@ -93,10 +93,10 @@ void *process_edges(void *arg)
     pthread_exit(NULL);
 }
 
-int *prim_mt_mst(int array_size, int graph_size, int graph_root, int num_threads)
+float *prim_mt_mst(int array_size, int graph_size, int graph_root, int num_threads)
 {
     int *visited = malloc(graph_size * sizeof(int));
-    int *d = malloc(graph_size * sizeof(int));
+    float *d = malloc(graph_size * sizeof(int));
 
     for (int v = 0; v < graph_size; v++)
     {

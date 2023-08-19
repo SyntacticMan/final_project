@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     print_graph(graph_header->graph_size);
     printf("\n");
 #else
-    int graph_root = pick_graph_root(graph_header->graph_size);
+    int graph_root = 2; // pick_graph_root(graph_header->graph_size);
 #endif
 
     gettimeofday(&start, NULL);
@@ -96,6 +96,7 @@ int main(int argc, char *argv[])
 
     printf("grafo-> %s\n", graph_filename);
     printf("graph root-> %d\n", graph_root);
+    printf("graph size-> %d\n", graph_header->graph_size);
 
     print_graph(graph_header->graph_size);
 
