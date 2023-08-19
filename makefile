@@ -10,9 +10,10 @@ drawSrcDir = $(srcDir)draw/
 buildDir = ./build/
 binDir = ./bin/
 
-includeFlags = -I /usr/include/graphviz
+includeFlags = -I/usr/local/include/igraph
 linkDir = -L /usr/lib/x86_64-linux-gnu/graphviz/
-linkLibraries = -lm -lgvc -lcgraph -lpthread
+linkLibraries = -lm -lpthread
+drawLinkLibraries =  -L/usr/local/lib -ligraph
 
 graphObjectFiles = $(buildDir)graph.o $(buildDir)file_module.o $(buildDir)draw_graph.o
 drawObjectFiles = $(buildDir)graph.o $(buildDir)file_module.o $(buildDir)draw_graph.o
@@ -23,7 +24,7 @@ CCFLAGS = -Wall $(includeFlags)
 all: graph prim
 
 draw: draw.o graph.o file_module.o
-	$(CC) $(CCFLAGS) $(linkDir) $(drawSrcDir)main.c $(drawObjectFiles) $(linkLibraries) -o $(binDir)$(drawBinaryName)	
+	$(CC) $(CCFLAGS) $(linkDir) $(drawSrcDir)main.c $(drawObjectFiles) -lm $(drawLinkLibraries) -o $(binDir)$(drawBinaryName)	
 
 graph: graph.o file_module.o draw.o
 	$(CC) $(CCFLAGS) $(linkDir) $(graphSrcDir)main.c $(graphObjectFiles) $(linkLibraries) -o $(binDir)$(graphBinaryName) $(linkLibraries)
@@ -32,7 +33,7 @@ prim: prim_st.o prim_mt.o file_module.o graph.o
 	$(CC) $(CCFLAGS) $(linkDir) $(primSrcDir)main.c $(primObjectFiles) $(linkLibraries) -o $(binDir)$(primBinaryName)
 
 draw.o: $ $(drawSrcDir)draw_graph.c $(drawSrcDir)draw_graph.h
-	$(CC) $(CCFLAGS) -c $(drawSrcDir)draw_graph.c -o $(buildDir)draw_graph.o
+	$(CC) $(CCFLAGS) -c $(drawSrcDir)draw_graph.c $(drawLinkLibraries) -o $(buildDir)draw_graph.o
 
 graph.o: $(graphSrcDir)graph.c $(graphSrcDir)graph.h
 	$(CC) $(CCFLAGS) -c $(graphSrcDir)graph.c -o $(buildDir)graph.o

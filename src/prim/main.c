@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     }
 
 #ifdef DEBUG
-    int graph_root = 1;
+    int graph_root = 2;
     print_graph(graph_header->graph_size);
     printf("\n");
 #else
