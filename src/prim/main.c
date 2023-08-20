@@ -32,8 +32,6 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-void print_mst(float *d, int graph_size);
-
 int main(int argc, char *argv[])
 {
 
@@ -100,7 +98,7 @@ int main(int argc, char *argv[])
 
     print_graph(graph_header->graph_size);
 
-    print_mst(d, graph_header->graph_size);
+    // print_mst(d, graph_header->graph_size);
 
     // Calculate the elapsed time in seconds and microseconds
     double seconds = (double)(end.tv_sec - start.tv_sec);
@@ -108,20 +106,4 @@ int main(int argc, char *argv[])
     double elapsed_time = seconds + microseconds / 1e6;
 
     printf("Execution time: %.6f seconds\n", elapsed_time);
-}
-
-void print_mst(float *d, int graph_size)
-{
-    printf("\n");
-    printf("    ");
-    for (int i = 1; i <= graph_size; i++)
-    {
-        printf("%2d|", i);
-    }
-    printf("\nd[] ");
-    for (int i = 1; i <= graph_size; i++)
-    {
-        printf("%2f|", d[i]);
-    }
-    printf("\n");
 }

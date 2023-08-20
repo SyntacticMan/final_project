@@ -17,7 +17,7 @@
 #include "prim_st.h"
 #endif
 
-static int get_u(int v, float *d, bool *visited, int graph_size);
+static int get_u(int v, float *d, int *v_t, bool *visited, int graph_size);
 
 float *prim_mst(int array_size, int graph_size, int graph_root)
 {
@@ -29,14 +29,9 @@ float *prim_mst(int array_size, int graph_size, int graph_root)
     d[graph_root] = 0;
     visited[graph_root] = true;
 
-    printf("graph_size: %d\n", graph_size);
-
-    // print_array(graph, graph_size);
-
     // inicializar a árvore mínima
     for (int v = 1; v <= graph_size; v++)
     {
-        printf("v:%d\n", v);
         if (v != graph_root)
             visited[v] = false;
 
@@ -44,7 +39,6 @@ float *prim_mst(int array_size, int graph_size, int graph_root)
 
         if (weight < INFINITE)
         {
-            printf("v: %d, w:%f\n", v, weight);
             d[v] = weight;
             v_t[v] = graph_root;
         }
@@ -57,74 +51,88 @@ float *prim_mst(int array_size, int graph_size, int graph_root)
 
     for (int v = 1; v <= graph_size; v++)
     {
-        // passar a raíz à frente
+        // excluir a raíz e v-v_t
         if (v == graph_root || visited[v])
             continue;
 
         // obter o vértice u
-        // int u = get_u(v, d, visited, graph_size);
+        int u = get_u(v, d, v_t, visited, graph_size);
 
-        // printf("Found u: %d\n", u);
+        printf("Found u: %d\n", u);
 
-        // v_t[v] = u;
-        // visited[u] = true;
+        visited[u] = true;
+        // print_mst(d, graph_size);
 
-        // for (int i = v; i < graph_size; i++)
-        // {
-        //     // excluir a diagonal
-        //     if (v == u || visited[v])
-        //         continue;
+        for (int i = v; i <= graph_size; i++)
+        {
+            // excluir a diagonal e v-v_t
+            if (i == u || visited[i])
+                continue;
 
-        //     int u_weight = get_edge(graph, u, v);
-        //     if (u_weight < d[v])
-        //     {
-        //         d[v] = u_weight;
-        //     }
-        // }
+            float u_weight = get_edge(graph, u, i);
 
-        // for (int u = 1; u <= graph_size; u++)
-        // {
+            if (u_weight == 0)
+                continue;
 
-        //     int edge_weight = get_edge(graph, v, u);
-
-        //     if (edge_weight < d[u])
-        //     {
-        //         d[u] = edge_weight;
-        //         v_t[u] = v;
-        //     }
-        // }
+            if (u_weight < d[i])
+            {
+                d[i] = u_weight;
+                v_t[i] = u;
+            }
+            printf("(%d,%d) => weight: %f | d[v]: %f\n", u, i, u_weight, d[i]);
+        }
     }
+
+    print_mst(d, v_t, graph_size);
 
     return d;
 }
 
-int get_u(int v, float *d, bool *visited, int graph_size)
+int get_u(int v, float *d, int *v_t, bool *visited, int graph_size)
 {
-    // começa como infinito
-    int u_min = 0;
+    int u_min;
+    float min_weight = INFINITE;
 
     for (int u = 1; u <= graph_size; u++)
     {
-        printf("u->%d\n", u);
         // excluir a diagonal e v-v_t
         if (u == v || visited[u])
             continue;
 
-        float weight = get_edge(graph, u, v);
-
-        printf("weight: %f | d[v]: %f\n", weight, d[v]);
-
-        if (d[v] < weight)
+        if (!visited[u] && d[u] < min_weight)
         {
             u_min = u;
-            d[u] = d[v];
-        }
-        else if (weight < d[v])
-        {
-            u_min = u;
-            d[u] = weight;
+            min_weight = d[u];
+            // printf("v->%d | u_min->%d | min_weight: %f | d[v]: %f\n", v, u_min, min_weight, d[v]);
         }
     }
 
     return u_min;
+}
+
+/*
+    print_mst
+
+    imprime a versão textual da árvore mínima
+*/
+void print_mst(float *d, int *v_t, int graph_size)
+{
+    printf("\n");
+    printf("    ");
+    for (int i = 1; i <= graph_size; i++)
+    {
+        printf("%2d|", i);
+    }
+    printf("\nd[] ");
+    for (int i = 1; i <= graph_size; i++)
+    {
+        printf("%2f|", d[i]);
+    }
+
+    printf("\nv[] ");
+    for (int i = 1; i <= graph_size; i++)
+    {
+        printf("%d|", v_t[i]);
+    }
+    printf("\n");
 }
