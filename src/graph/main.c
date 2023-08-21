@@ -32,7 +32,10 @@ int main(int argc, char *argv[])
 
 	int graph_size, requested_edge_percentage;
 	char *graph_filename;
+
+#ifdef DEBUG
 	bool print_matrix = false;
+#endif
 
 	int opt;
 	while ((opt = getopt(argc, argv, "s:f:p:m")) != -1)
@@ -48,9 +51,11 @@ int main(int argc, char *argv[])
 		case 'p': // percentagem do máximo de arestas a adicionar
 			requested_edge_percentage = atoi(optarg);
 			break;
+#ifdef DEBUG
 		case 'm': // imprimir a matriz de adjacência
 			print_matrix = true;
 			break;
+#endif
 		default:
 			fprintf(stderr, "Usage: %s [-s graph_size] [-f filename] [-p requested_edge_percentage]\n", argv[0]);
 			exit(EXIT_FAILURE);
@@ -73,16 +78,15 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+#ifdef DEBUG
 	int matrix_size = get_matrix_size(graph_size);
-	printf("%d\n", matrix_size);
 	printf("Array RAM size: %lu kb (%d)\n", ((matrix_size * sizeof(float)) / 1024), matrix_size);
 
-	// #ifdef DEBUG
 	graph_size = 6;
 	create_locked_graph(graph_size, requested_edge_percentage);
-	// #else
-	// create_graph(graph_size, requested_edge_percentage);
-	// #endif
+#else
+	create_graph(graph_size, requested_edge_percentage);
+#endif
 
 	if (graph == NULL)
 	{

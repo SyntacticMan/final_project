@@ -58,10 +58,9 @@ float *prim_mst(int array_size, int graph_size, int graph_root)
         // obter o vértice u
         int u = get_u(v, d, v_t, visited, graph_size);
 
-        printf("Found u: %d\n", u);
+        // printf("Found u: %d\n", u);
 
         visited[u] = true;
-        // print_mst(d, graph_size);
 
         for (int i = v; i <= graph_size; i++)
         {
@@ -79,7 +78,10 @@ float *prim_mst(int array_size, int graph_size, int graph_root)
                 d[i] = u_weight;
                 v_t[i] = u;
             }
+
+#ifdef DEBUG
             printf("(%d,%d) => weight: %f | d[v]: %f\n", u, i, u_weight, d[i]);
+#endif
         }
     }
 
@@ -118,21 +120,15 @@ int get_u(int v, float *d, int *v_t, bool *visited, int graph_size)
 void print_mst(float *d, int *v_t, int graph_size)
 {
     printf("\n");
-    printf("    ");
+
     for (int i = 1; i <= graph_size; i++)
     {
-        printf("%2d|", i);
-    }
-    printf("\nd[] ");
-    for (int i = 1; i <= graph_size; i++)
-    {
-        printf("%2f|", d[i]);
+        printf(" %d=(%2f)=>%d ", v_t[i], d[i], i);
+
+        // omitir na última iteração
+        if (i != graph_size)
+            printf(">");
     }
 
-    printf("\nv[] ");
-    for (int i = 1; i <= graph_size; i++)
-    {
-        printf("%d|", v_t[i]);
-    }
     printf("\n");
 }

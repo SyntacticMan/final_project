@@ -24,7 +24,7 @@ typedef struct
     int graph_size;
     int graph_root;
     int *visited;
-    int *d;
+    float *d;
 } ThreadData;
 
 void *process_edges(void *arg)
@@ -35,7 +35,7 @@ void *process_edges(void *arg)
     int graph_size = data->graph_size;
     int graph_root = data->graph_root;
     int *visited = data->visited;
-    int *d = data->d;
+    float *d = data->d;
 
     // calcular n/p
     int n_p = graph_size / num_threads;

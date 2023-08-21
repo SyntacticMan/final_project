@@ -26,8 +26,11 @@ static void create_valid_edge(int graph_size);
 
 static int random_generator(int max, int min);
 static float random_float_generator(float max, float min);
-static void print_progress_bar(int progress, int total, int barWidth);
 static double random_coordinate_generator(int graph_size);
+
+#ifdef DEBUG
+static void print_progress_bar(int progress, int total, int barWidth);
+#endif
 
 /*
  *   random_generator
@@ -380,6 +383,7 @@ void print_graph(int graph_size)
     }
 }
 
+#ifdef DEBUG
 void print_progress_bar(int progress, int total, int barWidth)
 {
     float percentage = (float)progress / total;
@@ -400,3 +404,4 @@ void print_progress_bar(int progress, int total, int barWidth)
     printf("] %.1f%%\r", percentage * 100);
     fflush(stdout);
 }
+#endif
