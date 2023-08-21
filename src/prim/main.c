@@ -96,7 +96,9 @@ int main(int argc, char *argv[])
     printf("graph root-> %d\n", graph_root);
     printf("graph size-> %d\n", graph_header->graph_size);
 
-    print_graph(graph_header->graph_size);
+    // acima dum certo tamanho é inútil
+    if (graph_header->graph_size <= 50)
+        print_graph(graph_header->graph_size);
 
     // print_mst(d, graph_header->graph_size);
 
