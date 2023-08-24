@@ -25,4 +25,4 @@
 
 #define MAX_THREADS 8
 
-float *prim_mt_mst(int array_size, int graph_size, int graph_root, int num_threads);
+void prim_mt_mst(int graph_size, int graph_root, int num_threads);

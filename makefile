@@ -47,16 +47,15 @@ prim_st.o: $(primSrcDir)prim_st.c $(primSrcDir)prim_st.h
 prim_mt.o: $(primSrcDir)prim_mt.c $(primSrcDir)prim_mt.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_mt.c -o $(buildDir)prim_mt.o
 
-compare: 
-	$(binDir)$(graphBinaryName) -s 30 -f graph.grf -p 70
-	$(binDir)$(primBinaryName) -f graph.grf
-	$(binDir)$(primBinaryName) -f graph.grf -t 2
-
-
 # test params
-GRAPH_SIZE = 30000
+GRAPH_SIZE = 6
 GRAPH_NAME = graph.grf
 EDGE_PERCENTAGE = 50
+
+compare: 
+	$(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE)
+	$(binDir)$(primBinaryName) -f $(GRAPH_NAME)
+	$(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
 
 test_prim:
 	$(binDir)$(primBinaryName) -f $(GRAPH_NAME)
@@ -71,8 +70,12 @@ gdb_graph:
 	 gdb --args $(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE)
 
 debug_prim:
-	$(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE)
+# $(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE)
 	gdb -ex 'b prim_st.c:84' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME)
+
+
+debug_mt:
+	gdb -ex 'b prim_mt.c:230' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
 
 debug: CCFLAGS += -DDEBUG -g
 debug: clean all

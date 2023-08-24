@@ -19,7 +19,7 @@
 
 static int get_u(int v, float *d, int *v_t, bool *visited, int graph_size);
 
-float *prim_mst(int array_size, int graph_size, int graph_root)
+float *prim_mst(int graph_size, int graph_root)
 {
     int *v_t = malloc(graph_size * sizeof(int));
     float *d = malloc(graph_size * sizeof(float));
