@@ -1,6 +1,6 @@
 #ifndef DRAW_GRAPH
 #define DRAW_GRAPH
-#include "draw_graph.h"
+#include "../draw/draw_graph.h"
 #endif
 
 #ifndef FILE_MODULE
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     // emitir o relatório do grafo carregado
     printf("Grafo carregado\n");
     printf("Tamanho do grafo: %d\n", graph_size);
-    printf("Numero arestas: %d\n", get_edge_count());
+    // printf("Numero arestas: %d\n", get_edge_count());
 
     draw_graph(graph, graph_size, "graph_draw.png", graph_title);
 

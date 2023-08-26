@@ -4,7 +4,8 @@
 #include "../graph/graph.h"
 #endif
 
-#include <igraph.h>
+#include "graphviz/gvc.h"
+// #include <igraph/igraph.h>
 
 // extern GVC_t *gvc;
 
