@@ -13,7 +13,7 @@ binDir = ./bin/
 includeFlags = -I/usr/local/include/igraph -I/usr/local/include/graphviz
 linkDir = -L /usr/local/lib/graphviz/
 linkLibraries = -lm -lpthread
-drawLinkLibraries =  -L/usr/local/lib -ligraph -lcgraph -lgvc 
+drawLinkLibraries =  -L/usr/local/lib -ligraph -lcgraph -lcairo -lgvc 
 
 graphObjectFiles = $(buildDir)graph.o $(buildDir)file_module.o
 drawObjectFiles = $(buildDir)draw_graph.o $(buildDir)graph.o $(buildDir)file_module.o 
@@ -48,7 +48,7 @@ prim_mt.o: $(primSrcDir)prim_mt.c $(primSrcDir)prim_mt.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_mt.c -o $(buildDir)prim_mt.o
 
 # test params
-GRAPH_SIZE = 6
+GRAPH_SIZE = 46000
 GRAPH_NAME = graph.grf
 EDGE_PERCENTAGE = 50
 GRAPH_TITLE = "Grafo Teste"

@@ -88,7 +88,10 @@ void create_graph(int graph_size, int edge_percentage)
     srand(time(NULL));
 
     // alocar as colunas
-    int matrix_size = get_matrix_size(graph_size);
+    unsigned long int matrix_size = get_matrix_size(graph_size);
+#ifdef DEBUG
+    printf("Allocating %lu bytes for a matrix with %lu elements\n", (matrix_size * sizeof(float)), matrix_size);
+#endif
     graph = malloc(matrix_size * sizeof(float));
 
     if (graph == NULL)
@@ -197,6 +200,15 @@ int get_index(int col, int row)
     if (row > 1)
         index += row - 1;
 
+#ifdef TRACE
+    if (index % 20000 == 0)
+    {
+        fflush(stdout);
+        printf("index for col: %d, row :%d => %d\n", col, row, index);
+        fflush(stdout);
+    }
+#endif
+
     return index;
 }
 
@@ -206,8 +218,11 @@ int get_index(int col, int row)
     calcula o número de elementos da matriz de adjacência
 
 */
-unsigned int get_matrix_size(int graph_size)
+unsigned long int get_matrix_size(int graph_size)
 {
+#ifdef DEBUG
+    printf("graph_size %d | graph_size - 1 %d | numerator %u\n", graph_size, graph_size - 1, (graph_size * (graph_size - 1)));
+#endif
     return ((graph_size * (graph_size - 1)) / 2);
 }
 

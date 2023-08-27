@@ -62,14 +62,14 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	// no imediato vou limitar o grafo a um máximo de 23000 vértices
+	// no imediato vou limitar o grafo a um máximo de 46000 vértices
 	// mais do que isso e começa a ter problemas em alocar memória
-	// adicionalmente limitado a 30 vértices pois graphviz tem um máximo de 400 arestas
-	// if (graph_size <= 1 || graph_size > 30)
-	// {
-	// 	printf("Grafo tem de ter um tamanho entre 2 e 30\n");
-	// 	return -1;
-	// }
+	// pois excede o unsigned long int
+	if (graph_size <= 1 || graph_size > 46000)
+	{
+		printf("Grafo tem de ter um tamanho entre 2 e 30\n");
+		return -1;
+	}
 
 	// percentagens a 0 ou negativas
 	if (requested_edge_percentage < 0 || requested_edge_percentage > 100)
@@ -79,14 +79,16 @@ int main(int argc, char *argv[])
 	}
 
 #ifdef DEBUG
-	int matrix_size = get_matrix_size(graph_size);
-	printf("Array RAM size: %lu kb (%d)\n", ((matrix_size * sizeof(float)) / 1024), matrix_size);
 
-	graph_size = 6;
-	create_locked_graph(graph_size, requested_edge_percentage);
-#else
-	create_graph(graph_size, requested_edge_percentage);
+	unsigned long int matrix_size = get_matrix_size(graph_size);
+	unsigned long int ram_kb = (matrix_size * sizeof(float)) / 1024;
+	unsigned long int ram_mb = ram_kb / 1024;
+	unsigned long int ram_gb = ram_mb / 1024;
+	printf("Array RAM size: %lu kb | %lu mb | %lu gb (%lu)\n", ram_kb, ram_mb, ram_gb, matrix_size);
+	// graph_size = 6;
+	// create_locked_graph(graph_size, requested_edge_percentage);
 #endif
+	create_graph(graph_size, requested_edge_percentage);
 
 	if (graph == NULL)
 	{
@@ -96,18 +98,18 @@ int main(int argc, char *argv[])
 
 	// obter as contagens das arestas
 	// número máximo de arestas é simplesmente o número de elementos da matriz de adjacência
-	unsigned int max_edge_count = get_matrix_size(graph_size);
+	unsigned long int max_edge_count = get_matrix_size(graph_size);
 	int actual_edge_percentage = (int)get_edge_percentage(graph_size);
 
 #ifdef DEBUG
-	if (print_matrix)
+	if (print_matrix && graph_size < 100)
 		print_graph(graph_size);
 #endif
 
 	// emitir o relatório de criação
 	printf("Grafo criado\n");
 	printf("Tamanho do grafo: %d\n", graph_size);
-	printf("Numero maximo de arestas: %d\n", max_edge_count);
+	printf("Numero maximo de arestas: %lu\n", max_edge_count);
 	printf("Percentagem de arestas pedidas: %d%% | Percentagem de arestas atribuidas: %d%%\n", requested_edge_percentage, actual_edge_percentage);
 
 	// gravar o grafo no ficheiro
