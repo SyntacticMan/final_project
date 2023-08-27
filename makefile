@@ -48,7 +48,7 @@ prim_mt.o: $(primSrcDir)prim_mt.c $(primSrcDir)prim_mt.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_mt.c -o $(buildDir)prim_mt.o
 
 # test params
-GRAPH_SIZE = 460
+GRAPH_SIZE = 20
 GRAPH_NAME = graph.grf
 EDGE_PERCENTAGE = 50
 GRAPH_TITLE = "Grafo Teste"
