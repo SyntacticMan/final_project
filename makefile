@@ -19,7 +19,7 @@ graphObjectFiles = $(buildDir)graph.o $(buildDir)file_module.o
 drawObjectFiles = $(buildDir)draw_graph.o $(buildDir)graph.o $(buildDir)file_module.o 
 primObjectFiles = $(buildDir)prim_st.o $(buildDir)prim_mt.o $(buildDir)file_module.o $(buildDir)graph.o
 
-CCFLAGS = -Wall
+CCFLAGS = -Wall -Wno-maybe-uninitialized
  
 all: graph prim draw
 
@@ -48,7 +48,7 @@ prim_mt.o: $(primSrcDir)prim_mt.c $(primSrcDir)prim_mt.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_mt.c -o $(buildDir)prim_mt.o
 
 # test params
-GRAPH_SIZE = 46000
+GRAPH_SIZE = 460
 GRAPH_NAME = graph.grf
 EDGE_PERCENTAGE = 50
 GRAPH_TITLE = "Grafo Teste"
@@ -72,6 +72,9 @@ test_draw:
 
 gdb_graph:
 	 gdb --args $(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE)
+
+gdb_draw:
+	 gdb --args $(binDir)$(drawBinaryName) -f $(GRAPH_NAME) -t $(GRAPH_TITLE)
 
 debug_prim:
 # $(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE)
