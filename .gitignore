@@ -11,3 +11,4 @@ documentation/IPC2e-graphs.pdf
 src/.vs/*
 *.stackdump
 *.swp
+*.dot

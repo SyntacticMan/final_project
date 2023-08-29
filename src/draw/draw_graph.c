@@ -10,7 +10,7 @@ GVC_t *gvc;
 
     cria uma representação gráfica do grafo em contexto
 */
-void draw_graph(float *graph_to_draw, unsigned int graph_size, const char *filename, char *graph_title)
+void draw_graph(unsigned int graph_size, const char *filename, char *graph_title)
 {
     Agraph_t *g;
     Agnode_t *n_node, *m_node;
@@ -26,63 +26,99 @@ void draw_graph(float *graph_to_draw, unsigned int graph_size, const char *filen
 
     // definir algoritmo de colocação, tipo e nome da imagem a gerar
     char *args[] = {
-        "sfdp",
+        "neato",
         "-Tsvg",
-        "-Goverlap=prism",
-        "-Gsize=67!",
-        "-Goutputorder=nodesfirst",
-        "-Gsplines=curved",
-        "-GK=3000",
-        // "-Gmaxiter=100",
+        "-Goverlap=scale",
+        // "-Gsize=67!",
+        // "-Goutputorder=nodesfirst",
+        // "-Gsplines=curved",
+        // "-GK=3",
+        // "-Gmaxiter=500",
         image_name};
 
     gvParseArgs(gvc, sizeof(args) / sizeof(char *), args);
 
-    // criar o grafo, com disciplina por omissão
+    // criar o grafo não direccionado no formato graphviz
     g = agopen("g", Agundirected, NULL);
 
+    // preparar título
     agsafeset(g, "label", graph_title, "");
     agsafeset(g, "labelloc", "t", "");
-    agsafeset(g, "ranksep", "0.9", "");
-    agsafeset(g, "nodesep", "0.5", "");
+    // agsafeset(g, "ranksep", "0.9", "");
+    // agsafeset(g, "nodesep", "0.5", "");
 
+    int count = 0;
+    // criar os vértices
+    for (int i = 1; i <= graph_size; i++)
+    {
+        sprintf(string_temp, "%d", i);
+        n_node = agnode(g, string_temp, 1);
+        agsafeset(n_node, "shape", "circle", "");   // círculos
+        agsafeset(n_node, "fontcolor", "blue", ""); // texto a azul
+        count++;
+    }
+
+#ifdef DEBUG
+    printf("%d nodes added\n", count);
+#endif
+
+    count = 0;
     for (int col = 1; col <= graph_size; col++)
     {
         for (int row = 1; row < col; row++)
         {
-            // printf("col: %d, row: %d\n", col, row);
-
+            // procurar os vértices, por nome
             sprintf(string_temp, "%d", col);
-            n_node = agnode(g, string_temp, 1);
-            agsafeset(n_node, "shape", "circle", "");
-            agsafeset(n_node, "fontcolor", "blue", "");
-
+            n_node = agnode(g, string_temp, 0);
             sprintf(string_temp, "%d", row);
-            m_node = agnode(g, string_temp, 1);
-            agsafeset(m_node, "shape", "circle", "");
-            agsafeset(m_node, "fontcolor", "blue", "");
+            m_node = agnode(g, string_temp, 0);
 
-            float weight = get_edge(graph_to_draw, col, row);
-            if (weight != INFINITE && weight > 0)
+            // e criar uma aresta, se tiver ligação
+            float weight = get_edge(graph, col, row);
+            if (weight < INFINITE && weight > 0)
             {
                 // printf("weight: %3.3f\n", weight);
 
                 edge = agedge(g, n_node, m_node, 0, 1);
+
+                // as arestas têm o seu peso inscrito como label
                 sprintf(string_temp, "%3.3f", weight);
                 agsafeset(edge, "label", string_temp, "");
                 agsafeset(edge, "fontsize", "8", "");
                 agsafeset(edge, "penwidth", "0.5", "");
-                agsafeset(edge, "color", "#808080B3", ""); // cinzento claro, 80% transparência
+                agsafeset(edge, "color", "#808080B3", "");
+                count++;
             }
         }
     }
 
+#ifdef DEBUG
+    printf("%d edges added\n", count);
+
+    // escrever o grafo num ficheiro dot
+    FILE *dotFile = fopen("graph_output.dot", "w");
+    if (dotFile)
+    {
+        agwrite(g, dotFile);
+        fclose(dotFile);
+    }
+    else
+    {
+        printf("Error opening file for writing.\n");
+    }
+#endif
+
     // calcular disposição
     gvLayoutJobs(gvc, g);
-
+#ifdef DEBUG
+    printf("Layout done\n");
+#endif
     // criar o grafo
     gvRenderJobs(gvc, g);
 
+#ifdef DEBUG
+    printf("Render done\n");
+#endif
     // libertar memória
     gvFreeLayout(gvc, g);
     agclose(g);

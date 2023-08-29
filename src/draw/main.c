@@ -52,14 +52,14 @@ int main(int argc, char *argv[])
 
     sprintf(string_temp, " (%d ", graph_size);
     strcat(graph_title, string_temp);
-    strcat(graph_title, "vértices)");
+    strcat(graph_title, "vertices)");
 
     // emitir o relatório do grafo carregado
     printf("Grafo carregado\n");
     printf("Tamanho do grafo: %d\n", graph_size);
     // printf("Numero arestas: %d\n", get_edge_count());
 
-    draw_graph(graph, graph_size, "graph_draw.png", graph_title);
+    draw_graph(graph_size, "graph_draw.png", graph_title);
 
     return 0;
 }
