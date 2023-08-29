@@ -48,9 +48,9 @@ prim_mt.o: $(primSrcDir)prim_mt.c $(primSrcDir)prim_mt.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_mt.c -o $(buildDir)prim_mt.o
 
 # test params
-GRAPH_SIZE = 460
+GRAPH_SIZE = 40
 GRAPH_NAME = graph.grf
-EDGE_PERCENTAGE = 50
+EDGE_PERCENTAGE = 40
 GRAPH_TITLE = "Grafo Teste"
 
 compare: 
@@ -76,19 +76,23 @@ gdb_graph:
 gdb_draw:
 	 gdb --args $(binDir)$(drawBinaryName) -f $(GRAPH_NAME) -t $(GRAPH_TITLE)
 
-debug_prim:
-# $(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE)
+gdb_prim:
 	gdb -ex 'b prim_st.c:84' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME)
 
 
-debug_mt:
+gdb_mt:
 	gdb -ex 'b prim_mt.c:230' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
 
+debug_draw: CCFLAGS += -DDEBUG -g
+debug_draw: draw
+
 debug: CCFLAGS += -DDEBUG -g
-debug: clean all
+
+# debug: clean all
 
 clean:
 	rm -f $(buildDir)*.o
 	rm -f $(binDir)*
 	rm -f *.grf
 	rm -f *.png
+	rm -f *.dot

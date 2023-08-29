@@ -171,7 +171,7 @@ void create_valid_edge(int graph_size)
     int col, row;
 
     col = random_coordinate_generator(graph_size);
-    // o máximo da linha é sempre col - 1
+
     row = random_coordinate_generator(col);
 
     // apenas aceitar coordenadas de forem válidas
@@ -297,8 +297,9 @@ float get_edge(float *graph, int col, int row)
 
     int index = get_index(col, row);
 
-    /* DEBUG */
-    // printf("(%d,%d) => index = %d || weight = %f\n", col, row, index, graph[index]);
+#ifdef TRACE
+    printf("(%d,%d) => index = %d || weight = %f\n", col, row, index, graph[index]);
+#endif
 
     return graph[index];
 }
@@ -318,14 +319,14 @@ int get_edge_count(int graph_size)
         {
             float edge = get_edge(graph, i, j);
 
-            if (edge > 0 && edge <= MAX_WEIGHT)
+            if (edge > 0 && edge <= INFINITE)
             {
                 edge_count++;
             }
         }
     }
 
-    // printf("edge count: %d\n", edge_count);
+    printf("edge count: %d\n", edge_count);
 
     return edge_count;
 }
