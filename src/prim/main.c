@@ -37,9 +37,9 @@ int main(int argc, char *argv[])
 
     srand(time NULL);
     struct timeval start, end;
+    int *v_t;
 
     char *graph_filename;
-    float *d;
     int opt;
     int threads = 1; // por omissão correr apenas numa thread
 
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     {
         // lançar single thread
         printf("Lançando Algoritmo de Prim em tarefa simples\n");
-        d = prim_mst(graph_header->graph_size, graph_root);
+        v_t = prim_mst(graph_header->graph_size, graph_root);
     }
     else
     {
@@ -97,10 +97,12 @@ int main(int argc, char *argv[])
     printf("graph root-> %d\n", graph_root);
     printf("graph size-> %d\n", graph_header->graph_size);
 
+#ifdef DEBUG
     // acima dum certo tamanho é inútil
     if (graph_header->graph_size <= 50)
         print_graph(graph_header->graph_size);
 
+#endif
     // print_mst(d, graph_header->graph_size);
 
     // Calculate the elapsed time in seconds and microseconds
@@ -109,4 +111,7 @@ int main(int argc, char *argv[])
     double elapsed_time = seconds + microseconds / 1e6;
 
     printf("Execution time: %.6f seconds\n", elapsed_time);
+
+    // actualizar o ficheiro do grafo
+    write_mst(v_t, (graph_header->graph_size * sizeof(int)), graph_root, graph_filename);
 }

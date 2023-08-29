@@ -77,16 +77,21 @@ gdb_draw:
 	 gdb --args $(binDir)$(drawBinaryName) -f $(GRAPH_NAME) -t $(GRAPH_TITLE)
 
 gdb_prim:
-	gdb -ex 'b prim_st.c:84' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME)
+	gdb -ex 'b file_module.c:65' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME)
 
 
 gdb_mt:
 	gdb -ex 'b prim_mt.c:230' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
 
-debug_draw: CCFLAGS += -DDEBUG -g
-debug_draw: draw
+debug_prim: CCFLAGS += -DDEBUG -g
+debug_prim: prim
 
-debug: CCFLAGS += -DDEBUG -g
+debug_flag: 
+	CCFLAGS += -DDEBUG -g
+
+debug_draw: CCFLAGS += -DDEBUG -g
+debug_draw: draw 
+
 
 # debug: clean all
 

@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
 	// no imediato vou limitar o grafo a um máximo de 46000 vértices
 	// mais do que isso e começa a ter problemas em alocar memória
-	// pois excede o unsigned long int
+	// pois excede o unsigned long int de matrix_size
 	if (graph_size <= 1 || graph_size > 46000)
 	{
 		printf("Grafo tem de ter um tamanho entre 2 e 30\n");
@@ -117,6 +117,7 @@ int main(int argc, char *argv[])
 
 	graph_header->graph_size = graph_size;
 	graph_header->edge_percentage = actual_edge_percentage;
+	graph_header->vt_size = 0; // como não há mst ainda, vt_size vai a 0
 
 	write_file(graph_header, graph, graph_filename);
 
