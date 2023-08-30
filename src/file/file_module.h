@@ -24,6 +24,7 @@ typedef struct _file_header
 } header;
 
 void write_file(header *file_header, float *graph, char *filename);
-float *read_file(char *filename, header *file_header);
+header *read_header(char *filename);
+float *read_graph(char *filename, int graph_size);
 void write_mst(int *v_t, int vt_size, int graph_root, char *filename);
 int *read_mst(char *filename);

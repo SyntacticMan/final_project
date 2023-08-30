@@ -138,9 +138,9 @@ void *prim_mst(void *arg)
     printf("thread %d: start = %d || end = %d || n = %d\n", thread_id, start, end, n);
 
     // alocar tendo em conta o número de vértices que foram atribuídos
-    int *v_t = malloc(n * sizeof(int));
-    float *d = malloc(n * sizeof(float));
-    bool *visited = malloc(n * sizeof(bool));
+    int *v_t = malloc((n + 1) * sizeof(int));
+    float *d = malloc((n + 1) * sizeof(float));
+    bool *visited = malloc((n + 1) * sizeof(bool));
 
     // processar graph_root apenas se estiver nos vértices
     // que foram atribuídos a este processo

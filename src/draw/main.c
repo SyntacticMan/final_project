@@ -1,6 +1,6 @@
 #ifndef DRAW_GRAPH
 #define DRAW_GRAPH
-#include "../draw/draw_graph.h"
+#include "draw_graph.h"
 #endif
 
 #ifndef FILE_MODULE
@@ -37,9 +37,12 @@ int main(int argc, char *argv[])
     }
 
     // carregar o ficheiro
-    header *graph_header = malloc(sizeof(header));
+    header *graph_header = read_header(graph_filename);
 
-    graph = read_file(graph_filename, graph_header);
+    if (graph_header == NULL)
+        return -1;
+
+    graph = read_graph(graph_filename, graph_header->graph_size);
 
     if (graph == NULL)
     {
@@ -58,9 +61,11 @@ int main(int argc, char *argv[])
     // emitir o relatório do grafo carregado
     printf("Grafo carregado\n");
     printf("Tamanho do grafo: %d\n", graph_size);
-    // printf("Numero arestas: %d\n", get_edge_count());
+    printf("Numero arestas: %d\n", get_edge_count(graph, graph_header->graph_size));
 
     draw_graph(graph, graph_size, "graph_draw.png", graph_title);
 
+    free(graph);
+    free(graph_header);
     return 0;
 }

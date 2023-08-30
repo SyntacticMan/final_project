@@ -62,23 +62,32 @@ int main(int argc, char *argv[])
         }
     }
 
-    header *graph_header = malloc(sizeof(header));
+    header *graph_header = read_header(graph_filename);
 
-    graph = read_file(graph_filename, graph_header);
+    if (graph_header == NULL)
+    {
+        printf("Nao foi possivel carregar o cabecalho do grafo\n");
+        return -1;
+    }
+
+    graph = read_graph(graph_filename, graph_header->graph_size);
 
     if (graph == NULL)
     {
         return -1;
     }
 
-    printf("graph %f\n", graph[0]);
-
 #ifdef DEBUG
     int graph_root = 2;
-    print_graph(graph_header->graph_size);
+    print_graph(graph, graph_header->graph_size);
     printf("\n");
 #else
-    int graph_root = pick_graph_root(graph_header->graph_size);
+    // se não tiver graph_root no ficheiro, gerar uma
+    int graph_root;
+    if (graph_header->graph_root > 0)
+        graph_root = graph_header->graph_root;
+    else
+        graph_root = pick_graph_root(graph_header->graph_size);
 #endif
 
     gettimeofday(&start, NULL);
@@ -103,7 +112,7 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
     // acima dum certo tamanho é inútil
     if (graph_header->graph_size <= 50)
-        print_graph(graph_header->graph_size);
+        print_graph(graph, graph_header->graph_size);
 
 #endif
     // print_mst(d, graph_header->graph_size);
@@ -114,11 +123,10 @@ int main(int argc, char *argv[])
     double elapsed_time = seconds + microseconds / 1e6;
 
     printf("Execution time: %.6f seconds\n", elapsed_time);
-    // printf("%d\n", v_t[0]);
 
     // actualizar o ficheiro do grafo
     write_mst(v_t, (graph_header->graph_size * sizeof(int)), graph_root, graph_filename);
 
-    // free(graph);
+    free(graph);
     free(graph_header);
 }

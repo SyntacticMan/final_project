@@ -21,9 +21,11 @@ static int get_u(int v, float *d, int *v_t, bool *visited, int graph_size);
 
 int *prim_mst(float *graph, int graph_size, int graph_root)
 {
-    int *v_t = malloc(graph_size * sizeof(int));
-    float *d = malloc(graph_size * sizeof(float));
-    bool *visited = malloc(graph_size * sizeof(bool));
+    // como vou usar de 1 a graph_size e o vetor vai de 0 a graph_size - 1
+    // é necessário adicionar o elemento em falta
+    int *v_t = malloc((graph_size + 1) * sizeof(int));
+    float *d = malloc((graph_size + 1) * sizeof(float));
+    bool *visited = malloc((graph_size + 1) * sizeof(bool));
 
     v_t[graph_root] = graph_root;
     d[graph_root] = 0;

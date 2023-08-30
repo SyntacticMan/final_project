@@ -39,7 +39,7 @@ void add_null_edge(float *graph, int u, int v);
 unsigned long int get_matrix_size(int graph_size);
 
 float get_edge(float *graph, int u, int v);
-int get_edge_count();
+int get_edge_count(float *graph, int graph_size);
 float get_edge_percentage(float *graph, int graph_size);
 
 int pick_graph_root(int graph_size);

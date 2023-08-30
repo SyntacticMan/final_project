@@ -41,9 +41,9 @@ void write_file(header *graph_header, float *graph, char *filename)
         return;
     }
 
-    unsigned int array_size = (graph_header->graph_size * (graph_header->graph_size - 1)) / 2;
+    unsigned long int array_size = (graph_header->graph_size * (graph_header->graph_size - 1)) / 2;
 
-    for (unsigned int i = 0; i < array_size; i++)
+    for (unsigned long int i = 0; i < array_size; i++)
     {
         fwrite(&graph[i], sizeof(float), 1, graph_file);
     }
@@ -63,10 +63,9 @@ void write_mst(int *v_t, int vt_size, int graph_root, char *filename)
     }
 
     printf("load header\n");
-    printf("sizeof(header) => %lu\n", sizeof(header));
 
     // carregar o cabeçalho
-    header *g_header = malloc(sizeof(header));
+    header *g_header = (header *)malloc(sizeof(header));
 
     if (g_header == NULL)
     {
@@ -97,7 +96,7 @@ void write_mst(int *v_t, int vt_size, int graph_root, char *filename)
     fclose(graph_file);
 }
 
-float *read_file(char *filename, header *graph_header)
+header *read_header(char *filename)
 {
     FILE *graph_file = fopen(filename, "rb");
 
@@ -107,15 +106,32 @@ float *read_file(char *filename, header *graph_header)
         return NULL;
     }
 
-    // carregar o cabeçalho
+    header *graph_header = malloc(sizeof(header));
+
     fread(graph_header, sizeof(header), 1, graph_file);
 
-    unsigned long int array_size = (graph_header->graph_size * (graph_header->graph_size - 1)) / 2;
+    return graph_header;
+}
 
-    // carregar o array
-    float *graph = (float *)malloc(array_size * sizeof(float));
+float *read_graph(char *filename, int graph_size)
+{
+    FILE *graph_file = fopen(filename, "rb");
 
-    for (unsigned int i = 0; i < array_size; i++)
+    if (!graph_file)
+    {
+        printf("Nao foi possivel abrir o ficheiro.\n");
+        return NULL;
+    }
+
+    // avançar para lá do cabeçalho
+    fseek(graph_file, sizeof(header), SEEK_SET);
+
+    unsigned long int array_size = (graph_size * (graph_size - 1)) / 2;
+
+    // carregar o vetor
+    float *graph = malloc(array_size * sizeof(float));
+
+    for (unsigned long int i = 0; i < array_size; i++)
     {
         fread(&graph[i], sizeof(float), 1, graph_file);
     }
