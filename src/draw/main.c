@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
     char *graph_filename;
     int opt;
     char *graph_title;
+    float *graph;
 
     while ((opt = getopt(argc, argv, "f:t:")) != -1)
     {
@@ -59,7 +60,7 @@ int main(int argc, char *argv[])
     printf("Tamanho do grafo: %d\n", graph_size);
     // printf("Numero arestas: %d\n", get_edge_count());
 
-    draw_graph(graph_size, "graph_draw.png", graph_title);
+    draw_graph(graph, graph_size, "graph_draw.png", graph_title);
 
     return 0;
 }

@@ -79,7 +79,6 @@ gdb_draw:
 gdb_prim:
 	gdb -ex 'b file_module.c:65' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME)
 
-
 gdb_mt:
 	gdb -ex 'b prim_mt.c:230' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
 

@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct file_header
+typedef struct _file_header
 {
     int graph_size;
     int graph_root;

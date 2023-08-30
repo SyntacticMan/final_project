@@ -24,6 +24,7 @@ typedef struct _thread_data
     int n;
     int start;
     int end;
+    float *graph;
 } ThreadData;
 
 static int get_u(int v, float *d, int *v_t, bool *visited, int graph_size);
@@ -87,7 +88,7 @@ static void print_mst(float *d, int *v_t, int graph_size);
 //     pthread_exit(NULL);
 // }
 
-void prim_mt_mst(int graph_size, int graph_root, int num_threads)
+void prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 {
     // certificar que não se pedem mais processos que vértices
     if (num_threads > graph_size)
@@ -112,6 +113,7 @@ void prim_mt_mst(int graph_size, int graph_root, int num_threads)
         // calcular ponto de início e fim de d_i
         thread_data[i].start = i * n + 1;
         thread_data[i].end = i * n + n;
+        thread_data[i].graph = graph;
 
         pthread_create(&threads[i], NULL, prim_mst, (void *)&thread_data[i]);
     }
@@ -131,6 +133,7 @@ void *prim_mst(void *arg)
     int n = data->n;
     int start = data->start;
     int end = data->end;
+    float *graph = data->graph;
 
     printf("thread %d: start = %d || end = %d || n = %d\n", thread_id, start, end, n);
 

@@ -17,7 +17,7 @@
 #include "file_module.h"
 #endif
 
-void write_file(header *file_header, float *graph, char *filename)
+void write_file(header *graph_header, float *graph, char *filename)
 {
     // abrir o ficheiro em modo de escrita binária
     // assim certifico-me que, se ele já existir, é apagado
@@ -29,7 +29,7 @@ void write_file(header *file_header, float *graph, char *filename)
         return;
     }
 
-    fwrite(file_header, sizeof(header), 1, graph_file);
+    fwrite(graph_header, sizeof(header), 1, graph_file);
 
     // para a adição do grafo é necessário reabrir o ficheiro
     // em modo de apensar para não destruir o cabeçalho
@@ -41,7 +41,7 @@ void write_file(header *file_header, float *graph, char *filename)
         return;
     }
 
-    unsigned int array_size = (file_header->graph_size * (file_header->graph_size - 1)) / 2;
+    unsigned int array_size = (graph_header->graph_size * (graph_header->graph_size - 1)) / 2;
 
     for (unsigned int i = 0; i < array_size; i++)
     {
@@ -53,6 +53,7 @@ void write_file(header *file_header, float *graph, char *filename)
 
 void write_mst(int *v_t, int vt_size, int graph_root, char *filename)
 {
+    printf("write_mst\n");
     // abrir o ficheiro em modo de leitura e escrita binária
     FILE *graph_file = fopen(filename, "rb+");
 
@@ -61,24 +62,34 @@ void write_mst(int *v_t, int vt_size, int graph_root, char *filename)
         printf("Nao foi possivel abrir %s.\n", filename);
     }
 
+    printf("load header\n");
+    printf("sizeof(header) => %lu\n", sizeof(header));
+
     // carregar o cabeçalho
-    header *file_header = malloc(sizeof(header));
-    fread(file_header, sizeof(header), 1, graph_file);
+    header *g_header = malloc(sizeof(header));
+
+    if (g_header == NULL)
+    {
+        printf("Nao foi possivel alocar graph_header\n");
+        return;
+    }
+
+    fread(g_header, sizeof(header), 1, graph_file);
 
     // registar o tamanho de vt, raíz da mst e atualizar o cabeçalho
-    file_header->vt_size = vt_size;
-    file_header->graph_root = graph_root;
+    g_header->vt_size = vt_size;
+    g_header->graph_root = graph_root;
 
     // rebobinar o apontador
     fseek(graph_file, 0, SEEK_CUR);
-    fwrite(file_header, sizeof(header), 1, graph_file);
+    fwrite(g_header, sizeof(header), 1, graph_file);
 
     //  v_t tem de ser escrito *após* o grafo
     // por isso é necessário fazer avançar o apontador para o fim do grafo
-    unsigned long int array_size = (file_header->graph_size * (file_header->graph_size - 1)) / 2;
+    unsigned long int array_size = (g_header->graph_size * (g_header->graph_size - 1)) / 2;
     fseek(graph_file, array_size, SEEK_CUR);
 
-    for (int i = 0; i < file_header->vt_size; i++)
+    for (int i = 0; i < g_header->vt_size; i++)
     {
         fwrite(&v_t[i], sizeof(int), 1, graph_file);
     }
@@ -86,7 +97,7 @@ void write_mst(int *v_t, int vt_size, int graph_root, char *filename)
     fclose(graph_file);
 }
 
-float *read_file(char *filename, header *file_header)
+float *read_file(char *filename, header *graph_header)
 {
     FILE *graph_file = fopen(filename, "rb");
 
@@ -97,9 +108,9 @@ float *read_file(char *filename, header *file_header)
     }
 
     // carregar o cabeçalho
-    fread(file_header, sizeof(header), 1, graph_file);
+    fread(graph_header, sizeof(header), 1, graph_file);
 
-    unsigned long int array_size = (file_header->graph_size * (file_header->graph_size - 1)) / 2;
+    unsigned long int array_size = (graph_header->graph_size * (graph_header->graph_size - 1)) / 2;
 
     // carregar o array
     float *graph = (float *)malloc(array_size * sizeof(float));
@@ -125,17 +136,17 @@ int *read_mst(char *filename)
     }
 
     // carregar o cabeçalho
-    header *file_header;
-    fread(file_header, sizeof(header), 1, graph_file);
+    header *graph_header = malloc(sizeof(header));
+    fread(graph_header, sizeof(header), 1, graph_file);
 
     // o v_t está a seguir ao grafo, por isso tenho de fazer avançar o ponteiro
-    unsigned long int array_size = (file_header->graph_size * (file_header->graph_size - 1)) / 2;
+    unsigned long int array_size = (graph_header->graph_size * (graph_header->graph_size - 1)) / 2;
     fseek(graph_file, array_size, SEEK_SET);
 
     // carregar v_t
-    int *v_t = (int *)malloc(file_header->vt_size * sizeof(int));
+    int *v_t = (int *)malloc(graph_header->vt_size * sizeof(int));
 
-    for (int i = 0; i < file_header->vt_size; i++)
+    for (int i = 0; i < graph_header->vt_size; i++)
     {
         fread(&v_t[i], sizeof(int), 1, graph_file);
     }

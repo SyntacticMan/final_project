@@ -19,7 +19,7 @@
 
 static int get_u(int v, float *d, int *v_t, bool *visited, int graph_size);
 
-int *prim_mst(int graph_size, int graph_root)
+int *prim_mst(float *graph, int graph_size, int graph_root)
 {
     int *v_t = malloc(graph_size * sizeof(int));
     float *d = malloc(graph_size * sizeof(float));
@@ -85,7 +85,12 @@ int *prim_mst(int graph_size, int graph_root)
         }
     }
 
+#ifdef DEBUG
     print_mst(d, v_t, graph_size);
+#endif
+
+    free(d);
+    free(visited);
 
     return v_t;
 }

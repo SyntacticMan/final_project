@@ -10,4 +10,4 @@
 
 // extern GVC_t *gvc;
 
-void draw_graph(unsigned int graph_size, const char *filename, char *graph_title);
+void draw_graph(float *graph, unsigned int graph_size, const char *filename, char *graph_title);

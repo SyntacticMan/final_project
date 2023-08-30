@@ -10,7 +10,7 @@ GVC_t *gvc;
 
     cria uma representação gráfica do grafo em contexto
 */
-void draw_graph(unsigned int graph_size, const char *filename, char *graph_title)
+void draw_graph(float *graph, unsigned int graph_size, const char *filename, char *graph_title)
 {
     Agraph_t *g;
     Agnode_t *n_node, *m_node;

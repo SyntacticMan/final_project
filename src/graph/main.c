@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
 
 	int graph_size, requested_edge_percentage;
 	char *graph_filename;
+	float *graph;
 
 #ifdef DEBUG
 	bool print_matrix = false;
@@ -88,7 +89,7 @@ int main(int argc, char *argv[])
 	// graph_size = 6;
 	// create_locked_graph(graph_size, requested_edge_percentage);
 #endif
-	create_graph(graph_size, requested_edge_percentage);
+	graph = create_graph(graph_size, requested_edge_percentage);
 
 	if (graph == NULL)
 	{
@@ -99,7 +100,7 @@ int main(int argc, char *argv[])
 	// obter as contagens das arestas
 	// número máximo de arestas é simplesmente o número de elementos da matriz de adjacência
 	unsigned long int max_edge_count = get_matrix_size(graph_size);
-	int actual_edge_percentage = (int)get_edge_percentage(graph_size);
+	int actual_edge_percentage = (int)get_edge_percentage(graph, graph_size);
 
 #ifdef DEBUG
 	if (print_matrix && graph_size < 100)
@@ -118,6 +119,7 @@ int main(int argc, char *argv[])
 	graph_header->graph_size = graph_size;
 	graph_header->edge_percentage = actual_edge_percentage;
 	graph_header->vt_size = 0; // como não há mst ainda, vt_size vai a 0
+	graph_header->graph_root = 0;
 
 	write_file(graph_header, graph, graph_filename);
 

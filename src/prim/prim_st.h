@@ -19,5 +19,5 @@
 #include "../graph/graph.h"
 #endif
 
-int *prim_mst(int graph_size, int graph_root);
+int *prim_mst(float *graph, int graph_size, int graph_root);
 void print_mst(float *d, int *v_t, int graph_size);

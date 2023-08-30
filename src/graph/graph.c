@@ -17,12 +17,12 @@
 #include "graph.h"
 #endif
 
-float *graph;
+// float *graph;
 
-static void add_random_edge(int u, int v);
+static void add_random_edge(float *graph, int u, int v);
 
 static int get_index(int col, int row);
-static void create_valid_edge(int graph_size);
+static void create_valid_edge(float *graph, int graph_size);
 
 static int random_generator(int max, int min);
 static float random_float_generator(float max, float min);
@@ -83,7 +83,7 @@ double random_coordinate_generator(int graph_size)
 
  * cria um novo grafo, com lista de vértices e arestas
  */
-void create_graph(int graph_size, int edge_percentage)
+float *create_graph(int graph_size, int edge_percentage)
 {
     srand(time(NULL));
 
@@ -92,11 +92,12 @@ void create_graph(int graph_size, int edge_percentage)
 #ifdef DEBUG
     printf("Allocating %lu bytes for a matrix with %lu elements\n", (matrix_size * sizeof(float)), matrix_size);
 #endif
-    graph = malloc(matrix_size * sizeof(float));
+    float *graph = malloc(matrix_size * sizeof(float));
 
     if (graph == NULL)
     {
-        return;
+        printf("Nao foi possivel alocar o grafo\n");
+        return NULL;
     }
 
     // uma primeira passagem para preencher a matriz com infinitos
@@ -119,8 +120,10 @@ void create_graph(int graph_size, int edge_percentage)
 
     for (int i = 0; i < num_edges; i++)
     {
-        create_valid_edge(graph_size);
+        create_valid_edge(graph, graph_size);
     }
+
+    return graph;
 }
 
 /*
@@ -128,16 +131,16 @@ void create_graph(int graph_size, int edge_percentage)
 
     cria um grafo fixo para facilitar testes
 */
-void create_locked_graph(int graph_size, int edge_percentage)
+float *create_locked_graph(int graph_size, int edge_percentage)
 {
     srand(time(NULL));
 
     // alocar as colunas
-    graph = (float *)malloc(get_matrix_size(graph_size) * sizeof(float));
+    float *graph = (float *)malloc(get_matrix_size(graph_size) * sizeof(float));
 
     if (graph == NULL)
     {
-        return;
+        return NULL;
     }
 
     for (int col = 1; col <= graph_size; col++)
@@ -158,6 +161,8 @@ void create_locked_graph(int graph_size, int edge_percentage)
     add_edge(graph, 5, 3, 1);
     add_edge(graph, 5, 4, 4);
     add_edge(graph, 6, 5, 5);
+
+    return graph;
 }
 
 /*
@@ -166,7 +171,7 @@ void create_locked_graph(int graph_size, int edge_percentage)
     função recursiva para atribuir uma aresta
     no vértice válido que ainda não tenha aresta
 */
-void create_valid_edge(int graph_size)
+void create_valid_edge(float *graph, int graph_size)
 {
     int col, row;
 
@@ -177,11 +182,11 @@ void create_valid_edge(int graph_size)
     // apenas aceitar coordenadas de forem válidas
     if (col <= graph_size && row < col && get_edge(graph, col, row) == INFINITE)
     {
-        add_random_edge(col, row);
+        add_random_edge(graph, col, row);
     }
     else
     {
-        create_valid_edge(graph_size);
+        create_valid_edge(graph, graph_size);
     }
 }
 
@@ -231,7 +236,7 @@ unsigned long int get_matrix_size(int graph_size)
 
  * cria uma aresta entre os vértices u e v com um peso aleatório
  */
-void add_random_edge(int col, int row)
+void add_random_edge(float *graph, int col, int row)
 {
     int index = get_index(col, row);
 
@@ -309,7 +314,7 @@ float get_edge(float *graph, int col, int row)
 
     obtém o número de arestas existentes no grafo
 */
-int get_edge_count(int graph_size)
+int get_edge_count(float *graph, int graph_size)
 {
     int edge_count = 0;
 
@@ -337,9 +342,9 @@ int get_edge_count(int graph_size)
     calcula a percentagem de arestas existentes no grafo
     contra o número máximo de arestas que pode ter
 */
-float get_edge_percentage(int graph_size)
+float get_edge_percentage(float *graph, int graph_size)
 {
-    return ((float)get_edge_count(graph_size) / (float)get_matrix_size(graph_size)) * 100.0;
+    return ((float)get_edge_count(graph, graph_size) / (float)get_matrix_size(graph_size)) * 100.0;
 }
 
 /*
@@ -369,7 +374,7 @@ void print_array(float *graph, int graph_size)
 
     imprime a matriz de adjacência do grafo na linha de comandos
 */
-void print_graph(int graph_size)
+void print_graph(float *graph, int graph_size)
 {
     for (int col = 1; col <= graph_size; col++)
     {
