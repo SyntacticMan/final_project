@@ -75,7 +75,9 @@ void write_mst(int *v_t, int vt_size, int graph_root, char *filename)
 
     fread(g_header, sizeof(header), 1, graph_file);
 
+#ifdef DEBUG
     printf("graph_root: %d\nvt_size: %d\n", graph_root, vt_size);
+#endif
 
     // registar o tamanho de vt, raíz da mst e atualizar o cabeçalho
     g_header->vt_size = vt_size;
@@ -159,7 +161,7 @@ int *read_mst(char *filename)
 
     // o v_t está a seguir ao grafo, por isso tenho de fazer avançar o ponteiro
     unsigned long int array_size = (graph_header->graph_size * (graph_header->graph_size - 1)) / 2;
-    fseek(graph_file, array_size, SEEK_SET);
+    fseek(graph_file, array_size, SEEK_CUR);
 
     // carregar v_t
     int *v_t = (int *)malloc(graph_header->vt_size * sizeof(int));

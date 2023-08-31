@@ -10,10 +10,10 @@ drawSrcDir = $(srcDir)draw/
 buildDir = ./build/
 binDir = ./bin/
 
-includeFlags = -I/usr/local/include/igraph -I/usr/local/include/graphviz
+includeFlags = -I/usr/local/include/graphviz
 linkDir = -L /usr/local/lib/graphviz/
 linkLibraries = -lm -lpthread
-drawLinkLibraries =  -L/usr/local/lib -ligraph -lcgraph -lcairo -lgvc 
+drawLinkLibraries =  -L/usr/local/lib -lcgraph -lgvc 
 
 graphObjectFiles = $(buildDir)graph.o $(buildDir)file_module.o
 drawObjectFiles = $(buildDir)draw_graph.o $(buildDir)graph.o $(buildDir)file_module.o 

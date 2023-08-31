@@ -103,8 +103,17 @@ int main(int argc, char *argv[])
         printf("Lançando Algoritmo de Prim com %d threads\n", threads);
         prim_mt_mst(graph, graph_header->graph_size, graph_root, threads);
     }
+
+    // emitir o tempo de execução do algoritmo
     gettimeofday(&end, NULL);
 
+    double seconds = (double)(end.tv_sec - start.tv_sec);
+    double microseconds = (double)(end.tv_usec - start.tv_usec);
+    double elapsed_time = seconds + microseconds / 1e6;
+
+    printf("Execution time: %.6f seconds\n", elapsed_time);
+
+    // emissão de relatório e gravação do mst no grafo
     printf("grafo-> %s\n", graph_filename);
     printf("graph root-> %d\n", graph_root);
     printf("graph size-> %d\n", graph_header->graph_size);
@@ -115,17 +124,9 @@ int main(int argc, char *argv[])
         print_graph(graph, graph_header->graph_size);
 
 #endif
-    // print_mst(d, graph_header->graph_size);
-
-    // Calculate the elapsed time in seconds and microseconds
-    double seconds = (double)(end.tv_sec - start.tv_sec);
-    double microseconds = (double)(end.tv_usec - start.tv_usec);
-    double elapsed_time = seconds + microseconds / 1e6;
-
-    printf("Execution time: %.6f seconds\n", elapsed_time);
 
     // actualizar o ficheiro do grafo
-    write_mst(v_t, (graph_header->graph_size * sizeof(int)), graph_root, graph_filename);
+    write_mst(v_t, graph_header->graph_size, graph_root, graph_filename);
 
     free(graph);
     free(graph_header);
