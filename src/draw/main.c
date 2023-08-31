@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
     int opt;
     char *graph_title;
     float *graph;
+    int *v_t;
 
     while ((opt = getopt(argc, argv, "f:t:")) != -1)
     {
@@ -49,6 +50,16 @@ int main(int argc, char *argv[])
         printf("Nao foi possivel carregar o grafo\n");
         return -1;
     }
+    printf("%d\n", graph_header->graph_root);
+
+    if (graph_header->vt_size > 0)
+    {
+        v_t = read_mst(graph_filename);
+
+        printf("v_t: %d\n", v_t[0]);
+    }
+
+    printf("root: %d\n", graph_header->graph_root);
 
     // preparar o título do grafo
     char string_temp[50];

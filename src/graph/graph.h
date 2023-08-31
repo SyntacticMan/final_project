@@ -28,10 +28,6 @@
 
 #define INFINITE MAX_WEIGHT + 2.0
 
-// grafo é representado como um vetor de pointeiros dinamicamente alocado de ints
-// uma vez que o tamanho do grafo é determinado durante a execução
-// extern float *graph;
-
 float *create_graph(int graph_size, int edge_percentage);
 float *create_locked_graph(int graph_size, int edge_percentage);
 void add_edge(float *graph, int u, int v, float weight);

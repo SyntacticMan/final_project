@@ -75,12 +75,14 @@ void write_mst(int *v_t, int vt_size, int graph_root, char *filename)
 
     fread(g_header, sizeof(header), 1, graph_file);
 
+    printf("graph_root: %d\nvt_size: %d\n", graph_root, vt_size);
+
     // registar o tamanho de vt, raíz da mst e atualizar o cabeçalho
     g_header->vt_size = vt_size;
     g_header->graph_root = graph_root;
 
     // rebobinar o apontador
-    fseek(graph_file, 0, SEEK_CUR);
+    fseek(graph_file, 0, SEEK_SET);
     fwrite(g_header, sizeof(header), 1, graph_file);
 
     //  v_t tem de ser escrito *após* o grafo
