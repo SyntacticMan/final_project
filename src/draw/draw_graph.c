@@ -10,7 +10,7 @@ GVC_t *gvc;
 
     cria uma representação gráfica do grafo em contexto
 */
-void draw_graph(float *graph, unsigned int graph_size, const char *filename, char *graph_title)
+void draw_graph(float *graph, int graph_size, int graph_root, int *v_t, int vt_size, const char *filename, char *graph_title)
 {
     Agraph_t *g;
     Agnode_t *n_node, *m_node;
@@ -53,8 +53,17 @@ void draw_graph(float *graph, unsigned int graph_size, const char *filename, cha
     {
         sprintf(string_temp, "%d", i);
         n_node = agnode(g, string_temp, 1);
-        agsafeset(n_node, "shape", "circle", "");   // círculos
-        agsafeset(n_node, "fontcolor", "blue", ""); // texto a azul
+        agsafeset(n_node, "shape", "circle", ""); // círculos
+
+        // raíz fica com o texto a preto
+        if (i == graph_root)
+        {
+            agsafeset(n_node, "fontcolor", "black", ""); // texto a azul
+        }
+        else
+        {
+            agsafeset(n_node, "fontcolor", "blue", ""); // texto a azul
+        }
         count++;
     }
 
@@ -77,16 +86,24 @@ void draw_graph(float *graph, unsigned int graph_size, const char *filename, cha
             float weight = get_edge(graph, col, row);
             if (weight < INFINITE && weight > 0)
             {
-                // printf("weight: %3.3f\n", weight);
-
                 edge = agedge(g, n_node, m_node, 0, 1);
 
                 // as arestas têm o seu peso inscrito como label
                 sprintf(string_temp, "%3.3f", weight);
                 agsafeset(edge, "label", string_temp, "");
                 agsafeset(edge, "fontsize", "8", "");
-                agsafeset(edge, "penwidth", "0.5", "");
-                agsafeset(edge, "color", "#808080B3", "");
+
+                // se fizer parte da MST então a aresta será mais grossa
+                if (v_t[col] == row)
+                {
+                    agsafeset(edge, "penwidth", "1.0", "");
+                }
+                else
+                {
+                    agsafeset(edge, "penwidth", "0.5", "");
+                    agsafeset(edge, "color", "#808080B3", "");
+                }
+
                 count++;
             }
         }
