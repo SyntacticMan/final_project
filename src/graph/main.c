@@ -66,9 +66,9 @@ int main(int argc, char *argv[])
 	// no imediato vou limitar o grafo a um máximo de 46000 vértices
 	// mais do que isso e começa a ter problemas em alocar memória
 	// pois excede o unsigned long int de matrix_size
-	if (graph_size <= 1 || graph_size > 46000)
+	if (graph_size <= 1 || graph_size > 56000)
 	{
-		printf("Grafo tem de ter um tamanho entre 2 e 30\n");
+		printf("Grafo tem de ter um tamanho entre 2 e 46000\n");
 		return -1;
 	}
 
@@ -99,18 +99,19 @@ int main(int argc, char *argv[])
 
 	// obter as contagens das arestas
 	// número máximo de arestas é simplesmente o número de elementos da matriz de adjacência
-	unsigned long int max_edge_count = get_matrix_size(graph_size);
+	unsigned long long int max_edge_count = get_matrix_size(graph_size);
 	int actual_edge_percentage = (int)get_edge_percentage(graph, graph_size);
 
 #ifdef DEBUG
 	if (print_matrix && graph_size < 100)
-		print_graph(graph_size);
+		print_graph(graph, graph_size);
 #endif
 
 	// emitir o relatório de criação
 	printf("Grafo criado\n");
 	printf("Tamanho do grafo: %d\n", graph_size);
-	printf("Numero maximo de arestas: %lu\n", max_edge_count);
+	printf("Numero maximo de arestas: %llu\n", max_edge_count);
+	printf("Numero de arestas atribuidas: %d\n", get_edge_count(graph, graph_size));
 	printf("Percentagem de arestas pedidas: %d%% | Percentagem de arestas atribuidas: %d%%\n", requested_edge_percentage, actual_edge_percentage);
 
 	// gravar o grafo no ficheiro

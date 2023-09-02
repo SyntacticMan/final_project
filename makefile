@@ -48,7 +48,7 @@ prim_mt.o: $(primSrcDir)prim_mt.c $(primSrcDir)prim_mt.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_mt.c -o $(buildDir)prim_mt.o
 
 # test params
-GRAPH_SIZE = 40
+GRAPH_SIZE = 46000
 GRAPH_NAME = graph.grf
 EDGE_PERCENTAGE = 40
 GRAPH_TITLE = "Grafo Teste"
@@ -90,6 +90,9 @@ debug_flag:
 
 debug_draw: CCFLAGS += -DDEBUG -g
 debug_draw: draw 
+
+debug_graph: CCFLAGS += -DDEBUG -g
+debug_graph: graph
 
 
 # debug: clean all
