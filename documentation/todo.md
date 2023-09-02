@@ -15,7 +15,7 @@
 * ~~implementar o método Box Muller para gerar números aleatórios~~
 * ~~corrigir o não estar a respeitar a percentagem de arestas pedida~~
 * ~~iterar n vezes, n = número de arestas a adicionar, adicionado arestas com vértices determinados pelo Box Muller~~
-* desenhar os grafos
+* ~~desenhar os grafos~~
 * Adicionar suporte para florestas de grafos
     * Gerar e processar florestas de grafos (nice to have)
 
@@ -27,7 +27,7 @@
 * ~~Disponibilizar função para ler o ficheiro~~
 
 ## Algoritmo Prim
-* Implementar módulo singlethread
+* ~~Implementar módulo singlethread~~
 * Implementar módulo multithread
     ~~* Função para separar o array do grafo em blocos~~
     ~~* Função para separar o array da árvore em blocos~~
@@ -41,9 +41,9 @@
 * Implementar num binário à parte
     * ler o grafo do ficheiro
     * ler a árvore mínima do ficheiro
-* Rever escolha da biblioteca de visualização
-    * igraph
-    * graphviz
+* ~~Rever escolha da biblioteca de visualização~~
+    * ~~igraph~~
+    * ~~graphviz~~
 
 
 ## Resultados

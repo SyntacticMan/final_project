@@ -10,9 +10,11 @@ drawSrcDir = $(srcDir)draw/
 buildDir = ./build/
 binDir = ./bin/
 
-includeFlags = -I/usr/local/include/graphviz
+graphIncludeFlags = -I/usr/local/include/graphviz
+primIncludeFlags =
 linkDir = -L /usr/local/lib/graphviz/
 linkLibraries = -lm -lpthread
+primLinkLibraries = -lm -lpthread
 drawLinkLibraries =  -L/usr/local/lib -lcgraph -lgvc 
 
 graphObjectFiles = $(buildDir)graph.o $(buildDir)file_module.o
@@ -30,7 +32,7 @@ graph: graph.o file_module.o
 	$(CC) $(CCFLAGS) $(linkDir) $(graphSrcDir)main.c $(graphObjectFiles) $(linkLibraries) -o $(binDir)$(graphBinaryName) $(linkLibraries)
 
 prim: prim_st.o prim_mt.o file_module.o graph.o
-	$(CC) $(CCFLAGS) $(linkDir) $(primSrcDir)main.c $(primObjectFiles) $(linkLibraries) -o $(binDir)$(primBinaryName)
+	$(CC) $(CCFLAGS) $(primSrcDir)main.c $(primObjectFiles) $(primLinkLibraries) -o $(binDir)$(primBinaryName)
 
 draw.o: $ $(drawSrcDir)draw_graph.c $(drawSrcDir)draw_graph.h
 	$(CC) $(CCFLAGS) -c $(drawSrcDir)draw_graph.c $(includeFlags) $(drawLinkLibraries) -o $(buildDir)draw_graph.o
@@ -48,7 +50,7 @@ prim_mt.o: $(primSrcDir)prim_mt.c $(primSrcDir)prim_mt.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_mt.c -o $(buildDir)prim_mt.o
 
 # test params
-GRAPH_SIZE = 46000
+GRAPH_SIZE = 460
 GRAPH_NAME = graph.grf
 EDGE_PERCENTAGE = 40
 GRAPH_TITLE = "Grafo Teste"
@@ -80,7 +82,7 @@ gdb_prim:
 	gdb -ex 'b file_module.c:65' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME)
 
 gdb_mt:
-	gdb -ex 'b prim_mt.c:230' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
+	gdb -ex 'b prim_mt.c:174' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
 
 debug_prim: CCFLAGS += -DDEBUG -g
 debug_prim: prim

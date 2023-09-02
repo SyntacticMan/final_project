@@ -21,74 +21,18 @@ typedef struct _thread_data
 {
     int thread_id;
     int graph_root;
-    int n;
-    int start;
-    int end;
-    float *graph;
+    int num_vertices;
+    int start_vertice;
+    int end_vertice;
+    float *local_graph; // V
+    int *v_t;
 } ThreadData;
 
 static int get_u(int v, float *d, int *v_t, bool *visited, int graph_size);
+static float *split_graph(float *graph, int start_vertice, int end_vertice);
 static void *prim_mst(void *arg);
-static void print_mst(float *d, int *v_t, int graph_size);
 
-/*
-    process_edges
-
-    prepara a matriz para ser divida entre as tarefas
-*/
-// void *process_edges(void *arg)
-// {
-//     ThreadData *data = (ThreadData *)arg;
-//     int thread_id = data->thread_id;
-//     int num_threads = data->num_threads;
-//     int graph_size = data->graph_size;
-//     int graph_root = data->graph_root;
-//     bool *visited = data->visited;
-//     int *v_t = data->v_t;
-//     float *d = data->d;
-
-//     printf("thread %d: start = %d || end = %d || n_p = %d\n", thread_id, start, end, n);
-
-//     for (int v = start; v <= end; v++)
-//     {
-//         // excluir a raíz e v-v_t
-//         if (v == graph_root || visited[v])
-//             continue;
-
-//         // obter o vértice u
-//         int u = get_u(v, d, v_t, visited, graph_size);
-
-//         // printf("Found u: %d\n", u);
-
-//         visited[u] = true;
-
-//         for (int i = v; i <= graph_size; i++)
-//         {
-//             // excluir a diagonal e v-v_t
-//             if (i == u || visited[i])
-//                 continue;
-
-//             float u_weight = get_edge(graph, u, i);
-
-//             if (u_weight == 0)
-//                 continue;
-
-//             if (u_weight < d[i])
-//             {
-//                 d[i] = u_weight;
-//                 v_t[i] = u;
-//             }
-
-// #ifdef DEBUG
-//             printf("(%d,%d) => weight: %f | d[v]: %f\n", u, i, u_weight, d[i]);
-// #endif
-//         }
-//     }
-
-//     pthread_exit(NULL);
-// }
-
-void prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
+int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 {
     // certificar que não se pedem mais processos que vértices
     if (num_threads > graph_size)
@@ -100,20 +44,27 @@ void prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
     pthread_t threads[num_threads];
     ThreadData thread_data[num_threads];
+    int *v_t = malloc((graph_size + 1) * sizeof(int));
 
     // calcular o número de vértices (n) a alocar a cada processo
-    int n = graph_size / num_threads;
+    int num_vertices = graph_size / num_threads;
 
     for (int i = 0; i < num_threads; i++)
     {
         thread_data[i].thread_id = i;
         thread_data[i].graph_root = graph_root;
-        thread_data[i].n = n;
+        thread_data[i].num_vertices = num_vertices;
 
-        // calcular ponto de início e fim de d_i
-        thread_data[i].start = i * n + 1;
-        thread_data[i].end = i * n + n;
-        thread_data[i].graph = graph;
+        thread_data[i].v_t = v_t;
+
+        // calcular os vértices de início e fim com base no número de vértices a processar
+        int start_vertice = (i * num_vertices) + 1;
+        int end_vertice = start_vertice + num_vertices - 1;
+        thread_data[i].start_vertice = start_vertice;
+        thread_data[i].end_vertice = end_vertice;
+
+        // criar o subconjunto de V a alocar à tarefa
+        thread_data[i].local_graph = split_graph(graph, start_vertice, end_vertice);
 
         pthread_create(&threads[i], NULL, prim_mst, (void *)&thread_data[i]);
     }
@@ -122,41 +73,42 @@ void prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     {
         pthread_join(threads[i], NULL);
     }
+
+    return v_t;
 }
 
 void *prim_mst(void *arg)
 {
 
     ThreadData *data = (ThreadData *)arg;
-    int thread_id = data->thread_id;
     int graph_root = data->graph_root;
-    int n = data->n;
-    int start = data->start;
-    int end = data->end;
-    float *graph = data->graph;
+    float *local_graph = data->local_graph;
+    int *v_t = data->v_t;
 
-    printf("thread %d: start = %d || end = %d || n = %d\n", thread_id, start, end, n);
+#ifdef DEBUG
+    printf("thread %d: start_vertice = %d || end_vertice = %d || num_vertices = %d\n", data->thread_id, start_vertice, end_vertice, data->num_vertices);
+#endif
 
     // alocar tendo em conta o número de vértices que foram atribuídos
-    int *v_t = malloc((n + 1) * sizeof(int));
-    float *d = malloc((n + 1) * sizeof(float));
-    bool *visited = malloc((n + 1) * sizeof(bool));
+    // int *v_t = malloc((n + 1) * sizeof(int));
+    float *d = malloc((data->num_vertices + 1) * sizeof(float));
+    bool *visited = malloc((data->num_vertices + 1) * sizeof(bool));
 
     // processar graph_root apenas se estiver nos vértices
     // que foram atribuídos a este processo
-    if (start < graph_root && graph_root < end)
+    if (data->start_vertice < graph_root && graph_root < data->end_vertice)
     {
         v_t[graph_root] = graph_root;
         d[graph_root] = 0;
         visited[graph_root] = true;
 
         // inicializar a árvore mínima
-        for (int v = start; v <= end; v++)
+        for (int v = data->start_vertice; v <= data->end_vertice; v++)
         {
             if (v != graph_root)
                 visited[v] = false;
 
-            float weight = get_edge(graph, graph_root, v);
+            float weight = get_edge(local_graph, graph_root, v);
 
             if (weight < INFINITE)
             {
@@ -173,7 +125,7 @@ void *prim_mst(void *arg)
     else
     {
         // senão fazer a inicialização simples
-        for (int v = start; v <= end; v++)
+        for (int v = data->start_vertice; v <= data->end_vertice; v++)
         {
             visited[v] = false;
 
@@ -182,26 +134,28 @@ void *prim_mst(void *arg)
         }
     }
 
-    for (int v = start; v <= end; v++)
+    for (int v = data->start_vertice; v <= data->end_vertice; v++)
     {
         // excluir a raíz e v-v_t
         if (v == graph_root || visited[v])
             continue;
 
         // obter o vértice u
-        int u = get_u(v, d, v_t, visited, n);
+        int u = get_u(v, d, v_t, visited, data->num_vertices);
 
+#ifdef TRACE
         printf("(thread %d) Found u: %d\n", thread_id, u);
+#endif
 
         visited[u] = true;
 
-        for (int i = v; i <= end; i++)
+        for (int i = v; i <= data->end_vertice; i++)
         {
             // excluir a diagonal e v-v_t
             if (i == u || visited[i])
                 continue;
 
-            float u_weight = get_edge(graph, u, i);
+            float u_weight = get_edge(local_graph, u, i);
 
             if (u_weight == 0)
                 continue;
@@ -212,20 +166,17 @@ void *prim_mst(void *arg)
                 v_t[i] = u;
             }
 
-#ifdef DEBUG
-            printf("[thread %d](%d,%d) => weight: %f | d[v]: %f\n", thread_id, u, i, u_weight, d[i]);
+#ifdef TRACE
+            printf("[thread %d](%d,%d) => weight: %f | d[v]: %f\n", data->thread_id, u, i, u_weight, d[i]);
 #endif
         }
     }
 
-    print_mst(d, v_t, n);
     // free(v_t);
     // free(visited);
     // free(d);
 
     pthread_exit(NULL);
-
-    return d;
 }
 
 int get_u(int v, float *d, int *v_t, bool *visited, int graph_size)
@@ -243,7 +194,10 @@ int get_u(int v, float *d, int *v_t, bool *visited, int graph_size)
         {
             u_min = u;
             min_weight = d[u];
+
+#ifdef TRACE
             printf("v->%d | u_min->%d | min_weight: %f | d[v]: %f\n", v, u_min, min_weight, d[v]);
+#endif
         }
     }
 
@@ -251,22 +205,33 @@ int get_u(int v, float *d, int *v_t, bool *visited, int graph_size)
 }
 
 /*
-    print_mst
+    split_graph
 
-    imprime a versão textual da árvore mínima
+    cria um subconjunto de graph, com início em start_vertice e fim em end_vertice
 */
-void print_mst(float *d, int *v_t, int graph_size)
+float *split_graph(float *graph, int start_vertice, int end_vertice)
 {
-    printf("\n");
+    if (graph == NULL)
+        return NULL;
 
-    for (int i = 1; i <= graph_size; i++)
+    // determinar os indíces de início e fim do vetor a copiar
+    // início é col e primeira linha
+    unsigned int start_index = get_index(start_vertice, 1);
+
+    // como considero apenas a triangular superior
+    // fim é col e a penúltima linha (col, col-1)
+    unsigned int end_index = get_index(end_vertice, (end_vertice - 1));
+
+    // determinar o tamanho do subconjunto
+    unsigned int graph_subset = end_index - start_index + 1;
+
+    float *sub_graph = (float *)malloc(graph_subset * sizeof(float));
+
+    // copiar o grafo para o novo vetor
+    for (int i = 0; i < graph_subset; i++)
     {
-        printf(" %d=(%2f)=>%d ", v_t[i], d[i], i);
-
-        // omitir na última iteração
-        if (i != graph_size)
-            printf(">");
+        sub_graph[i] = graph[start_index + i];
     }
 
-    printf("\n");
+    return sub_graph;
 }

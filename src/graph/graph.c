@@ -23,8 +23,6 @@ static void add_random_edge(float *graph, int u, int v);
 
 static void create_valid_edge(float *graph, int graph_size);
 
-static unsigned int get_index(int col, int row);
-
 static int random_generator(int max, int min);
 static float random_float_generator(float max, float min);
 static double random_coordinate_generator(int graph_size);
@@ -242,7 +240,7 @@ float get_edge(float *graph, int col, int row)
         row = temp;
     }
 
-    int index = get_index(col, row);
+    unsigned int index = get_index(col, row);
 
 #ifdef TRACE
     printf("(%d,%d) => index = %d || weight = %f\n", col, row, index, graph[index]);

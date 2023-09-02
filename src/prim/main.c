@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-#ifdef DEBUG
+#ifdef LOCK
     int graph_root = 2;
     print_graph(graph, graph_header->graph_size);
     printf("\n");
@@ -90,6 +90,11 @@ int main(int argc, char *argv[])
         graph_root = pick_graph_root(graph_header->graph_size);
 #endif
 
+    // emissão de relatório e gravação do mst no grafo
+    printf("grafo-> %s\n", graph_filename);
+    printf("graph root-> %d\n", graph_root);
+    printf("graph size-> %d\n", graph_header->graph_size);
+
     gettimeofday(&start, NULL);
     if (threads <= 1)
     {
@@ -99,9 +104,9 @@ int main(int argc, char *argv[])
     }
     else
     {
-        threads = 1;
+        // threads = 1;
         printf("Lançando Algoritmo de Prim com %d threads\n", threads);
-        prim_mt_mst(graph, graph_header->graph_size, graph_root, threads);
+        v_t = prim_mt_mst(graph, graph_header->graph_size, graph_root, threads);
     }
 
     // emitir o tempo de execução do algoritmo
@@ -113,14 +118,9 @@ int main(int argc, char *argv[])
 
     printf("Execution time: %.6f seconds\n", elapsed_time);
 
-    // emissão de relatório e gravação do mst no grafo
-    printf("grafo-> %s\n", graph_filename);
-    printf("graph root-> %d\n", graph_root);
-    printf("graph size-> %d\n", graph_header->graph_size);
-
 #ifdef DEBUG
     // acima dum certo tamanho é inútil
-    if (graph_header->graph_size <= 50)
+    if (graph_header->graph_size <= 20)
         print_graph(graph, graph_header->graph_size);
 
 #endif
