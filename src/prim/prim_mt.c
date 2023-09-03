@@ -22,6 +22,7 @@ typedef struct _thread_data
     int thread_id;
     int graph_root;
     int num_vertices;
+    int graph_size;
     int start_vertice;
     int end_vertice;
     float *local_graph; // V
@@ -29,7 +30,10 @@ typedef struct _thread_data
 } ThreadData;
 
 static int get_u(int v, float *d, int *v_t, bool *visited, int graph_size);
+static int get_corrected_vertice(int v, int num_vertices);
+
 static float *split_graph(float *graph, int start_vertice, int end_vertice);
+
 static void *prim_mst(void *arg);
 
 int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
@@ -54,6 +58,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         thread_data[i].thread_id = i;
         thread_data[i].graph_root = graph_root;
         thread_data[i].num_vertices = num_vertices;
+        thread_data[i].graph_size = graph_size;
 
         thread_data[i].v_t = v_t;
 
@@ -86,11 +91,10 @@ void *prim_mst(void *arg)
     int *v_t = data->v_t;
 
 #ifdef DEBUG
-    printf("thread %d: start_vertice = %d || end_vertice = %d || num_vertices = %d\n", data->thread_id, start_vertice, end_vertice, data->num_vertices);
+    printf("thread %d: start_vertice = %d || end_vertice = %d || num_vertices = %d\n", data->thread_id, data->start_vertice, data->end_vertice, data->num_vertices);
 #endif
 
     // alocar tendo em conta o número de vértices que foram atribuídos
-    // int *v_t = malloc((n + 1) * sizeof(int));
     float *d = malloc((data->num_vertices + 1) * sizeof(float));
     bool *visited = malloc((data->num_vertices + 1) * sizeof(bool));
 
@@ -102,13 +106,16 @@ void *prim_mst(void *arg)
         d[graph_root] = 0;
         visited[graph_root] = true;
 
+        // corrigir graph_root para a local_graph
+        int corrected_root = get_corrected_vertice(graph_root, data->num_vertices);
+
         // inicializar a árvore mínima
-        for (int v = data->start_vertice; v <= data->end_vertice; v++)
+        for (int v = 1; v <= data->graph_size; v++)
         {
             if (v != graph_root)
                 visited[v] = false;
 
-            float weight = get_edge(local_graph, graph_root, v);
+            float weight = get_edge(local_graph, corrected_root, v);
 
             if (weight < INFINITE)
             {
@@ -125,7 +132,7 @@ void *prim_mst(void *arg)
     else
     {
         // senão fazer a inicialização simples
-        for (int v = data->start_vertice; v <= data->end_vertice; v++)
+        for (int v = 1; v <= data->graph_size; v++)
         {
             visited[v] = false;
 
@@ -155,7 +162,8 @@ void *prim_mst(void *arg)
             if (i == u || visited[i])
                 continue;
 
-            float u_weight = get_edge(local_graph, u, i);
+            // aqui é necessário corrigir o vértice
+            float u_weight = get_edge(local_graph, get_corrected_vertice(u, data->num_vertices), i);
 
             if (u_weight == 0)
                 continue;
@@ -215,7 +223,7 @@ float *split_graph(float *graph, int start_vertice, int end_vertice)
         return NULL;
 
     // determinar os indíces de início e fim do vetor a copiar
-    // início é col e primeira linha
+    // início é col e primeira linha (col, 1)
     unsigned int start_index = get_index(start_vertice, 1);
 
     // como considero apenas a triangular superior
@@ -234,4 +242,21 @@ float *split_graph(float *graph, int start_vertice, int end_vertice)
     }
 
     return sub_graph;
+}
+
+/*
+    get_corrected_vertice
+
+    corrige o vértice dado para o vetor local
+    apenas considera quando v > num_vertices pois isso
+    indica que está em P_i, i>0
+
+    para P_0 não é necessária correção
+*/
+int get_corrected_vertice(int v, int num_vertices)
+{
+    if (v > num_vertices)
+        v -= num_vertices;
+
+    return v;
 }

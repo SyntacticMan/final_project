@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     printf("Tamanho do grafo: %d\n", graph_header->graph_size);
     printf("Numero arestas: %d\n", get_edge_count(graph, graph_header->graph_size));
 
-    draw_graph(graph, graph_header->graph_size, graph_header->graph_root, v_t, graph_header->vt_size, "graph_draw.png", graph_title);
+    draw_graph(graph, graph_header->graph_size, graph_header->graph_root, v_t, graph_header->vt_size, "graph_draw.svg", graph_title);
 
     free(graph);
     free(graph_header);

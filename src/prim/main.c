@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        // threads = 1;
+        threads = 1;
         printf("Lançando Algoritmo de Prim com %d threads\n", threads);
         v_t = prim_mt_mst(graph, graph_header->graph_size, graph_root, threads);
     }

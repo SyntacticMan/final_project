@@ -82,7 +82,7 @@ gdb_prim:
 	gdb -ex 'b file_module.c:65' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME)
 
 gdb_mt:
-	gdb -ex 'b prim_mt.c:174' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
+	gdb -ex 'b prim_mt.c:105' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
 
 debug_prim: CCFLAGS += -DDEBUG -g
 debug_prim: prim
@@ -105,3 +105,4 @@ clean:
 	rm -f *.grf
 	rm -f *.png
 	rm -f *.dot
+	rm -f *.svg
