@@ -26,10 +26,13 @@ typedef struct _thread_data
     int start_vertice;
     int end_vertice;
     float *local_graph; // V
+    float *d;           // sub_d
+    bool *visited;
     int *v_t;
 } ThreadData;
 
 static int get_u(int v, float *d, int *v_t, bool *visited, int graph_size);
+static float get_corrected_edge(float *local_graph, int col, int row, int num_vertices);
 static int get_corrected_vertice(int v, int num_vertices);
 
 static float *split_graph(float *graph, int start_vertice, int end_vertice);
@@ -49,6 +52,8 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     pthread_t threads[num_threads];
     ThreadData thread_data[num_threads];
     int *v_t = malloc((graph_size + 1) * sizeof(int));
+    float *d = malloc((graph_size + 1) * sizeof(float));
+    bool *visited = malloc((graph_size + 1) * sizeof(bool));
 
     // calcular o número de vértices (n) a alocar a cada processo
     int num_vertices = graph_size / num_threads;
@@ -60,7 +65,10 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         thread_data[i].num_vertices = num_vertices;
         thread_data[i].graph_size = graph_size;
 
+        // passar os vetores globais aos processos
         thread_data[i].v_t = v_t;
+        thread_data[i].d = d;
+        thread_data[i].visited = visited;
 
         // calcular os vértices de início e fim com base no número de vértices a processar
         int start_vertice = (i * num_vertices) + 1;
@@ -95,8 +103,8 @@ void *prim_mst(void *arg)
 #endif
 
     // alocar tendo em conta o número de vértices que foram atribuídos
-    float *d = malloc((data->num_vertices + 1) * sizeof(float));
-    bool *visited = malloc((data->num_vertices + 1) * sizeof(bool));
+    float *d = data->d;
+    bool *visited = data->visited;
 
     // processar graph_root apenas se estiver nos vértices
     // que foram atribuídos a este processo
@@ -110,12 +118,12 @@ void *prim_mst(void *arg)
         int corrected_root = get_corrected_vertice(graph_root, data->num_vertices);
 
         // inicializar a árvore mínima
-        for (int v = 1; v <= data->graph_size; v++)
+        for (int v = data->start_vertice; v <= data->end_vertice; v++)
         {
             if (v != graph_root)
                 visited[v] = false;
 
-            float weight = get_edge(local_graph, corrected_root, v);
+            float weight = get_corrected_edge(local_graph, corrected_root, v, data->num_vertices);
 
             if (weight < INFINITE)
             {
@@ -132,7 +140,7 @@ void *prim_mst(void *arg)
     else
     {
         // senão fazer a inicialização simples
-        for (int v = 1; v <= data->graph_size; v++)
+        for (int v = data->start_vertice; v <= data->end_vertice; v++)
         {
             visited[v] = false;
 
@@ -153,7 +161,7 @@ void *prim_mst(void *arg)
 #ifdef TRACE
         printf("(thread %d) Found u: %d\n", thread_id, u);
 #endif
-
+        // sincronizar aqui para procurar o u global
         visited[u] = true;
 
         for (int i = v; i <= data->end_vertice; i++)
@@ -163,7 +171,7 @@ void *prim_mst(void *arg)
                 continue;
 
             // aqui é necessário corrigir o vértice
-            float u_weight = get_edge(local_graph, get_corrected_vertice(u, data->num_vertices), i);
+            float u_weight = get_corrected_edge(local_graph, u, i, data->num_vertices);
 
             if (u_weight == 0)
                 continue;
@@ -242,6 +250,30 @@ float *split_graph(float *graph, int start_vertice, int end_vertice)
     }
 
     return sub_graph;
+}
+
+/*
+    get_corrected_edge
+
+    obtém a aresta sempre com a coluna corrigida para o grafo local
+*/
+float get_corrected_edge(float *local_graph, int col, int row, int num_vertices)
+{
+    /*
+        fazer a inversão para a triangular superior aqui
+        pois col tem de ser corrigida para o grafo local
+        *antes* de ser enviada para get_edge()
+    */
+    if (col < row)
+    {
+        int temp = col;
+        col = row;
+        row = temp;
+    }
+
+    col = get_corrected_vertice(col, num_vertices);
+
+    return get_edge(local_graph, col, row);
 }
 
 /*

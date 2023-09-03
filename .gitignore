@@ -5,6 +5,7 @@ bin/prim
 include/*
 *breakpoints*
 *.png
+*.svg
 *.as
 documentation/IPC2e-graphs.pdf
 src/.vs/*
