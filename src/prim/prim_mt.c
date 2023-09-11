@@ -22,6 +22,7 @@ typedef struct _thread_data
     int thread_id;
     int graph_root;
     int num_vertices;
+    int num_threads;
     int graph_size;
     int start_vertice;
     int end_vertice;
@@ -31,7 +32,13 @@ typedef struct _thread_data
     int *v_t;
 } ThreadData;
 
-static int get_u(int v, float *d, int *v_t, bool *visited, int graph_size);
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+
+int min_u, min_weight;
+int *global_u;
+
+static int get_u(float *local_graph, float *d, int v, int *v_t, bool *visited, int graph_size);
 static float get_corrected_edge(float *local_graph, int col, int row, int num_vertices);
 static int get_corrected_vertice(int v, int num_vertices);
 
@@ -55,6 +62,8 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     float *d = malloc((graph_size + 1) * sizeof(float));
     bool *visited = malloc((graph_size + 1) * sizeof(bool));
 
+    global_u = malloc(num_threads + 1);
+
     // calcular o número de vértices (n) a alocar a cada processo
     int num_vertices = graph_size / num_threads;
 
@@ -64,6 +73,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         thread_data[i].graph_root = graph_root;
         thread_data[i].num_vertices = num_vertices;
         thread_data[i].graph_size = graph_size;
+        thread_data[i].num_threads = num_threads;
 
         // passar os vetores globais aos processos
         thread_data[i].v_t = v_t;
@@ -73,6 +83,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         // calcular os vértices de início e fim com base no número de vértices a processar
         int start_vertice = (i * num_vertices) + 1;
         int end_vertice = start_vertice + num_vertices - 1;
+
         thread_data[i].start_vertice = start_vertice;
         thread_data[i].end_vertice = end_vertice;
 
@@ -114,7 +125,7 @@ void *prim_mst(void *arg)
         d[graph_root] = 0;
         visited[graph_root] = true;
 
-        // corrigir graph_root para a local_graph
+        // corrigir graph_root para local_graph
         int corrected_root = get_corrected_vertice(graph_root, data->num_vertices);
 
         // inicializar a árvore mínima
@@ -155,14 +166,54 @@ void *prim_mst(void *arg)
         if (v == graph_root || visited[v])
             continue;
 
-        // obter o vértice u
-        int u = get_u(v, d, v_t, visited, data->num_vertices);
+        // inicializar o u global deste processo
+        // data->global_u[data->thread_id] = 0;
 
-#ifdef TRACE
-        printf("(thread %d) Found u: %d\n", thread_id, u);
+        // obter o vértice u
+        int u = get_u(local_graph, d, v, v_t, visited, data->num_vertices);
+
+#ifdef DEBUG
+        printf("(thread %d) Found u: %d for v: %d\n", data->thread_id, u, v);
 #endif
-        // sincronizar aqui para procurar o u global
-        visited[u] = true;
+
+        // Lock and update the global result
+        pthread_mutex_lock(&mutex);
+        global_u[data->thread_id] = u;
+        pthread_mutex_unlock(&mutex);
+
+        pthread_mutex_lock(&mutex);
+
+        // o processo 0 é responsável por determinar o u global
+        if (data->thread_id == 0)
+        {
+            min_u = 0;
+            min_weight = INFINITE;
+
+            for (int i = 0; i < data->num_threads; i++)
+            {
+                if (d[global_u[i]] < min_weight)
+                {
+                    min_u = global_u[i];
+                    min_weight = d[global_u[i]];
+                }
+            }
+
+            // fazer a transmissão
+            pthread_cond_broadcast(&cond);
+        }
+        else
+        {
+            // os outros ficam a aguardar a transmissão
+            pthread_cond_wait(&cond, &mutex);
+        }
+
+        pthread_mutex_unlock(&mutex);
+
+        // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
+        if (min_u == u)
+            visited[u] = true;
+        else
+            u = min_u;
 
         for (int i = v; i <= data->end_vertice; i++)
         {
@@ -188,16 +239,12 @@ void *prim_mst(void *arg)
         }
     }
 
-    // free(v_t);
-    // free(visited);
-    // free(d);
-
     pthread_exit(NULL);
 }
 
-int get_u(int v, float *d, int *v_t, bool *visited, int graph_size)
+int get_u(float *local_graph, float *d, int v, int *v_t, bool *visited, int graph_size)
 {
-    int u_min;
+    int u_min = 1;
     float min_weight = INFINITE;
 
     for (int u = 1; u <= graph_size; u++)
@@ -206,15 +253,22 @@ int get_u(int v, float *d, int *v_t, bool *visited, int graph_size)
         if (u == v || visited[u])
             continue;
 
-        if (!visited[u] && d[u] < min_weight)
+        if ((d[u] < min_weight && d[u] > 0))
         {
             u_min = u;
             min_weight = d[u];
-
-#ifdef TRACE
-            printf("v->%d | u_min->%d | min_weight: %f | d[v]: %f\n", v, u_min, min_weight, d[v]);
-#endif
         }
+
+        int u_weight = get_corrected_edge(local_graph, v, u, graph_size);
+        if (u_weight < min_weight)
+        {
+            u_min = u;
+            min_weight = u_weight;
+        }
+
+#ifdef DEBUG
+        printf("v->%d | u_min->%d | min_weight: %f | d[v]: %f\n", v, u_min, min_weight, d[v]);
+#endif
     }
 
     return u_min;

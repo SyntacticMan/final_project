@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
             break;
         default:
             fprintf(stderr, "Algoritmo de Prim\n");
-            fprintf(stderr, "Usage: %s [-f filename] [-t number of threads] [-p print mst]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-f filename] [-t number of threads] [-p print graph]\n", argv[0]);
             exit(EXIT_FAILURE);
             break;
         }
