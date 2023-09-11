@@ -81,15 +81,11 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
                 v_t[i] = u;
             }
 
-#ifdef DEBUG
+#ifdef TRACE
             printf("(%d,%d) => weight: %f | d[v]: %f\n", u, i, u_weight, d[i]);
 #endif
         }
     }
-
-#ifdef DEBUG
-    print_mst(d, v_t, graph_size);
-#endif
 
     free(d);
     free(visited);
@@ -118,25 +114,4 @@ int get_u(int v, float *d, int *v_t, bool *visited, int graph_size)
     }
 
     return u_min;
-}
-
-/*
-    print_mst
-
-    imprime a versão textual da árvore mínima
-*/
-void print_mst(float *d, int *v_t, int graph_size)
-{
-    printf("\n");
-
-    for (int i = 1; i <= graph_size; i++)
-    {
-        printf(" %d=(%2f)=>%d ", v_t[i], d[i], i);
-
-        // omitir na última iteração
-        if (i != graph_size)
-            printf(">");
-    }
-
-    printf("\n");
 }

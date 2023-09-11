@@ -51,7 +51,7 @@ void write_file(header *graph_header, float *graph, char *filename)
     fclose(graph_file);
 }
 
-void write_mst(int *v_t, int vt_size, int graph_root, char *filename)
+void write_mst(int *v_t, int graph_size, int graph_root, char *filename)
 {
     printf("write_mst\n");
     // abrir o ficheiro em modo de leitura e escrita binária
@@ -76,11 +76,11 @@ void write_mst(int *v_t, int vt_size, int graph_root, char *filename)
     fread(g_header, sizeof(header), 1, graph_file);
 
 #ifdef DEBUG
-    printf("graph_root: %d\nvt_size: %d\n", graph_root, vt_size);
+    printf("graph_root: %d\nvt_size: %d\n", graph_root, graph_size + 1);
 #endif
 
     // registar o tamanho de vt, raíz da mst e atualizar o cabeçalho
-    g_header->vt_size = vt_size;
+    g_header->vt_size = graph_size + 1;
     g_header->graph_root = graph_root;
 
     // rebobinar o apontador
@@ -92,6 +92,7 @@ void write_mst(int *v_t, int vt_size, int graph_root, char *filename)
     unsigned long int array_size = (g_header->graph_size * (g_header->graph_size - 1)) / 2;
     fseek(graph_file, array_size, SEEK_CUR);
 
+    v_t[0] = 0;
     for (int i = 0; i < g_header->vt_size; i++)
     {
         fwrite(&v_t[i], sizeof(int), 1, graph_file);

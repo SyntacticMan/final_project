@@ -32,6 +32,8 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+void print_mst(float *d, int *v_t, int graph_size);
+
 int main(int argc, char *argv[])
 {
 
@@ -43,8 +45,9 @@ int main(int argc, char *argv[])
     char *graph_filename;
     int opt;
     int threads = 1; // por omissão correr apenas numa thread
+    bool print_agm = false;
 
-    while ((opt = getopt(argc, argv, "f:t:")) != -1)
+    while ((opt = getopt(argc, argv, "f:t:p")) != -1)
     {
         switch (opt)
         {
@@ -54,9 +57,12 @@ int main(int argc, char *argv[])
         case 't':
             threads = atoi(optarg);
             break;
+        case 'p':
+            print_agm = true;
+            break;
         default:
             fprintf(stderr, "Algoritmo de Prim\n");
-            fprintf(stderr, "Usage: %s [-f filename] [-t number of threads]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-f filename] [-t number of threads] [-p print mst]\n", argv[0]);
             exit(EXIT_FAILURE);
             break;
         }
@@ -96,6 +102,24 @@ int main(int argc, char *argv[])
     printf("graph size-> %d\n", graph_header->graph_size);
 
     gettimeofday(&start, NULL);
+
+    // se receber a opção, simplesmente ler a AGM e sair
+    if (print_agm && graph_header->vt_size > 0)
+    {
+        v_t = read_mst(graph_filename);
+
+        if (v_t == NULL)
+        {
+            printf("Erro ao ler a AGM\n");
+            return -1;
+        }
+
+        print_mst(graph, v_t, graph_header->vt_size);
+        gettimeofday(&end, NULL);
+        return 0;
+    }
+
+    // execução normal
     if (threads <= 1)
     {
         // lançar single thread
@@ -123,6 +147,7 @@ int main(int argc, char *argv[])
     if (graph_header->graph_size <= 20)
         print_graph(graph, graph_header->graph_size);
 
+    print_mst(graph, v_t, graph_header->vt_size);
 #endif
 
     // actualizar o ficheiro do grafo
@@ -130,4 +155,25 @@ int main(int argc, char *argv[])
 
     free(graph);
     free(graph_header);
+}
+
+/*
+    print_mst
+
+    imprime a versão textual da árvore mínima
+*/
+void print_mst(float *d, int *v_t, int graph_size)
+{
+    printf("\n");
+
+    for (int i = 1; i < graph_size; i++)
+    {
+        printf(" %d=()=>%d ", v_t[i], /*d[i],*/ i);
+
+        // omitir na última iteração
+        if (i != graph_size)
+            printf(">");
+    }
+
+    printf("\n");
 }
