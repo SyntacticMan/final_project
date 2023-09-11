@@ -72,6 +72,12 @@ test_graph:
 test_draw:
 	$(binDir)$(drawBinaryName) -f $(GRAPH_NAME) -t $(GRAPH_TITLE)
 
+test_debug_graph:
+	$(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE) -m
+
+read_graph:
+	$(binDir)$(primBinaryName) -f $(GRAPH_NAME) -p
+
 gdb_graph:
 	 gdb --args $(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE)
 

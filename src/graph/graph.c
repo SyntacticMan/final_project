@@ -74,17 +74,10 @@ float *create_graph(int graph_size, int edge_percentage)
     double num_edges_count = 0;
     for (int col = 2; col <= graph_size; col++)
     {
-        for (int row = 1; row < col; row++)
-        {
-            // se linha = coluna o vértice ligar-se-ia a ele mesmo
-            // se linha > coluna estou na triangular inferior
-            // em ambos os casos passo à frente
-            if ((row >= col))
-                continue;
+        int row = random_generator(col, 1);
 
-            add_random_edge(graph, col, row);
-            num_edges_count++;
-        }
+        add_random_edge(graph, col, row);
+        num_edges_count++;
     }
 
     // obter o número de arestas correspondentes à percentagem pedida

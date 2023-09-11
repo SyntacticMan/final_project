@@ -105,7 +105,7 @@ int get_u(int v, float *d, int *v_t, bool *visited, int graph_size)
             continue;
 
         // float u_weight = get_edge(g)
-        if (!visited[u] && d[u] < min_weight)
+        if (!visited[u] && d[u] < min_weight && d[u] > 0)
         {
             u_min = u;
             min_weight = d[u];

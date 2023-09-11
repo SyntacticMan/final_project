@@ -97,26 +97,40 @@ int main(int argc, char *argv[])
 #endif
 
     // emissão de relatório e gravação do mst no grafo
-    printf("grafo-> %s\n", graph_filename);
-    printf("graph root-> %d\n", graph_root);
-    printf("graph size-> %d\n", graph_header->graph_size);
+    printf("Grafo -> %s\n", graph_filename);
+    printf("Raiz -> %d\n", graph_root);
+    printf("Tamanho -> %d\n", graph_header->graph_size);
 
     gettimeofday(&start, NULL);
 
     // se receber a opção, simplesmente ler a AGM e sair
-    if (print_agm && graph_header->vt_size > 0)
+    if (print_agm)
     {
-        v_t = read_mst(graph_filename);
+        if (graph_header->graph_size <= 20)
+            print_graph(graph, graph_header->graph_size);
 
-        if (v_t == NULL)
+        // se tiver mst, imprimir
+        if (graph_header->vt_size > 0)
         {
-            printf("Erro ao ler a AGM\n");
-            return -1;
+            v_t = read_mst(graph_filename);
+
+            if (v_t == NULL)
+            {
+                printf("Erro ao ler a AGM\n");
+                return -1;
+            }
+
+            print_mst(graph, v_t, graph_header->vt_size);
+        }
+        else
+        {
+            printf("\nSem AGM em ficheiro.\n");
         }
 
-        print_mst(graph, v_t, graph_header->vt_size);
         gettimeofday(&end, NULL);
-        return 0;
+
+        // terminar a execução
+        exit(0);
     }
 
     // execução normal
@@ -147,7 +161,7 @@ int main(int argc, char *argv[])
     if (graph_header->graph_size <= 20)
         print_graph(graph, graph_header->graph_size);
 
-    print_mst(graph, v_t, graph_header->vt_size);
+    print_mst(graph, v_t, graph_header->graph_size + 1);
 #endif
 
     // actualizar o ficheiro do grafo

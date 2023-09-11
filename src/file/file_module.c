@@ -53,7 +53,6 @@ void write_file(header *graph_header, float *graph, char *filename)
 
 void write_mst(int *v_t, int graph_size, int graph_root, char *filename)
 {
-    printf("write_mst\n");
     // abrir o ficheiro em modo de leitura e escrita binária
     FILE *graph_file = fopen(filename, "rb+");
 
@@ -61,8 +60,6 @@ void write_mst(int *v_t, int graph_size, int graph_root, char *filename)
     {
         printf("Nao foi possivel abrir %s.\n", filename);
     }
-
-    printf("load header\n");
 
     // carregar o cabeçalho
     header *g_header = (header *)malloc(sizeof(header));
