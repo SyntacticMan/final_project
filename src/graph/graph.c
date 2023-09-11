@@ -70,17 +70,36 @@ float *create_graph(int graph_size, int edge_percentage)
         }
     }
 
+    // todos os vértices têm de ter pelo menos uma ligação
+    double num_edges_count = 0;
+    for (int col = 2; col <= graph_size; col++)
+    {
+        for (int row = 1; row < col; row++)
+        {
+            // se linha = coluna o vértice ligar-se-ia a ele mesmo
+            // se linha > coluna estou na triangular inferior
+            // em ambos os casos passo à frente
+            if ((row >= col))
+                continue;
+
+            add_random_edge(graph, col, row);
+            num_edges_count++;
+        }
+    }
+
     // obter o número de arestas correspondentes à percentagem pedida
+    // excluindo as que já têm
     double num_edges = ((double)matrix_size * (edge_percentage / 100.0));
+    num_edges -= num_edges_count;
 
     // float num_edges = matrix_size * (edge_percentage / 100.0);
+#ifdef DEBUG
     printf("num_edges= %f\n", num_edges);
+#endif
 
-    double num_edges_count = 0;
     for (int i = 0; i < num_edges; i++)
     {
         create_valid_edge(graph, graph_size);
-        num_edges_count++;
     }
     printf("num_edges_count= %f\n", num_edges_count);
 
