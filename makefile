@@ -25,6 +25,8 @@ CCFLAGS = -Wall -Wno-maybe-uninitialized
  
 all: graph prim draw
 
+debug: debug_graph debug_prim debug_draw
+
 draw: graph.o file_module.o draw.o
 	$(CC) $(CCFLAGS) $(linkDir) $(drawSrcDir)main.c $(drawObjectFiles) -lm $(drawLinkLibraries) -o $(binDir)$(drawBinaryName)	
 

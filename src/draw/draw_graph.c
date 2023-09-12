@@ -74,7 +74,7 @@ void draw_graph(float *graph, int graph_size, int graph_root, int *v_t, int vt_s
     count = 0;
     for (int col = 2; col <= graph_size; col++)
     {
-        for (int row = 1; row < col; row++)
+        for (int row = 1; row <= graph_size; row++)
         {
             // procurar os vértices, por nome
             sprintf(string_temp, "%d", col);
