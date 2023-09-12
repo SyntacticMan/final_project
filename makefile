@@ -98,6 +98,9 @@ debug_prim: prim
 debug_flag: 
 	CCFLAGS += -DDEBUG -g
 
+lock_graph:	CCFLAGS += -DLOCK -g
+lock_graph:	debug_graph
+
 debug_draw: CCFLAGS += -DDEBUG -g
 debug_draw: draw 
 

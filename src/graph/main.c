@@ -79,8 +79,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-#ifdef DEBUG
-
+#ifdef LOCK
 	graph_size = 6;
 	unsigned long int matrix_size = get_matrix_size(graph_size);
 	unsigned long int ram_kb = (matrix_size * sizeof(float)) / 1024;
@@ -89,7 +88,7 @@ int main(int argc, char *argv[])
 	printf("Array RAM size: %lu kb | %lu mb | %lu gb (%lu)\n", ram_kb, ram_mb, ram_gb, matrix_size);
 
 	graph = create_locked_graph(graph_size, requested_edge_percentage);
-#elif
+#else
 	graph = create_graph(graph_size, requested_edge_percentage);
 #endif
 
