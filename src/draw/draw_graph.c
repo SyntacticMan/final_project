@@ -72,7 +72,7 @@ void draw_graph(float *graph, int graph_size, int graph_root, int *v_t, int vt_s
 #endif
 
     count = 0;
-    for (int col = 1; col <= graph_size; col++)
+    for (int col = 2; col <= graph_size; col++)
     {
         for (int row = 1; row < col; row++)
         {

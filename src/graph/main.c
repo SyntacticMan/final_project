@@ -81,15 +81,17 @@ int main(int argc, char *argv[])
 
 #ifdef DEBUG
 
+	graph_size = 6;
 	unsigned long int matrix_size = get_matrix_size(graph_size);
 	unsigned long int ram_kb = (matrix_size * sizeof(float)) / 1024;
 	unsigned long int ram_mb = ram_kb / 1024;
 	unsigned long int ram_gb = ram_mb / 1024;
 	printf("Array RAM size: %lu kb | %lu mb | %lu gb (%lu)\n", ram_kb, ram_mb, ram_gb, matrix_size);
-	// graph_size = 6;
-	// create_locked_graph(graph_size, requested_edge_percentage);
-#endif
+
+	graph = create_locked_graph(graph_size, requested_edge_percentage);
+#elif
 	graph = create_graph(graph_size, requested_edge_percentage);
+#endif
 
 	if (graph == NULL)
 	{
@@ -120,8 +122,12 @@ int main(int argc, char *argv[])
 	graph_header->graph_size = graph_size;
 	graph_header->edge_percentage = actual_edge_percentage;
 	graph_header->vt_size = 0; // como não há mst ainda, vt_size vai a 0
-	graph_header->graph_root = 0;
 
+#ifdef DEBUG
+	graph_header->graph_root = 2;
+#elif
+	graph_header->graph_root = 0;
+#endif
 	write_file(graph_header, graph, graph_filename);
 
 	free(graph);

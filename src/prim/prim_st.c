@@ -17,7 +17,7 @@
 #include "prim_st.h"
 #endif
 
-static int get_u(int v, float *d, int *v_t, bool *visited, int graph_size);
+static int get_u(float *graph, int v, float *d, int *v_t, bool *visited, int graph_size);
 
 int *prim_mst(float *graph, int graph_size, int graph_root)
 {
@@ -58,7 +58,7 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
             continue;
 
         // obter o vértice u
-        int u = get_u(v, d, v_t, visited, graph_size);
+        int u = get_u(graph, v, d, v_t, visited, graph_size);
 
         // printf("Found u: %d\n", u);
 
@@ -93,7 +93,7 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
     return v_t;
 }
 
-int get_u(int v, float *d, int *v_t, bool *visited, int graph_size)
+int get_u(float *graph, int v, float *d, int *v_t, bool *visited, int graph_size)
 {
     int u_min;
     float min_weight = INFINITE;
@@ -105,11 +105,18 @@ int get_u(int v, float *d, int *v_t, bool *visited, int graph_size)
             continue;
 
         // float u_weight = get_edge(g)
-        if (!visited[u] && d[u] < min_weight && d[u] > 0)
+        if (d[u] < min_weight && d[u] > 0)
         {
             u_min = u;
             min_weight = d[u];
             // printf("v->%d | u_min->%d | min_weight: %f | d[v]: %f\n", v, u_min, min_weight, d[v]);
+        }
+
+        int u_weight = get_edge(graph, v, u);
+        if (u_weight < min_weight)
+        {
+            u_min = u;
+            min_weight = u_weight;
         }
     }
 

@@ -32,7 +32,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-void print_mst(float *d, int *v_t, int graph_size);
+void print_mst(float *d, int *v_t, int graph_size, int graph_root);
 
 int main(int argc, char *argv[])
 {
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
                 return -1;
             }
 
-            print_mst(graph, v_t, graph_header->vt_size);
+            print_mst(graph, v_t, graph_header->vt_size, graph_header->graph_root);
         }
         else
         {
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
     if (graph_header->graph_size <= 20)
         print_graph(graph, graph_header->graph_size);
 
-    print_mst(graph, v_t, graph_header->graph_size + 1);
+    print_mst(graph, v_t, graph_header->graph_size + 1, graph_header->graph_root);
 #endif
 
     // actualizar o ficheiro do grafo
@@ -176,14 +176,21 @@ int main(int argc, char *argv[])
 
     imprime a versão textual da árvore mínima
 */
-void print_mst(float *d, int *v_t, int graph_size)
+void print_mst(float *d, int *v_t, int graph_size, int graph_root)
 {
     printf("\n");
 
     for (int i = 1; i < graph_size; i++)
     {
-        printf(" %d=()=>%d ", v_t[i], /*d[i],*/ i);
+        if (i == graph_root)
+        {
+            printf(" < [%d] |%d| >", i, v_t[i]);
+        }
+        else
+        {
 
+            printf(" %d=()=>%d ", i, v_t[i]);
+        }
         // omitir na última iteração
         if (i != graph_size)
             printf(">");
