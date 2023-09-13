@@ -52,7 +52,7 @@ prim_mt.o: $(primSrcDir)prim_mt.c $(primSrcDir)prim_mt.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_mt.c -o $(buildDir)prim_mt.o
 
 # test params
-GRAPH_SIZE = 12
+GRAPH_SIZE = 4000
 GRAPH_NAME = graph.grf
 EDGE_PERCENTAGE = 40
 GRAPH_TITLE = "Grafo Teste"
@@ -66,7 +66,7 @@ test_prim:
 	$(binDir)$(primBinaryName) -f $(GRAPH_NAME)
 
 test_mt:
-	$(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
+	$(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 8
 
 test_graph:
 	$(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE)
@@ -95,8 +95,11 @@ gdb_mt:
 debug_prim: CCFLAGS += -DDEBUG -g
 debug_prim: prim
 
-debug_flag: 
-	CCFLAGS += -DDEBUG -g
+trace_prim: CCFLAGS += -DTRACE -DDEBUG -g
+trace_prim: prim
+
+lock_prim:	CCFLAGS += -DLOCK -g
+lock_prim:	debug_prim
 
 lock_graph:	CCFLAGS += -DLOCK -g
 lock_graph:	debug_graph
@@ -106,6 +109,7 @@ debug_draw: draw
 
 debug_graph: CCFLAGS += -DDEBUG -g
 debug_graph: graph
+
 
 
 # debug: clean all

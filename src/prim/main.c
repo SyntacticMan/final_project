@@ -142,7 +142,11 @@ int main(int argc, char *argv[])
     }
     else
     {
-        // threads = 1;
+
+#ifdef LOCK
+        threads = 1;
+#endif
+
         printf("Lançando Algoritmo de Prim com %d threads\n", threads);
         v_t = prim_mt_mst(graph, graph_header->graph_size, graph_root, threads);
     }
@@ -165,7 +169,7 @@ int main(int argc, char *argv[])
 #endif
 
     // actualizar o ficheiro do grafo
-    write_mst(v_t, graph_header->graph_size, graph_root, graph_filename);
+    // write_mst(v_t, graph_header->graph_size, graph_root, graph_filename);
 
     free(graph);
     free(graph_header);
@@ -182,6 +186,9 @@ void print_mst(float *d, int *v_t, int graph_size, int graph_root)
 
     for (int i = 1; i < graph_size; i++)
     {
+        if ((graph_size > 50) && (i > 25) && (i < graph_size - 20))
+            continue;
+
         if (i == graph_root)
         {
             printf(" < [%d] |%d| >", i, v_t[i]);

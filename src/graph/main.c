@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
 #ifdef DEBUG
 	graph_header->graph_root = 2;
-#elif
+#else
 	graph_header->graph_root = 0;
 #endif
 	write_file(graph_header, graph, graph_filename);
