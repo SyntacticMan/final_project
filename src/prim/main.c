@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
 #endif
 
     // actualizar o ficheiro do grafo
-    // write_mst(v_t, graph_header->graph_size, graph_root, graph_filename);
+    write_mst(v_t, graph_header->graph_size, graph_root, graph_filename);
 
     free(graph);
     free(graph_header);

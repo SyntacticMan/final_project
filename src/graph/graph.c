@@ -27,7 +27,7 @@ static int random_generator(int max, int min);
 static float random_float_generator(float max, float min);
 static double random_coordinate_generator(int graph_size);
 
-#ifdef DEBUG
+#ifdef TRACE
 static void print_progress_bar(int progress, int total, int barWidth);
 #endif
 
