@@ -180,13 +180,14 @@ void *main_thread(void *arg)
 
 #ifdef DEBUG
         printf("min_u: %d\n", get_min_u());
+        printf("finish_count: %d", get_finish_count());
 #endif
 
         // fazer a transmissão
         pthread_cond_broadcast(&cond);
     }
 
-    return (void *)NULL;
+    pthread_exit(NULL);
 }
 
 void *prim_mst(void *arg)
