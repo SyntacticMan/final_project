@@ -41,10 +41,14 @@ float *create_graph(int graph_size, int edge_percentage)
     srand(time(NULL));
 
     // alocar as colunas
-    unsigned int matrix_size = get_matrix_size(graph_size);
+    unsigned long long matrix_size = get_matrix_size(graph_size);
 
 #ifdef DEBUG
-    printf("Allocating %lu bytes for a matrix with %u elements\n", (matrix_size * sizeof(float)), matrix_size);
+    // unsigned int matrix_size = get_matrix_size(graph_size);
+    unsigned long int ram_kb = (matrix_size * sizeof(float)) / 1024;
+    unsigned long int ram_mb = ram_kb / 1024;
+    unsigned long int ram_gb = ram_mb / 1024;
+    printf("Allocating %lu kb | %lu mb | %lu gb (matrix size: %llu)\n", ram_kb, ram_mb, ram_gb, matrix_size);
 #endif
 
     float *graph = malloc(matrix_size * sizeof(float));
@@ -214,18 +218,9 @@ void add_null_edge(float *graph, int col, int row)
     calcula o número de elementos da matriz de adjacência
 
 */
-unsigned int get_matrix_size(int graph_size)
+unsigned long long get_matrix_size(int graph_size)
 {
-    // por alguma razão, se tentar fazer a conta duma só vez,
-    // começa a devolver resultados incorrectos acima de 46000
-    unsigned int numerator = graph_size * (graph_size - 1);
-    unsigned int matrix_size = numerator / 2;
-
-#ifdef TRACE
-    printf("graph_size %d | graph_size - 1 %d | numerator %u | matrix_size %u\n", graph_size, graph_size - 1, numerator, matrix_size);
-#endif
-
-    return matrix_size;
+    return (graph_size * (graph_size - 1)) / 2;
 }
 
 /*
@@ -267,9 +262,10 @@ float get_edge(float *graph, int col, int row)
     converte a coluna e linha no índice correspondente
     no vetor que guarda o grafo
 */
-unsigned int get_index(int col, int row)
+unsigned long long get_index(int col, int row)
 {
-    unsigned int index = ((col - 1) * (col - 2)) / 2;
+    // unsigned int index = ((col - 1) * (col - 2)) / 2;
+    unsigned long long index = ((col - 1ULL) * (col - 2ULL)) / 2ULL;
 
     // adicionar a linha ao índice
     // para obter índice da coluna/linha
@@ -277,12 +273,8 @@ unsigned int get_index(int col, int row)
         index += row - 1;
 
 #ifdef TRACE
-    if (index % 20000 == 0)
-    {
-        fflush(stdout);
-        printf("index for col: %d, row :%d => %i\n", col, row, index);
-        fflush(stdout);
-    }
+    if (col > 46000)
+        printf("index for col: %d, row :%d => %lli\n", col, row, index);
 #endif
     return index;
 }

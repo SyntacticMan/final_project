@@ -17,6 +17,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #ifndef GRAPH
 #define GRAPH

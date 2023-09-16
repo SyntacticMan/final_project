@@ -99,12 +99,12 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     global_weight = malloc(num_threads + 1);
 
     // inicializar o contador de término das tarefas
-    finish_count = 0;
+    finish_count = 1;
 
     process_error("pthread_cond_init", pthread_cond_init(&cond, NULL));
 
     // ter em conta main_process
-    process_error("barrier_init", pthread_barrier_init(&barrier, NULL, num_threads));
+    process_error("barrier_init", pthread_barrier_init(&barrier, NULL, num_threads + 1));
 
     initialize_mutexes();
 
@@ -142,7 +142,12 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     }
 
     // aguardar pelo fim das tarefas
-    // process_error("main thread join", pthread_join(main_process[0], (void **)NULL));
+    process_error("main thread join", pthread_join(main_process[0], (void **)NULL));
+
+    for (int i = 0; i < num_threads; i++)
+    {
+        pthread_join(threads[i], (void **)NULL);
+    }
 
     free(global_u);
     free(global_weight);
@@ -152,7 +157,9 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
     process_error("condition destroy", pthread_cond_destroy(&cond));
 
+#ifdef DEBUG
     printf("print_mst_mt ended\n");
+#endif
     return v_t;
 }
 
@@ -164,6 +171,7 @@ void *main_thread(void *arg)
     {
         // aguardar que as tarefas tenham encontrado o seu u
         pthread_barrier_wait(&barrier);
+        // usleep(2000000);
 
         // o processo 0 é responsável por determinar o u global
         set_min_u(0);
@@ -275,8 +283,11 @@ void *prim_mst(void *arg)
         printf("(thread %d) Found u: %d for v: %d\n", data->thread_id, u, v);
 #endif
         // Lock and update the global result
-        set_global_u(data->thread_id, u);
-        set_global_weight(data->thread_id, get_corrected_edge(local_graph, v, u, data->num_threads));
+        if (get_corrected_edge(local_graph, v, u, data->num_threads) < get_global_weight(data->thread_id))
+        {
+            set_global_u(data->thread_id, u);
+            set_global_weight(data->thread_id, get_corrected_edge(local_graph, v, u, data->num_threads));
+        }
 
         pthread_barrier_wait(&barrier);
 
@@ -426,19 +437,16 @@ float get_corrected_edge(float *local_graph, int col, int row, int num_vertices)
 int get_corrected_vertice(int v, int num_vertices)
 {
     if (v > num_vertices)
-    {
         v -= num_vertices;
-        // printf("corrected vertice from %d to %d\n", v, v -= num_vertices);
-    }
 
     return v;
 }
 
+/******************************************************************************
+ * Funções para aceder aos recursos partilhados
+ *******************************************************************************/
 void set_vt(int *v_t, int index, float value)
 {
-#ifdef TRACE
-    printf("locked index %d (%f)\n", index, value);
-#endif
     process_error("lock vt", pthread_mutex_lock(&mutex_vt));
     v_t[index] = value;
     process_error("unlock vt", pthread_mutex_unlock(&mutex_vt));
@@ -503,26 +511,20 @@ int get_finish_count(void)
 void initialize_mutexes(void)
 {
     process_error("mutex_minu init", pthread_mutex_init(&mutex_minu, NULL));
-
     process_error("mutex_globalu", pthread_mutex_init(&mutex_globalu, NULL));
-
+    process_error("mutex_globalweight", pthread_mutex_init(&mutex_globalweight, NULL));
     process_error("mutex_vt init", pthread_mutex_init(&mutex_vt, NULL));
-
     process_error("mutext_wait init", pthread_mutex_init(&mutex_wait, NULL));
-
     process_error("mutext_finish_count init", pthread_mutex_init(&mutex_finish_count, NULL));
 }
 
 void destroy_mutexes(void)
 {
     process_error("mutex_minu destroy", pthread_mutex_destroy(&mutex_minu));
-
     process_error("mutex_globalu destroy", pthread_mutex_destroy(&mutex_globalu));
-
+    process_error("mutex_globalweight destroy", pthread_mutex_destroy(&mutex_globalweight));
     process_error("mutex_vt destroy", pthread_mutex_destroy(&mutex_vt));
-
     process_error("mutex_wait destroy", pthread_mutex_destroy(&mutex_wait));
-
     process_error("mutex_finish_count destroy", pthread_mutex_destroy(&mutex_finish_count));
 }
 

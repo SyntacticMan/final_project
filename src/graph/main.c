@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 	graph_header->edge_percentage = actual_edge_percentage;
 	graph_header->vt_size = 0; // como não há mst ainda, vt_size vai a 0
 
-#ifdef DEBUG
+#ifdef LOCK
 	graph_header->graph_root = 2;
 #else
 	graph_header->graph_root = 0;

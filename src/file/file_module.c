@@ -31,17 +31,7 @@ void write_file(header *graph_header, float *graph, char *filename)
 
     fwrite(graph_header, sizeof(header), 1, graph_file);
 
-    // para a adição do grafo é necessário reabrir o ficheiro
-    // em modo de apensar para não destruir o cabeçalho
-    // graph_file = freopen(filename, "ab", graph_file);
-
-    // if (graph_file == NULL)
-    // {
-    //     printf("Nao foi possivel abrir %s.\n", filename);
-    //     return;
-    // }
-
-    unsigned long int array_size = (graph_header->graph_size * (graph_header->graph_size - 1)) / 2;
+    unsigned long long array_size = (graph_header->graph_size * (graph_header->graph_size - 1)) / 2;
 
     // for (unsigned long int i = 0; i < array_size; i++)
     // {
