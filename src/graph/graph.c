@@ -81,16 +81,11 @@ float *create_graph(int graph_size, int edge_percentage)
         num_edges_count++;
     }
 
-    for (int col = 2; col <= graph_size; col++)
-    {
-    }
-
     // obter o número de arestas correspondentes à percentagem pedida
     // excluindo as que já têm
     double num_edges = ((double)matrix_size * (edge_percentage / 100.0));
     num_edges -= num_edges_count;
 
-    // float num_edges = matrix_size * (edge_percentage / 100.0);
 #ifdef DEBUG
     printf("num_edges= %f\n", num_edges);
 #endif
@@ -99,7 +94,6 @@ float *create_graph(int graph_size, int edge_percentage)
     {
         create_valid_edge(graph, graph_size);
     }
-    printf("num_edges_count= %f\n", num_edges_count);
 
     return graph;
 }
