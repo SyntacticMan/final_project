@@ -59,6 +59,7 @@ float *create_graph(int graph_size, int edge_percentage)
         return NULL;
     }
 
+    double num_edges_count = 0;
     // uma primeira passagem para preencher a matriz com infinitos
     for (int col = 2; col <= graph_size; col++)
     {
@@ -72,16 +73,16 @@ float *create_graph(int graph_size, int edge_percentage)
 
             add_null_edge(graph, col, row);
         }
-    }
 
-    // todos os vértices têm de ter pelo menos uma ligação
-    double num_edges_count = 0;
-    for (int col = 2; col <= graph_size; col++)
-    {
+        // todos os vértices têm de ter pelo menos uma ligação
         int row = random_generator(col, 1);
 
         add_random_edge(graph, col, row);
         num_edges_count++;
+    }
+
+    for (int col = 2; col <= graph_size; col++)
+    {
     }
 
     // obter o número de arestas correspondentes à percentagem pedida
@@ -220,7 +221,7 @@ void add_null_edge(float *graph, int col, int row)
 */
 unsigned long long get_matrix_size(int graph_size)
 {
-    return (graph_size * (graph_size - 1)) / 2;
+    return (graph_size * (graph_size - 1ULL)) / 2ULL;
 }
 
 /*

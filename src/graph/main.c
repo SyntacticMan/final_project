@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 
 	// obter as contagens das arestas
 	// número máximo de arestas é simplesmente o número de elementos da matriz de adjacência
-	unsigned long long int max_edge_count = get_matrix_size(graph_size);
+	unsigned long long max_edge_count = get_matrix_size(graph_size);
 	int actual_edge_percentage = (int)get_edge_percentage(graph, graph_size);
 
 #ifdef DEBUG
