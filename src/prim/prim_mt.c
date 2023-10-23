@@ -162,7 +162,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 #endif
     return v_t;
 }
-
+// TODO: remover isto, passa tudo para o processo 0
 void *main_thread(void *arg)
 {
     MainData *data = (MainData *)arg;
@@ -282,6 +282,13 @@ void *prim_mst(void *arg)
 #ifdef DEBUG
         printf("(thread %d) Found u: %d for v: %d\n", data->thread_id, u, v);
 #endif
+        /* TODO: se fôr o processo 0, fica a aguardar todos os u dos outros processos
+         para depois obter o global_u
+         a seguir envia-o para os processos
+            se não fôr o processo 0, envia o u para o processo 0 e fica a aguardar o u_globla
+            se u == u_global então regista-o em v_t local, senão simplesmente faz u = u_global
+            e passa ao próximo
+        */
         // Lock and update the global result
         if (get_corrected_edge(local_graph, v, u, data->num_threads) < get_global_weight(data->thread_id))
         {
