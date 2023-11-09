@@ -74,7 +74,6 @@ static void process_error(char *name, int result);
 static void initialize_mutexes(void);
 static void destroy_mutexes(void);
 
-static void *main_thread(void *arg);
 static void *prim_mst(void *arg);
 
 int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
@@ -89,11 +88,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
     pthread_t threads[num_threads];
 
-    pthread_t main_process[1];
-    pthread_attr_t main_process_attributes;
-    pthread_attr_init(&main_process_attributes);
-    pthread_attr_setdetachstate(&main_process_attributes, PTHREAD_CREATE_JOINABLE);
-
     v_t = malloc((graph_size + 1) * sizeof(int));
     global_u = malloc(num_threads + 1);
     global_weight = malloc(num_threads + 1);
@@ -107,12 +101,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     process_error("barrier_init", pthread_barrier_init(&barrier, NULL, num_threads + 1));
 
     initialize_mutexes();
-
-    // criar o processo principal
-    MainData main_data[1];
-    main_data[0].num_threads = num_threads;
-
-    process_error("main_thread create", pthread_create(&main_process[0], &main_process_attributes, main_thread, (void *)&main_data[0]));
 
     // tarefas acessórias
     ThreadData thread_data[num_threads];
@@ -141,9 +129,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         process_error("worker_thread create", pthread_create(&threads[i], NULL, prim_mst, (void *)&thread_data[i]));
     }
 
-    // aguardar pelo fim das tarefas
-    process_error("main thread join", pthread_join(main_process[0], (void **)NULL));
-
     for (int i = 0; i < num_threads; i++)
     {
         pthread_join(threads[i], (void **)NULL);
@@ -161,41 +146,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     printf("print_mst_mt ended\n");
 #endif
     return v_t;
-}
-// TODO: remover isto, passa tudo para o processo 0
-void *main_thread(void *arg)
-{
-    MainData *data = (MainData *)arg;
-
-    while (get_finish_count() < data->num_threads)
-    {
-        // aguardar que as tarefas tenham encontrado o seu u
-        pthread_barrier_wait(&barrier);
-        // usleep(2000000);
-
-        // o processo 0 é responsável por determinar o u global
-        set_min_u(0);
-        int min_weight = INFINITE;
-
-        for (int i = 0; i < data->num_threads; i++)
-        {
-            if (get_global_weight(i) < min_weight)
-            {
-                set_min_u(get_global_u(i));
-                min_weight = get_global_weight(i);
-            }
-        }
-
-#ifdef DEBUG
-        printf("min_u: %d\n", get_min_u());
-        printf("finish_count: %d", get_finish_count());
-#endif
-
-        // fazer a transmissão
-        pthread_cond_broadcast(&cond);
-    }
-
-    pthread_exit(NULL);
 }
 
 void *prim_mst(void *arg)
@@ -219,18 +169,18 @@ void *prim_mst(void *arg)
     // que foram atribuídos a este processo
     if (data->start_vertice < graph_root && graph_root < data->end_vertice)
     {
-        set_vt(v_t, graph_root, graph_root);
+        set_vt(v_t, graph_root, 0);
 
         // corrigir graph_root para as variáveis locais
         int corrected_root = get_corrected_vertice(graph_root, data->num_vertices);
 
-        d[graph_root] = 0;
-        visited[graph_root] = true;
+        d[corrected_root] = 0;
+        visited[corrected_root] = true;
 
         // inicializar a árvore mínima
         for (int v = data->start_vertice; v <= data->end_vertice; v++)
         {
-            corrected_v = get_corrected_vertice(v, data->num_threads);
+            corrected_v = get_corrected_vertice(v, data->num_vertices);
 
             if (v != graph_root)
             {
@@ -258,7 +208,7 @@ void *prim_mst(void *arg)
         // senão fazer a inicialização simples
         for (int v = data->start_vertice; v <= data->end_vertice; v++)
         {
-            // corrected_v = get_corrected_vertice(v, data->num_vertices);
+            corrected_v = get_corrected_vertice(v, data->num_vertices);
 
             visited[corrected_v] = false;
 
@@ -290,15 +240,45 @@ void *prim_mst(void *arg)
             e passa ao próximo
         */
         // Lock and update the global result
-        if (get_corrected_edge(local_graph, v, u, data->num_threads) < get_global_weight(data->thread_id))
+        if (get_corrected_edge(local_graph, v, u, data->num_vertices) < get_global_weight(data->thread_id))
         {
             set_global_u(data->thread_id, u);
-            set_global_weight(data->thread_id, get_corrected_edge(local_graph, v, u, data->num_threads));
+            set_global_weight(data->thread_id, get_corrected_edge(local_graph, v, u, data->num_vertices));
         }
 
-        pthread_barrier_wait(&barrier);
+        // se fôr o processo 0, obter o u geral
+        if (data->thread_id == 0)
+        {
+            // aguardar que as tarefas tenham encontrado o seu u
+            pthread_barrier_wait(&barrier);
 
-        pthread_cond_wait(&cond, &mutex_wait);
+            // o processo 0 é responsável por determinar o u global
+            set_min_u(0);
+            int min_weight = INFINITE;
+
+            for (int i = 0; i < data->num_threads; i++)
+            {
+                if (get_global_weight(i) < min_weight)
+                {
+                    set_min_u(get_global_u(i));
+                    min_weight = get_global_weight(i);
+                }
+            }
+
+#ifdef DEBUG
+            printf("min_u: %d\n", get_min_u());
+            printf("finish_count: %d", get_finish_count());
+#endif
+
+            // fazer a transmissão
+            pthread_cond_broadcast(&cond);
+        }
+        else
+        {
+            // os outros processos ficam à espera do resultado
+            pthread_barrier_wait(&barrier);
+            pthread_cond_wait(&cond, &mutex_wait);
+        }
 
         // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
         if (get_min_u() == u)
@@ -443,9 +423,25 @@ float get_corrected_edge(float *local_graph, int col, int row, int num_vertices)
 */
 int get_corrected_vertice(int v, int num_vertices)
 {
+#ifdef DEBUG
+    int uncorrected_vertice = v;
     if (v > num_vertices)
+    {
+        printf("vertice to correct: %d (num_vertices: %d)\n", v, num_vertices);
         v -= num_vertices;
+    }
+#else
 
+    if (v > num_vertices)
+    {
+        v -= num_vertices;
+    }
+#endif
+
+#ifdef DEBUG
+    if (uncorrected_vertice != v)
+        printf("corrected vertice: %d\n", v);
+#endif
     return v;
 }
 
