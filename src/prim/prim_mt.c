@@ -89,8 +89,15 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     pthread_t threads[num_threads];
 
     v_t = malloc((graph_size + 1) * sizeof(int));
-    global_u = malloc(num_threads + 1);
-    global_weight = malloc(num_threads + 1);
+    global_u = malloc((num_threads + 1) * sizeof(int));
+    global_weight = malloc((num_threads + 1) * sizeof(float));
+
+    // inicializar os vetores
+    if (global_u != NULL)
+        memset(global_u, 0, (num_threads + 1) * sizeof(int));
+
+    if (global_weight != NULL)
+        memset(global_weight, 0, (num_threads + 1) * sizeof(float));
 
     // inicializar o contador de término das tarefas
     finish_count = 1;
@@ -156,8 +163,8 @@ void *prim_mst(void *arg)
 
     float *local_graph = data->local_graph; // thread safe, cada processo tem a sua cópia
 
-    float *d = malloc((data->num_threads + 1) * sizeof(float));
-    bool *visited = malloc((data->num_threads + 1) * sizeof(bool));
+    float *d = malloc((data->num_vertices + 1) * sizeof(float));
+    bool *visited = malloc((data->num_vertices + 1) * sizeof(bool));
 
     int corrected_v = 0;
 
@@ -223,11 +230,11 @@ void *prim_mst(void *arg)
         corrected_v = get_corrected_vertice(v, data->num_vertices);
 
         // excluir a raíz e v-v_t
-        if (v == graph_root || visited[v])
+        if (v == graph_root || visited[corrected_v])
             continue;
 
         // obter o vértice u
-        int u = get_u(local_graph, d, v, v_t, visited, data->num_vertices);
+        int u = get_u(local_graph, d, corrected_v, v_t, visited, data->num_vertices);
 
 #ifdef DEBUG
         printf("(thread %d) Found u: %d for v: %d\n", data->thread_id, u, v);
@@ -240,10 +247,10 @@ void *prim_mst(void *arg)
             e passa ao próximo
         */
         // Lock and update the global result
-        if (get_corrected_edge(local_graph, v, u, data->num_vertices) < get_global_weight(data->thread_id))
+        if (get_corrected_edge(local_graph, corrected_v, u, data->num_vertices) < get_global_weight(data->thread_id))
         {
             set_global_u(data->thread_id, u);
-            set_global_weight(data->thread_id, get_corrected_edge(local_graph, v, u, data->num_vertices));
+            set_global_weight(data->thread_id, get_corrected_edge(local_graph, corrected_v, u, data->num_vertices));
         }
 
         // se fôr o processo 0, obter o u geral
@@ -423,7 +430,7 @@ float get_corrected_edge(float *local_graph, int col, int row, int num_vertices)
 */
 int get_corrected_vertice(int v, int num_vertices)
 {
-#ifdef DEBUG
+#ifdef TRACE
     int uncorrected_vertice = v;
     if (v > num_vertices)
     {
@@ -438,7 +445,7 @@ int get_corrected_vertice(int v, int num_vertices)
     }
 #endif
 
-#ifdef DEBUG
+#ifdef TRACE
     if (uncorrected_vertice != v)
         printf("corrected vertice: %d\n", v);
 #endif
