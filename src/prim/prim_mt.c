@@ -104,8 +104,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
     process_error("pthread_cond_init", pthread_cond_init(&cond, NULL));
 
-    // ter em conta main_process
-    process_error("barrier_init", pthread_barrier_init(&barrier, NULL, num_threads + 1));
+    process_error("barrier_init", pthread_barrier_init(&barrier, NULL, num_threads));
 
     initialize_mutexes();
 
@@ -247,17 +246,22 @@ void *prim_mst(void *arg)
             e passa ao próximo
         */
         // Lock and update the global result
+        printf("Thread %d check and update global result\n", data->thread_id);
+
         if (get_corrected_edge(local_graph, corrected_v, u, data->num_vertices) < get_global_weight(data->thread_id))
         {
             set_global_u(data->thread_id, u);
             set_global_weight(data->thread_id, get_corrected_edge(local_graph, corrected_v, u, data->num_vertices));
         }
+        printf("Thread %d check and update global result done\n", data->thread_id);
 
         // se fôr o processo 0, obter o u geral
         if (data->thread_id == 0)
         {
+            printf("Thread %d hold\n", data->thread_id);
             // aguardar que as tarefas tenham encontrado o seu u
             pthread_barrier_wait(&barrier);
+            printf("Thread %d resume\n", data->thread_id);
 
             // o processo 0 é responsável por determinar o u global
             set_min_u(0);
@@ -283,7 +287,10 @@ void *prim_mst(void *arg)
         else
         {
             // os outros processos ficam à espera do resultado
+            printf("Thread %d hold\n", data->thread_id);
             pthread_barrier_wait(&barrier);
+            printf("Thread %d resume\n", data->thread_id);
+
             pthread_cond_wait(&cond, &mutex_wait);
         }
 
@@ -472,8 +479,9 @@ void set_min_u(int value)
 int get_min_u(void)
 {
     process_error("lock minu", pthread_mutex_lock(&mutex_minu));
-    return min_u;
+    int result = min_u;
     process_error("unlock minu", pthread_mutex_unlock(&mutex_minu));
+    return result;
 }
 
 void set_global_u(int index, int value)
@@ -486,8 +494,9 @@ void set_global_u(int index, int value)
 int get_global_u(int index)
 {
     process_error("lock globalu", pthread_mutex_lock(&mutex_globalu));
-    return global_u[index];
+    int result = global_u[index];
     process_error("unlock globalu", pthread_mutex_unlock(&mutex_globalu));
+    return result;
 }
 
 void set_global_weight(int index, float value)
@@ -500,8 +509,9 @@ void set_global_weight(int index, float value)
 float get_global_weight(int index)
 {
     process_error("lock globalweight", pthread_mutex_lock(&mutex_globalweight));
-    return global_weight[index];
+    float result = global_weight[index];
     process_error("unlock globalweight", pthread_mutex_unlock(&mutex_globalweight));
+    return result;
 }
 
 void set_finish_count(void)
@@ -514,8 +524,9 @@ void set_finish_count(void)
 int get_finish_count(void)
 {
     process_error("lock finish_count", pthread_mutex_lock(&mutex_finish_count));
-    return finish_count;
+    int result = finish_count;
     process_error("unlock finish_count", pthread_mutex_unlock(&mutex_finish_count));
+    return result;
 }
 
 void initialize_mutexes(void)

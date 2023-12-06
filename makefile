@@ -90,7 +90,7 @@ gdb_prim:
 	gdb -ex 'b file_module.c:65' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME)
 
 gdb_mt:
-	gdb -ex 'b prim_mt.c:105' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
+	gdb --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
 
 valgrind_mt:
 	valgrind --track-origins=yes $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
