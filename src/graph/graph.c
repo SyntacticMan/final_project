@@ -68,7 +68,7 @@ float *create_graph(int graph_size, int edge_percentage)
             // se linha = coluna o vértice ligar-se-ia a ele mesmo
             // se linha > coluna estou na triangular inferior
             // em ambos os casos passo à frente
-            if ((row >= col))
+            if (row >= col)
                 continue;
 
             add_null_edge(graph, col, row);

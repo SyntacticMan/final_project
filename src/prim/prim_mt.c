@@ -100,7 +100,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         memset(global_weight, 0, (num_threads + 1) * sizeof(float));
 
     // inicializar o contador de término das tarefas
-    finish_count = 1;
+    finish_count = 0;
 
     process_error("pthread_cond_init", pthread_cond_init(&cond, NULL));
 
@@ -260,7 +260,9 @@ void *prim_mst(void *arg)
         {
             printf("Thread %d hold\n", data->thread_id);
             // aguardar que as tarefas tenham encontrado o seu u
-            pthread_barrier_wait(&barrier);
+            if (get_finish_count() <= data->num_threads - 1)
+                pthread_barrier_wait(&barrier);
+
             printf("Thread %d resume\n", data->thread_id);
 
             // o processo 0 é responsável por determinar o u global
@@ -278,7 +280,7 @@ void *prim_mst(void *arg)
 
 #ifdef DEBUG
             printf("min_u: %d\n", get_min_u());
-            printf("finish_count: %d", get_finish_count());
+            printf("finish_count: %d\n", get_finish_count());
 #endif
 
             // fazer a transmissão

@@ -35,7 +35,7 @@ void add_edge(float *graph, int u, int v, float weight);
 void add_null_edge(float *graph, int u, int v);
 unsigned long long get_matrix_size(int graph_size);
 
-float get_edge(float *graph, int u, int v);
+float get_edge(float *graph, int col, int row);
 int get_edge_count(float *graph, int graph_size);
 double get_edge_percentage(float *graph, int graph_size);
 unsigned long long get_index(int col, int row);

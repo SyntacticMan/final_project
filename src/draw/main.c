@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
     float *graph;
     int *v_t;
 
+    // processar as opções da linha de comandos
     while ((opt = getopt(argc, argv, "f:t:")) != -1)
     {
         switch (opt)

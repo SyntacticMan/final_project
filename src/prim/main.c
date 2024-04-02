@@ -189,18 +189,11 @@ void print_mst(float *d, int *v_t, int graph_size, int graph_root)
         if ((graph_size > 50) && (i > 25) && (i < graph_size - 20))
             continue;
 
-        if (i == graph_root)
-        {
-            printf(" < [%d] |%d| >", i, v_t[i]);
-        }
-        else
-        {
+        printf("%d-(%f)", v_t[i], d[i]);
 
-            printf(" %d=()=>%d ", i, v_t[i]);
-        }
         // omitir na última iteração
-        if (i != graph_size)
-            printf(">");
+        if (i < graph_size - 1)
+            printf("->");
     }
 
     printf("\n");
