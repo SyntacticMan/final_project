@@ -434,7 +434,7 @@ void print_graph(float *graph, int graph_size)
         {
             float edge = get_edge(graph, col, row);
             if (edge == INFINITE)
-                printf("|  inf");
+                printf("|    \u221e");
             else
                 printf("|%3.3f", edge);
         }
