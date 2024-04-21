@@ -29,6 +29,9 @@ void write_file(header *graph_header, float *graph, char *filename)
         return;
     }
 
+#ifdef DEBUG
+    printf("writing %s\n", filename);
+#endif
     fwrite(graph_header, sizeof(header), 1, graph_file);
 
     unsigned long long array_size = (graph_header->graph_size * (graph_header->graph_size - 1)) / 2;

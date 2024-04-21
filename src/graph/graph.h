@@ -30,7 +30,7 @@
 #define INFINITE MAX_WEIGHT + 2.0
 
 float *create_graph(int graph_size, int edge_percentage);
-float *create_locked_graph(int graph_size, int edge_percentage);
+float *create_locked_graph();
 void add_edge(float *graph, int u, int v, float weight);
 void add_null_edge(float *graph, int u, int v);
 unsigned long long get_matrix_size(int graph_size);

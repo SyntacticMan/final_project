@@ -26,6 +26,7 @@ static void create_valid_edge(float *graph, int graph_size);
 static int random_generator(int max, int min);
 static float random_float_generator(float max, float min);
 static double random_coordinate_generator(int graph_size);
+static void print_line(int graph_size);
 
 #ifdef TRACE
 static void print_progress_bar(int progress, int total, int barWidth);
@@ -101,21 +102,21 @@ float *create_graph(int graph_size, int edge_percentage)
 /*
     create_locked_graph
 
-    cria um grafo fixo para facilitar testes
+    recria o grafo do livro fixo para validar funcionamento do algoritmo
 */
-float *create_locked_graph(int graph_size, int edge_percentage)
+float *create_locked_graph()
 {
     srand(time(NULL));
 
     // alocar as colunas
-    float *graph = (float *)malloc(get_matrix_size(graph_size) * sizeof(float));
+    float *graph = (float *)malloc(get_matrix_size(6) * sizeof(float));
 
     if (graph == NULL)
     {
         return NULL;
     }
 
-    for (int col = 1; col <= graph_size; col++)
+    for (int col = 1; col <= 6; col++)
     {
         for (int row = 1; row < col; row++)
         {
@@ -399,22 +400,37 @@ double random_coordinate_generator(int graph_size)
 */
 void print_graph(float *graph, int graph_size)
 {
-    for (int col = 1; col <= graph_size; col++)
+
+    print_line(graph_size);
+
+    for (int row = 1; row <= graph_size; row++)
     {
         // cabeçalho
-        if (col == 1)
+
+        if (row == 1)
         {
-            printf(" ");
+            printf("|");
+            if (graph_size <= 10)
+                printf("|%*c", 2, ' ');
+            else if (graph_size <= 100)
+                printf("%*c", 3, ' ');
 
-            for (int row = 1; row <= graph_size; row++)
+            for (int col = 1; col <= graph_size; col++)
             {
-                printf("|%5d", row);
+                printf("|%5d", col);
             }
-            printf("\n");
-        }
-        printf("%2d", col);
 
-        for (int row = 1; row <= graph_size; row++)
+            printf("|\n");
+            print_line(graph_size);
+        }
+        else
+        {
+            print_line(graph_size);
+        }
+
+        printf("|%3d", row);
+
+        for (int col = 1; col <= graph_size; col++)
         {
             float edge = get_edge(graph, col, row);
             if (edge == INFINITE)
@@ -423,8 +439,27 @@ void print_graph(float *graph, int graph_size)
                 printf("|%3.3f", edge);
         }
 
-        printf("\n");
+        printf("|\n");
     }
+
+    print_line(graph_size);
+}
+
+void print_line(int graph_size)
+{
+    for (int i = 0; i < graph_size + 1; i++)
+    {
+        printf(" ");
+
+        if (i == 0)
+            printf("---");
+        else
+        {
+            printf("-----");
+        }
+    }
+
+    printf("\n");
 }
 
 #ifdef TRACE

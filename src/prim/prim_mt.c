@@ -52,7 +52,7 @@ int *global_u;
 float *global_weight;
 int *v_t;
 
-static int get_u(float *local_graph, float *d, int v, int *v_t, bool *visited, int graph_size);
+static int get_u(float *d, int *v_t, bool *visited, int graph_size);
 static float get_corrected_edge(float *local_graph, int col, int row, int num_vertices);
 static int get_corrected_vertice(int v, int num_vertices);
 
@@ -233,7 +233,7 @@ void *prim_mst(void *arg)
             continue;
 
         // obter o vértice u
-        int u = get_u(local_graph, d, corrected_v, v_t, visited, data->num_vertices);
+        int u = get_u(d, v_t, visited, data->num_vertices);
 
 #ifdef DEBUG
         printf("(thread %d) Found u: %d for v: %d\n", data->thread_id, u, v);
@@ -340,33 +340,23 @@ void *prim_mst(void *arg)
     pthread_exit(NULL);
 }
 
-int get_u(float *local_graph, float *d, int v, int *v_t, bool *visited, int graph_size)
+int get_u(float *d, int *v_t, bool *visited, int graph_size)
 {
-    int u_min = 1;
+
+    int u_min = 0;
     float min_weight = INFINITE;
 
     for (int u = 1; u <= graph_size; u++)
     {
-        // excluir a diagonal e v-v_t
-        if (u == v || visited[u])
+        // excluir os já visitados (v-vt)
+        if (visited[u])
             continue;
 
-        if ((d[u] < min_weight && d[u] > 0))
+        if (d[u] < min_weight)
         {
             u_min = u;
             min_weight = d[u];
         }
-
-        int u_weight = get_corrected_edge(local_graph, v, u, graph_size);
-        if (u_weight < min_weight)
-        {
-            u_min = u;
-            min_weight = u_weight;
-        }
-
-#ifdef TRACE
-        printf("v->%d | u_min->%d | min_weight: %f | d[v]: %f\n", v, u_min, min_weight, d[v]);
-#endif
     }
 
     return u_min;

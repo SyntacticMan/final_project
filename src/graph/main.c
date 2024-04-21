@@ -33,13 +33,14 @@ int main(int argc, char *argv[])
 	int graph_size, requested_edge_percentage;
 	char *graph_filename;
 	float *graph;
+	bool lock_graph = false;
 
 #ifdef DEBUG
 	bool print_matrix = false;
 #endif
 
 	int opt;
-	while ((opt = getopt(argc, argv, "s:f:p:m")) != -1)
+	while ((opt = getopt(argc, argv, "s:f:l:p:m")) != -1)
 	{
 		switch (opt)
 		{
@@ -49,6 +50,9 @@ int main(int argc, char *argv[])
 		case 'f': // nome do ficheiro
 			graph_filename = optarg;
 			break;
+		case 'l': // grafo fixo
+			graph_size = 6;
+			lock_graph = true;
 		case 'p': // percentagem do máximo de arestas a adicionar
 			requested_edge_percentage = atoi(optarg);
 			break;
@@ -79,18 +83,14 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-#ifdef LOCK
-	graph_size = 6;
-	unsigned long int matrix_size = get_matrix_size(graph_size);
-	unsigned long int ram_kb = (matrix_size * sizeof(float)) / 1024;
-	unsigned long int ram_mb = ram_kb / 1024;
-	unsigned long int ram_gb = ram_mb / 1024;
-	printf("Array RAM size: %lu kb | %lu mb | %lu gb (%lu)\n", ram_kb, ram_mb, ram_gb, matrix_size);
-
-	graph = create_locked_graph(graph_size, requested_edge_percentage);
-#else
-	graph = create_graph(graph_size, requested_edge_percentage);
-#endif
+	if (lock_graph)
+	{
+		graph = create_locked_graph();
+	}
+	else
+	{
+		graph = create_graph(graph_size, requested_edge_percentage);
+	}
 
 	if (graph == NULL)
 	{
@@ -122,11 +122,11 @@ int main(int argc, char *argv[])
 	graph_header->edge_percentage = actual_edge_percentage;
 	graph_header->vt_size = 0; // como não há mst ainda, vt_size vai a 0
 
-#ifdef LOCK
-	graph_header->graph_root = 2;
-#else
-	graph_header->graph_root = 0;
-#endif
+	if (lock_graph)
+		graph_header->graph_root = 2;
+	else
+		graph_header->graph_root = 0;
+
 	write_file(graph_header, graph, graph_filename);
 
 	free(graph);
