@@ -19,6 +19,12 @@
 
 static int get_u(float *d, int *v_t, bool *visited, int graph_size);
 
+/*
+    prim_mst
+
+    implementação do algoritmo de prim
+    versão em tarefa simples
+*/
 int *prim_mst(float *graph, int graph_size, int graph_root)
 {
     // como vou usar de 1 a graph_size e o vetor vai de 0 a graph_size - 1
@@ -50,7 +56,9 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
             v_t[v] = 0; // marcado a 0 pois não há nenhum vértice 0
         }
 
+#ifdef DEBUG
         printf("d[%d]=%0.2f v_t[%d]=%d\n", v, d[v], v, v_t[v]);
+#endif
     }
 
     for (int v = 1; v <= graph_size; v++)
@@ -113,7 +121,11 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
 
     return v_t;
 }
+/*
+    get_u
 
+    obtém o vértice u com o menor peso que há em d[v]
+*/
 int get_u(float *d, int *v_t, bool *visited, int graph_size)
 {
     int u_min = 0;

@@ -84,18 +84,12 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-#ifdef LOCK
-    int graph_root = 2;
-    print_graph(graph, graph_header->graph_size);
-    printf("\n");
-#else
     // se não tiver graph_root no ficheiro, gerar uma
     int graph_root;
     if (graph_header->graph_root > 0)
         graph_root = graph_header->graph_root;
     else
         graph_root = pick_graph_root(graph_header->graph_size);
-#endif
 
     // emissão de relatório e gravação do mst no grafo
     printf("Grafo -> %s\n", graph_filename);
@@ -143,11 +137,6 @@ int main(int argc, char *argv[])
     }
     else
     {
-
-#ifdef LOCK
-        threads = 1;
-#endif
-
         printf("Lançando Algoritmo de Prim com %d threads\n", threads);
         v_t = prim_mt_mst(graph, graph_header->graph_size, graph_root, threads);
     }
