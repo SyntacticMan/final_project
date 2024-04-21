@@ -9,6 +9,7 @@ primSrcDir = $(srcDir)prim/
 drawSrcDir = $(srcDir)draw/
 buildDir = ./build/
 binDir = ./bin/
+graphDir = ./graphs/
 
 graphIncludeFlags = -I/usr/local/include/graphviz
 primIncludeFlags =
@@ -123,6 +124,7 @@ trace_graph: graph
 clean:
 	rm -f $(buildDir)*.o
 	rm -f $(binDir)*
+	rm -f $(graphDir)*
 	rm -f *.grf
 	rm -f *.png
 	rm -f *.dot
