@@ -32,7 +32,8 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-void print_mst(float *d, int *v_t, int graph_size, int graph_root);
+void print_mst(float *graph, int *v_t, int graph_size, int graph_root);
+char get_letter(int number);
 
 int main(int argc, char *argv[])
 {
@@ -180,7 +181,7 @@ int main(int argc, char *argv[])
 
     imprime a versão textual da árvore mínima
 */
-void print_mst(float *d, int *v_t, int graph_size, int graph_root)
+void print_mst(float *graph, int *v_t, int graph_size, int graph_root)
 {
     printf("\n");
 
@@ -189,12 +190,25 @@ void print_mst(float *d, int *v_t, int graph_size, int graph_root)
         if ((graph_size > 50) && (i > 25) && (i < graph_size - 20))
             continue;
 
-        printf("%d-(%f)", v_t[i], d[i]);
+        if (i == graph_root)
+            continue;
+
+        printf("(%c)-[%0.2f]-(%c)", get_letter(i), get_edge(graph, v_t[i], i), get_letter(v_t[i]));
 
         // omitir na última iteração
         if (i < graph_size - 1)
-            printf("->");
+            printf("||");
     }
 
     printf("\n");
+}
+
+char get_letter(int number)
+{
+    if (number >= 1 && number <= 26)
+    {
+        return 'a' + (number - 1);
+    }
+    else
+        return 'A';
 }

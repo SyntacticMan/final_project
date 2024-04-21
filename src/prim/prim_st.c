@@ -17,7 +17,7 @@
 #include "prim_st.h"
 #endif
 
-static int get_u(float *graph, int v, float *d, int *v_t, bool *visited, int graph_size);
+static int get_u(float *graph, float *d, int *v_t, bool *visited, int graph_size);
 
 int *prim_mst(float *graph, int graph_size, int graph_root)
 {
@@ -50,44 +50,63 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
             v_t[v] = 0; // marcado a 0 pois não há nenhum vértice 0
         }
 
-        printf("d[%d]=%f v_t[%d]=%d\n", v, d[v], v, v_t[v]);
+        printf("d[%d]=%0.2f v_t[%d]=%d\n", v, d[v], v, v_t[v]);
     }
 
     for (int v = 1; v <= graph_size; v++)
     {
         // excluir a raíz e v-v_t
-        if (v == graph_root || visited[v])
+        if (visited[v])
             continue;
 
         // obter o vértice u
-        int u = get_u(graph, v, d, v_t, visited, graph_size);
+        int u = get_u(graph, d, v_t, visited, graph_size);
 
-        printf("Found u: %d\n", u);
+        printf("Found u: %d (v=%d)\n", u, v);
 
         visited[u] = true;
+        // d[u] = get_edge(graph, u, v);
 
-        for (int i = v; i <= graph_size; i++)
+        for (int i = 1; i <= graph_size; i++)
         {
-            // excluir a diagonal e v-v_t
-            if (i == u || visited[i])
+            // excluir os já visitados
+            if (visited[i] || i == u)
+            {
+#ifdef DEBUG
+                printf("Excluding v = %d\n", i);
+#endif
                 continue;
+            }
 
             float u_weight = get_edge(graph, u, i);
+            float d_weight = d[i];
 
-            if (u_weight == 0)
+            // se não tiver ligação, omitir
+            if (u_weight == INFINITE)
                 continue;
 
-            if (u_weight < d[i])
+            printf("Evaluating v = %d for u = %d\n", i, u);
+
+            if (u_weight < d_weight)
             {
                 d[i] = u_weight;
                 v_t[i] = u;
+
+                printf("v= %d | d[%d] = %0.2f | v_t[%d]=%d\n", v, i, d[i], i, v_t[i]);
             }
 
-#ifdef TRACE
-            printf("(%d,%d) => weight: %f | d[%d]: %f\n", u, i, u_weight, i, d[i]);
-#endif
+            // printf("d[%d]=%0.2f v_t[%d]=%d\n", i, d[i], i, v_t[i]);
         }
     }
+
+#ifdef DEBUG
+    for (int i = 1; i <= graph_size; i++)
+    {
+        printf("d[%d]=%0.2f\tv_t[%d]=%d\n", i, d[i], i, v_t[i]);
+    }
+
+    // printf("(%d,%d) => weight: %f | d[%d]: %f\n", u, i, u_weight, i, d[i]);
+#endif
 
     free(d);
     free(visited);
@@ -95,29 +114,23 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
     return v_t;
 }
 
-int get_u(float *graph, int v, float *d, int *v_t, bool *visited, int graph_size)
+int get_u(float *graph, float *d, int *v_t, bool *visited, int graph_size)
 {
-    int u_min = v_t[v];
-    float min_weight = d[v];
+    int u_min = 0;
+    float min_weight = INFINITE;
 
     for (int u = 1; u <= graph_size; u++)
     {
-        // excluir a diagonal e v-v_t
-        if (u == v || visited[u])
+        // excluir os já visitados
+        if (visited[u])
             continue;
 
-        int u_weight = get_edge(graph, u, v);
-
-        if (u_weight < min_weight)
+        if (d[u] < min_weight)
         {
             u_min = u;
-            min_weight = u_weight;
+            min_weight = d[u];
         }
     }
-
-#ifdef DEBUG
-    printf("v->%d | u_min->%d | min_weight: %f | d[%d]: %f\n", v, u_min, min_weight, v, d[v]);
-#endif
 
     return u_min;
 }
