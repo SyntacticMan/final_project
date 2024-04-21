@@ -193,7 +193,10 @@ void print_mst(float *graph, int *v_t, int graph_size, int graph_root)
         if (i == graph_root)
             continue;
 
-        printf("(%c)-[%0.2f]-(%c)", get_letter(i), get_edge(graph, v_t[i], i), get_letter(v_t[i]));
+        if (graph_size <= 26)
+            printf("(%c)-[%0.2f]-(%c)", get_letter(i), get_edge(graph, v_t[i], i), get_letter(v_t[i]));
+        else
+            printf("(%d)-[%0.2f]-(%c)", i, get_edge(graph, v_t[i], i), get_letter(v_t[i]));
 
         // omitir na última iteração
         if (i < graph_size - 1)
@@ -205,10 +208,10 @@ void print_mst(float *graph, int *v_t, int graph_size, int graph_root)
 
 char get_letter(int number)
 {
-    if (number >= 1 && number <= 26)
+    if (number < 1 || number > 26)
     {
-        return 'a' + (number - 1);
+        return 'Z';
     }
-    else
-        return 'A';
+
+    return 'a' + (number - 1);
 }

@@ -290,7 +290,7 @@ int get_edge_count(float *graph, int graph_size)
         {
             float edge = get_edge(graph, i, j);
 
-            if (edge > MIN_WEIGHT && edge < INFINITE)
+            if (edge > 0 && edge < INFINITE)
             {
                 edge_count++;
             }

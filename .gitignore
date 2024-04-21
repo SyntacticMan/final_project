@@ -12,3 +12,4 @@ src/.vs/*
 *.stackdump
 *.swp
 *.dot
+x86_64
