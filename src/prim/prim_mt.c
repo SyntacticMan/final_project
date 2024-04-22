@@ -184,29 +184,31 @@ void *prim_mst(void *arg)
         visited[corrected_root] = true;
 
         // inicializar a árvore mínima
-        for (int v = data->start_vertice; v <= data->end_vertice; v++)
+        for (int v = 1; v <= data->num_vertices; v++)
         {
-            corrected_v = get_corrected_vertice(v, data->num_vertices);
-
             if (v != graph_root)
             {
-                visited[corrected_v] = false;
+                visited[v] = false;
             }
 
             float weight = get_corrected_edge(local_graph, corrected_root, v, data->num_vertices);
 
             if (weight < INFINITE)
             {
-                d[corrected_v] = weight;
+                d[v] = weight;
 
-                set_vt(v_t, v, graph_root);
+                set_vt(v_t, corrected_v, graph_root);
             }
             else
             {
-                d[corrected_v] = INFINITE;
+                d[get_corrected_vertice(v, data->num_vertices)] = INFINITE;
 
-                set_vt(v_t, v, 0); // marcado a 0 pois não há nenhum vértice 0
+                set_vt(v_t, get_corrected_vertice(v, data->num_vertices), 0); // marcado a 0 pois não há nenhum vértice 0
             }
+
+#ifdef DEBUG
+            printf("d[%d]=%0.2f v_t[%d]=%d\n", corrected_v, d[corrected_v], corrected_v, v_t[corrected_v]);
+#endif
         }
     }
     else
@@ -220,7 +222,11 @@ void *prim_mst(void *arg)
 
             d[corrected_v] = INFINITE;
 
-            set_vt(v_t, v, 0); // marcado a 0 pois não há nenhum vértice 0
+            set_vt(v_t, corrected_v, 0); // marcado a 0 pois não há nenhum vértice 0
+
+#ifdef DEBUG
+            printf("d[%d]=%0.2f v_t[%d]=%d\n", corrected_v, d[corrected_v], corrected_v, v_t[corrected_v]);
+#endif
         }
     }
 
@@ -229,41 +235,50 @@ void *prim_mst(void *arg)
         corrected_v = get_corrected_vertice(v, data->num_vertices);
 
         // excluir a raíz e v-v_t
-        if (v == graph_root || visited[corrected_v])
+        if (corrected_v == graph_root || visited[corrected_v])
             continue;
 
         // obter o vértice u
         int u = get_u(d, v_t, visited, data->num_vertices);
 
 #ifdef DEBUG
-        printf("(thread %d) Found u: %d for v: %d\n", data->thread_id, u, v);
+        printf("[thread %d] Found u: %d (v=%d)\n", data->thread_id, u, v);
 #endif
-        /* TODO: se fôr o processo 0, fica a aguardar todos os u dos outros processos
-         para depois obter o global_u
-         a seguir envia-o para os processos
-            se não fôr o processo 0, envia o u para o processo 0 e fica a aguardar o u_globla
-            se u == u_global então regista-o em v_t local, senão simplesmente faz u = u_global
-            e passa ao próximo
-        */
-        // Lock and update the global result
+/* TODO: se fôr o processo 0, fica a aguardar todos os u dos outros processos
+ para depois obter o global_u
+ a seguir envia-o para os processos
+    se não fôr o processo 0, envia o u para o processo 0 e fica a aguardar o u_globla
+    se u == u_global então regista-o em v_t local, senão simplesmente faz u = u_global
+    e passa ao próximo
+*/
+// Lock and update the global result
+#ifdef TRACE
         printf("Thread %d check and update global result\n", data->thread_id);
+#endif
 
         if (get_corrected_edge(local_graph, corrected_v, u, data->num_vertices) < get_global_weight(data->thread_id))
         {
             set_global_u(data->thread_id, u);
             set_global_weight(data->thread_id, get_corrected_edge(local_graph, corrected_v, u, data->num_vertices));
         }
-        printf("Thread %d check and update global result done\n", data->thread_id);
 
+#ifdef TRACE
+        printf("Thread %d check and update global result done\n", data->thread_id);
+#endif
         // se fôr o processo 0, obter o u geral
         if (data->thread_id == 0)
         {
+#ifdef DEBUG
             printf("Thread %d hold\n", data->thread_id);
+#endif
+
             // aguardar que as tarefas tenham encontrado o seu u
             if (get_finish_count() <= data->num_threads - 1)
                 pthread_barrier_wait(&barrier);
 
+#ifdef DEBUG
             printf("Thread %d resume\n", data->thread_id);
+#endif
 
             // o processo 0 é responsável por determinar o u global
             set_min_u(0);
@@ -288,10 +303,16 @@ void *prim_mst(void *arg)
         }
         else
         {
-            // os outros processos ficam à espera do resultado
+// os outros processos ficam à espera do resultado
+#ifdef DEBUG
             printf("Thread %d hold\n", data->thread_id);
+#endif
+
             pthread_barrier_wait(&barrier);
+
+#ifdef DEBUG
             printf("Thread %d resume\n", data->thread_id);
+#endif
 
             pthread_cond_wait(&cond, &mutex_wait);
         }
@@ -332,8 +353,9 @@ void *prim_mst(void *arg)
     // sinalizar que já terminou de processar o bloco
     set_finish_count();
 
+#ifdef DEBUG
     printf("Thread %d finished\n", get_finish_count());
-
+#endif
     free(visited);
     free(d);
 
@@ -438,9 +460,9 @@ int get_corrected_vertice(int v, int num_vertices)
     }
 #else
 
-    if (v > num_vertices)
+    if (v < num_vertices)
     {
-        v -= num_vertices;
+        v += num_vertices;
     }
 #endif
 
