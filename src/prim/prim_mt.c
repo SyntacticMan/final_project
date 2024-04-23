@@ -24,8 +24,8 @@ typedef struct _thread_data
     int num_vertices;
     int num_threads;
     int graph_size;
-    int start_vertice;
-    int end_vertice;
+    int start_col;
+    int end_col;
     float *local_graph; // V
 } ThreadData;
 
@@ -58,7 +58,7 @@ static int get_vertice_mt(int v, int num_vertices);
 
 static void set_vt(int *v_t, int index, float value);
 
-static float *split_graph(float *graph, int start_vertice, int end_vertice);
+static float *split_graph(float *graph, int start_col, int end_col, int graph_size);
 
 static int get_min_u(void);
 static void set_min_u(int value);
@@ -123,14 +123,14 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         thread_data[i].num_threads = num_threads;
 
         // calcular os vértices de início e fim com base no número de vértices a processar
-        int start_vertice = (i * num_vertices) + 1;
-        int end_vertice = start_vertice + num_vertices - 1;
+        int start_col = (i * num_vertices) + 1;
+        int end_col = start_col + num_vertices - 1;
 
-        thread_data[i].start_vertice = start_vertice;
-        thread_data[i].end_vertice = end_vertice;
+        thread_data[i].start_col = start_col;
+        thread_data[i].end_col = end_col;
 
         // criar o subconjunto de V a alocar à tarefa
-        thread_data[i].local_graph = split_graph(graph, start_vertice, end_vertice);
+        thread_data[i].local_graph = split_graph(graph, start_col, end_col, graph_size);
 
         process_error("worker_thread create", pthread_create(&threads[i], NULL, prim_mst, (void *)&thread_data[i]));
     }
@@ -166,79 +166,82 @@ void *prim_mst(void *arg)
     bool *visited = malloc((data->num_vertices + 1) * sizeof(bool));
 
     int corrected_v = 0;
+    int root_mt = 0;
 
 #ifdef DEBUG
-    printf("thread %d: start_vertice = %d || end_vertice = %d || num_vertices = %d\n", data->thread_id, data->start_vertice, data->end_vertice, data->num_vertices);
+    printf("thread %d: start_col = %d || end_col = %d || num_vertices = %d\n", data->thread_id, data->start_col, data->end_col, data->num_vertices);
+
+    print_graph(local_graph, data->num_vertices);
 #endif
 
     // processar graph_root apenas se estiver nos vértices
     // que foram atribuídos a este processo
-    if (data->start_vertice < graph_root && graph_root < data->end_vertice)
+    if (data->start_col < graph_root && graph_root < data->end_col)
     {
         set_vt(v_t, graph_root, 0);
 
         // corrigir graph_root para as variáveis locais
-        int root_mt = get_vertice_mt(graph_root, data->num_vertices);
+        root_mt = get_vertice_mt(graph_root, data->num_vertices);
 
         d[root_mt] = 0;
         visited[root_mt] = true;
-
-        // como v_t é global, v tem de manter o valor original
-        // e os ciclos são sempre feitos em relação a v global
-
-        // inicializar a árvore mínima
-        for (int v = data->start_vertice; v <= data->end_vertice; v++)
-        {
-            // obter o v para os vetores locais
-            corrected_v = get_vertice_mt(v, data->num_vertices);
-
-            // como v é global, a avaliação contra a raíz
-            // também tem de ser global
-            if (v != graph_root)
-            {
-                visited[corrected_v] = false;
-            }
-
-            float weight = get_edge_mt(local_graph, root_mt, v, data->num_vertices);
-
-            if (weight < INFINITE)
-            {
-                d[corrected_v] = weight;
-
-                set_vt(v_t, v, graph_root);
-            }
-            else
-            {
-                d[corrected_v] = INFINITE;
-
-                set_vt(v_t, v, 0); // marcado a 0 pois não há nenhum vértice 0
-            }
-
-#ifdef DEBUG
-            printf("d[%d]=%0.2f v_t[%d]=%d\n", v, d[corrected_v], v, v_t[v]);
-#endif
-        }
     }
-    else
+
+    // como v_t é global, v tem de manter o valor original
+    // e os ciclos são sempre feitos em relação a v global
+
+    // inicializar a árvore mínima
+    for (int v = data->start_col; v <= data->end_col; v++)
     {
-        // senão fazer a inicialização simples
-        for (int v = data->start_vertice; v <= data->end_vertice; v++)
+        // obter o v para os vetores locais
+        corrected_v = get_vertice_mt(v, data->num_vertices);
+
+        // como v é global, a avaliação contra a raíz
+        // também tem de ser global
+        if (v != graph_root)
         {
-            corrected_v = get_vertice_mt(v, data->num_vertices);
-
             visited[corrected_v] = false;
+        }
 
+        float weight = get_edge(local_graph, graph_root, v);
+
+        if (weight < INFINITE)
+        {
+            d[corrected_v] = weight;
+
+            set_vt(v_t, v, graph_root);
+        }
+        else
+        {
             d[corrected_v] = INFINITE;
 
             set_vt(v_t, v, 0); // marcado a 0 pois não há nenhum vértice 0
+        }
 
 #ifdef DEBUG
-            printf("d[%d]=%0.2f v_t[%d]=%d\n", v, d[corrected_v], v, v_t[v]);
+        printf("d[%d]=%0.2f v_t[%d]=%d\n", v, d[corrected_v], v, v_t[v]);
 #endif
-        }
     }
+    //     else
+    //     {
+    //         // senão fazer a inicialização simples
+    //         for (int v = data->start_col; v <= data->end_col; v++)
+    //         {
+    //             corrected_v = get_vertice_mt(v, data->num_vertices);
 
-    for (int v = data->start_vertice; v <= data->end_vertice; v++)
+    //             visited[corrected_v] = false;
+
+    //             d[corrected_v] = INFINITE;
+
+    //             set_vt(v_t, v, 0); // marcado a 0 pois não há nenhum vértice 0
+
+    // #ifdef DEBUG
+    //             printf("d[%d]=%0.2f v_t[%d]=%d\n", v, d[corrected_v], v, v_t[v]);
+    // #endif
+    //         }
+    //     }
+
+    for (int v = data->start_col; v <= data->end_col; v++)
     {
         corrected_v = get_vertice_mt(v, data->num_vertices);
 
@@ -331,7 +334,7 @@ void *prim_mst(void *arg)
         else
             u = get_min_u();
 
-        for (int i = v; i <= data->end_vertice; i++)
+        for (int i = v; i <= data->end_col; i++)
         {
             corrected_v = get_vertice_mt(i, data->num_vertices);
 
@@ -395,33 +398,50 @@ int get_u(float *d, int *v_t, bool *visited, int graph_size)
 /*
     split_graph
 
-    cria um subconjunto de graph, com início em start_vertice e fim em end_vertice
+    cria um subconjunto de graph, com início em start_col e fim em end_col
 */
-float *split_graph(float *graph, int start_vertice, int end_vertice)
+float *split_graph(float *graph, int start_col, int end_col, int graph_size)
 {
     if (graph == NULL)
         return NULL;
 
-    // determinar os indíces de início e fim do vetor a copiar
-    // início é col e primeira linha (col, 1)
-    unsigned int start_index = get_index(start_vertice, 1);
+    unsigned long long matrix_size = get_matrix_size(graph_size);
+    float *split_graph = malloc(matrix_size * sizeof(float));
 
-    // como considero apenas a triangular superior
-    // fim é col e a penúltima linha (col, col-1)
-    unsigned int end_index = get_index(end_vertice, (end_vertice - 1));
-
-    // determinar o tamanho do subconjunto
-    unsigned int graph_subset = end_index - start_index + 1;
-
-    float *sub_graph = (float *)malloc(graph_subset * sizeof(float));
-
-    // copiar o grafo para o novo vetor
-    for (int i = 0; i < graph_subset; i++)
+    for (int col = 1; col <= graph_size; col++)
     {
-        sub_graph[i] = graph[start_index + i];
+        // apenas processar as linhas que pertencem
+        // às colunas pedidas
+        if (col >= start_col && col <= end_col)
+        {
+
+            for (int row = 1; row < graph_size; row++)
+            {
+                // se linha = coluna o vértice ligar-se-ia a ele mesmo
+                // se linha > coluna estou na triangular inferior
+                // em ambos os casos passo à frente
+                if (row >= col)
+                    continue;
+
+                add_edge(split_graph, col, row, get_edge(graph, col, row));
+            }
+        }
+        else
+        {
+            for (int row = 1; row < graph_size; row++)
+            {
+                // se linha = coluna o vértice ligar-se-ia a ele mesmo
+                // se linha > coluna estou na triangular inferior
+                // em ambos os casos passo à frente
+                if (row >= col)
+                    continue;
+
+                add_null_edge(split_graph, col, row);
+            }
+        }
     }
 
-    return sub_graph;
+    return split_graph;
 }
 
 /*

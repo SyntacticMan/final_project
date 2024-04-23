@@ -409,7 +409,7 @@ void print_graph(float *graph, int graph_size)
 
         if (row == 1)
         {
-            printf("|");
+            // printf("|");
             if (graph_size <= 10)
                 printf("|%*c", 2, ' ');
             else if (graph_size <= 100)
