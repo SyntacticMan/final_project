@@ -53,8 +53,8 @@ float *global_weight;
 int *v_t;
 
 static int get_u(float *d, int *v_t, bool *visited, int graph_size);
-static float get_corrected_edge(float *local_graph, int col, int row, int num_vertices);
-static int get_corrected_vertice(int v, int num_vertices);
+static float get_edge_mt(float *local_graph, int col, int row, int num_vertices);
+static int get_vertice_mt(int v, int num_vertices);
 
 static void set_vt(int *v_t, int index, float value);
 
@@ -178,36 +178,44 @@ void *prim_mst(void *arg)
         set_vt(v_t, graph_root, 0);
 
         // corrigir graph_root para as variáveis locais
-        int corrected_root = get_corrected_vertice(graph_root, data->num_vertices);
+        int root_mt = get_vertice_mt(graph_root, data->num_vertices);
 
-        d[corrected_root] = 0;
-        visited[corrected_root] = true;
+        d[root_mt] = 0;
+        visited[root_mt] = true;
+
+        // como v_t é global, v tem de manter o valor original
+        // e os ciclos são sempre feitos em relação a v global
 
         // inicializar a árvore mínima
-        for (int v = 1; v <= data->num_vertices; v++)
+        for (int v = data->start_vertice; v <= data->end_vertice; v++)
         {
+            // obter o v para os vetores locais
+            corrected_v = get_vertice_mt(v, data->num_vertices);
+
+            // como v é global, a avaliação contra a raíz
+            // também tem de ser global
             if (v != graph_root)
             {
-                visited[v] = false;
+                visited[corrected_v] = false;
             }
 
-            float weight = get_corrected_edge(local_graph, corrected_root, v, data->num_vertices);
+            float weight = get_edge_mt(local_graph, root_mt, v, data->num_vertices);
 
             if (weight < INFINITE)
             {
-                d[v] = weight;
+                d[corrected_v] = weight;
 
-                set_vt(v_t, corrected_v, graph_root);
+                set_vt(v_t, v, graph_root);
             }
             else
             {
-                d[get_corrected_vertice(v, data->num_vertices)] = INFINITE;
+                d[corrected_v] = INFINITE;
 
-                set_vt(v_t, get_corrected_vertice(v, data->num_vertices), 0); // marcado a 0 pois não há nenhum vértice 0
+                set_vt(v_t, v, 0); // marcado a 0 pois não há nenhum vértice 0
             }
 
 #ifdef DEBUG
-            printf("d[%d]=%0.2f v_t[%d]=%d\n", corrected_v, d[corrected_v], corrected_v, v_t[corrected_v]);
+            printf("d[%d]=%0.2f v_t[%d]=%d\n", v, d[corrected_v], v, v_t[v]);
 #endif
         }
     }
@@ -216,23 +224,23 @@ void *prim_mst(void *arg)
         // senão fazer a inicialização simples
         for (int v = data->start_vertice; v <= data->end_vertice; v++)
         {
-            corrected_v = get_corrected_vertice(v, data->num_vertices);
+            corrected_v = get_vertice_mt(v, data->num_vertices);
 
             visited[corrected_v] = false;
 
             d[corrected_v] = INFINITE;
 
-            set_vt(v_t, corrected_v, 0); // marcado a 0 pois não há nenhum vértice 0
+            set_vt(v_t, v, 0); // marcado a 0 pois não há nenhum vértice 0
 
 #ifdef DEBUG
-            printf("d[%d]=%0.2f v_t[%d]=%d\n", corrected_v, d[corrected_v], corrected_v, v_t[corrected_v]);
+            printf("d[%d]=%0.2f v_t[%d]=%d\n", v, d[corrected_v], v, v_t[v]);
 #endif
         }
     }
 
     for (int v = data->start_vertice; v <= data->end_vertice; v++)
     {
-        corrected_v = get_corrected_vertice(v, data->num_vertices);
+        corrected_v = get_vertice_mt(v, data->num_vertices);
 
         // excluir a raíz e v-v_t
         if (corrected_v == graph_root || visited[corrected_v])
@@ -256,10 +264,10 @@ void *prim_mst(void *arg)
         printf("Thread %d check and update global result\n", data->thread_id);
 #endif
 
-        if (get_corrected_edge(local_graph, corrected_v, u, data->num_vertices) < get_global_weight(data->thread_id))
+        if (get_edge_mt(local_graph, corrected_v, u, data->num_vertices) < get_global_weight(data->thread_id))
         {
             set_global_u(data->thread_id, u);
-            set_global_weight(data->thread_id, get_corrected_edge(local_graph, corrected_v, u, data->num_vertices));
+            set_global_weight(data->thread_id, get_edge_mt(local_graph, corrected_v, u, data->num_vertices));
         }
 
 #ifdef TRACE
@@ -325,14 +333,14 @@ void *prim_mst(void *arg)
 
         for (int i = v; i <= data->end_vertice; i++)
         {
-            corrected_v = get_corrected_vertice(i, data->num_vertices);
+            corrected_v = get_vertice_mt(i, data->num_vertices);
 
             // excluir a diagonal e v-v_t
             if (i == u || visited[corrected_v])
                 continue;
 
             // aqui é necessário corrigir o vértice
-            float u_weight = get_corrected_edge(local_graph, u, i, data->num_vertices);
+            float u_weight = get_edge_mt(local_graph, u, i, data->num_vertices);
 
             if (u_weight == 0)
                 continue;
@@ -417,11 +425,11 @@ float *split_graph(float *graph, int start_vertice, int end_vertice)
 }
 
 /*
-    get_corrected_edge
+    get_edge_mt
 
     obtém a aresta sempre com a coluna corrigida para o grafo local
 */
-float get_corrected_edge(float *local_graph, int col, int row, int num_vertices)
+float get_edge_mt(float *local_graph, int col, int row, int num_vertices)
 {
     /*
         fazer a inversão para a triangular superior aqui
@@ -435,13 +443,13 @@ float get_corrected_edge(float *local_graph, int col, int row, int num_vertices)
         row = temp;
     }
 
-    col = get_corrected_vertice(col, num_vertices);
+    col = get_vertice_mt(col, num_vertices);
 
     return get_edge(local_graph, col, row);
 }
 
 /*
-    get_corrected_vertice
+    get_vertice_mt
 
     corrige o vértice dado para o vetor local
     apenas considera quando v > num_vertices pois isso
@@ -449,7 +457,7 @@ float get_corrected_edge(float *local_graph, int col, int row, int num_vertices)
 
     para P_0 não é necessária correção
 */
-int get_corrected_vertice(int v, int num_vertices)
+int get_vertice_mt(int v, int num_vertices)
 {
 #ifdef TRACE
     int uncorrected_vertice = v;
@@ -460,9 +468,9 @@ int get_corrected_vertice(int v, int num_vertices)
     }
 #else
 
-    if (v < num_vertices)
+    if (v > num_vertices)
     {
-        v += num_vertices;
+        v -= num_vertices;
     }
 #endif
 
