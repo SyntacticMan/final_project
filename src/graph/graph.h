@@ -42,5 +42,5 @@ unsigned long long get_index(int col, int row);
 
 int pick_graph_root(int graph_size);
 
-void print_graph(float *graph, int graph_size);
+void print_graph(float *graph, int columns, int rows);
 void print_array(float *graph, int graph_size);

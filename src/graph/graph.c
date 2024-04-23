@@ -398,39 +398,39 @@ double random_coordinate_generator(int graph_size)
 
     imprime a matriz de adjacência do grafo na linha de comandos
 */
-void print_graph(float *graph, int graph_size)
+void print_graph(float *graph, int columns, int rows)
 {
 
-    print_line(graph_size);
+    print_line(columns);
 
-    for (int row = 1; row <= graph_size; row++)
+    for (int row = 1; row <= rows; row++)
     {
         // cabeçalho
 
         if (row == 1)
         {
             // printf("|");
-            if (graph_size <= 10)
+            if (columns <= 10)
                 printf("|%*c", 2, ' ');
-            else if (graph_size <= 100)
+            else if (columns <= 100)
                 printf("%*c", 3, ' ');
 
-            for (int col = 1; col <= graph_size; col++)
+            for (int col = 1; col <= columns; col++)
             {
                 printf("|%5d", col);
             }
 
             printf("|\n");
-            print_line(graph_size);
+            print_line(columns);
         }
         else
         {
-            print_line(graph_size);
+            print_line(columns);
         }
 
         printf("|%3d", row);
 
-        for (int col = 1; col <= graph_size; col++)
+        for (int col = 1; col <= columns; col++)
         {
             float edge = get_edge(graph, col, row);
             if (edge == INFINITE)
@@ -442,7 +442,7 @@ void print_graph(float *graph, int graph_size)
         printf("|\n");
     }
 
-    print_line(graph_size);
+    print_line(columns);
 }
 
 void print_line(int graph_size)
