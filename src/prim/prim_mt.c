@@ -52,9 +52,7 @@ int *global_u;
 float *global_weight;
 int *v_t;
 
-static int get_u(float *d, int *v_t, bool *visited, int graph_size);
-static float get_edge_mt(float *local_graph, int col, int row, int num_vertices);
-static int get_vertice_mt(int v, int num_vertices);
+static int get_u(float *d, bool *visited, int graph_size);
 
 static void set_vt(int *v_t, int index, float value);
 
@@ -216,7 +214,7 @@ void *prim_mst(void *arg)
             continue;
 
         // obter o vértice u
-        int u = get_u(d, v_t, visited, data->num_vertices);
+        int u = get_u(d, visited, data->num_vertices);
 
 #ifdef DEBUG
         printf("[thread %d] Found u: %d (v=%d)\n", data->thread_id, u, v);
@@ -337,7 +335,7 @@ void *prim_mst(void *arg)
     pthread_exit(NULL);
 }
 
-int get_u(float *d, int *v_t, bool *visited, int graph_size)
+int get_u(float *d, bool *visited, int graph_size)
 {
 
     int u_min = 0;
