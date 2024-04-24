@@ -63,7 +63,7 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
 
     for (int v = 1; v <= graph_size; v++)
     {
-        // excluir a raíz e v-v_t
+        // excluir v-v_t
         if (visited[v])
             continue;
 
