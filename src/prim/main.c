@@ -102,8 +102,7 @@ int main(int argc, char *argv[])
     if (print_agm)
     {
         if (graph_header->graph_size <= 20)
-            print_graph(graph, graph_header->graph_size, graph_header->graph_size);
-
+            print_graph(graph, graph_header->graph_size);
         // se tiver mst, imprimir
         if (graph_header->vt_size > 0)
         {
@@ -153,7 +152,7 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
     // acima dum certo tamanho é inútil
     if (graph_header->graph_size <= 20)
-        print_graph(graph, graph_header->graph_size, graph_header->graph_size);
+        print_graph(graph, graph_header->graph_size);
 
     print_mst(graph, v_t, graph_header->graph_size + 1, graph_header->graph_root);
 #endif

@@ -398,39 +398,39 @@ double random_coordinate_generator(int graph_size)
 
     imprime a matriz de adjacência do grafo na linha de comandos
 */
-void print_graph(float *graph, int columns, int rows)
+void print_graph(float *graph, int graph_size)
 {
 
-    print_line(columns);
+    print_line(graph_size);
 
-    for (int row = 1; row <= rows; row++)
+    for (int row = 1; row <= graph_size; row++)
     {
         // cabeçalho
 
         if (row == 1)
         {
             // printf("|");
-            if (columns <= 10)
+            if (graph_size <= 10)
                 printf("|%*c", 2, ' ');
-            else if (columns <= 100)
+            else if (graph_size <= 100)
                 printf("%*c", 3, ' ');
 
-            for (int col = 1; col <= columns; col++)
+            for (int col = 1; col <= graph_size; col++)
             {
                 printf("|%5d", col);
             }
 
             printf("|\n");
-            print_line(columns);
+            print_line(graph_size);
         }
         else
         {
-            print_line(columns);
+            print_line(graph_size);
         }
 
         printf("|%3d", row);
 
-        for (int col = 1; col <= columns; col++)
+        for (int col = 1; col <= graph_size; col++)
         {
             float edge = get_edge(graph, col, row);
             if (edge == INFINITE)
@@ -442,7 +442,57 @@ void print_graph(float *graph, int columns, int rows)
         printf("|\n");
     }
 
-    print_line(columns);
+    print_line(graph_size);
+}
+
+/*
+    print_graph
+
+    imprime a matriz de adjacência divida do grafo na linha de comandos
+*/
+void print_graph_mt(float *graph, int start_col, int end_col, int graph_size)
+{
+    int cols = end_col - start_col;
+    print_line(cols + 1);
+
+    for (int row = 1; row <= graph_size; row++)
+    {
+        // cabeçalho
+        if (row == 1)
+        {
+            if (cols <= 10)
+                printf("|%*c", 3, ' ');
+            else if (cols <= 100)
+                printf("%*c", 2, ' ');
+
+            for (int col = start_col; col <= end_col; col++)
+            {
+                printf("|%5d", col);
+            }
+
+            printf("|\n");
+            print_line(cols + 1);
+        }
+        else
+        {
+            print_line(cols + 1);
+        }
+
+        printf("|%3d", row);
+
+        for (int col = start_col; col <= end_col; col++)
+        {
+            float edge = get_edge(graph, col, row);
+            if (edge == INFINITE)
+                printf("|    \u221e");
+            else
+                printf("|%3.3f", edge);
+        }
+
+        printf("|\n");
+    }
+
+    print_line(cols + 1);
 }
 
 void print_line(int graph_size)

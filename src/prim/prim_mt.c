@@ -171,7 +171,7 @@ void *prim_mst(void *arg)
 #ifdef DEBUG
     printf("thread %d: start_col = %d || end_col = %d || num_vertices = %d\n", data->thread_id, data->start_col, data->end_col, data->num_vertices);
 
-    print_graph(local_graph, data->start_col, data->end_col);
+    print_graph_mt(local_graph, data->start_col, data->end_col, data->graph_size);
 #endif
 
     // processar graph_root apenas se estiver nos vértices
