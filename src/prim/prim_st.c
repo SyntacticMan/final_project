@@ -17,7 +17,7 @@
 #include "prim_st.h"
 #endif
 
-static int get_u(float *d, bool *visited, int graph_size);
+static int get_u(float *d, int *v_t, int v, bool *visited, int graph_size);
 
 /*
     prim_mst
@@ -68,7 +68,7 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
             continue;
 
         // obter o vértice u
-        int u = get_u(d, visited, graph_size);
+        int u = get_u(d, v_t, v, visited, graph_size);
 
 #ifdef DEBUG
         printf("Found u: %d (v=%d)\n", u, v);
@@ -80,7 +80,7 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
             // excluir os já visitados
             if (visited[i] || i == u)
             {
-#ifdef DEBUG
+#ifdef TRACE
                 printf("Excluding v = %d\n", i);
 #endif
                 continue;
@@ -93,7 +93,7 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
             if (u_weight == INFINITE)
                 continue;
 
-#ifdef DEBUG
+#ifdef TRACE
             printf("Evaluating v = %d for u = %d\n", i, u);
 #endif
             if (u_weight < d_weight)
@@ -126,15 +126,15 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
 
     obtém o vértice u com o menor peso que há em d[v]
 */
-int get_u(float *d, bool *visited, int graph_size)
+int get_u(float *d, int *v_t, int v, bool *visited, int graph_size)
 {
-    int u_min = 0;
-    float min_weight = INFINITE;
+    int u_min = v_t[v];
+    float min_weight = d[v];
 
     for (int u = 1; u <= graph_size; u++)
     {
         // excluir os já visitados (v-vt)
-        if (visited[u])
+        if (visited[u] || u == v)
             continue;
 
         if (d[u] < min_weight)

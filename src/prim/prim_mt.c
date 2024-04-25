@@ -52,7 +52,7 @@ int *global_u;
 float *global_weight;
 int *v_t;
 
-static int get_u(float *d, bool *visited, int graph_size, int correction_factor);
+static int get_u(float *d, int *v_t, int v, bool *visited, int num_vertices, int correction_factor);
 
 static float *split_graph(float *graph, int start_col, int end_col, int graph_size);
 static int get_local_vertice(int v, int correction_factor);
@@ -83,10 +83,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     // certificar que não se pedem mais processos que vértices
     if (num_threads > graph_size)
         num_threads = graph_size;
-
-#ifdef DEBUG
-    printf("num_threads %d\n", num_threads);
-#endif
 
     pthread_t threads[num_threads];
 
@@ -134,7 +130,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         // criar o subconjunto de V a alocar à tarefa
         thread_data[i].local_graph = split_graph(graph, start_col, end_col, graph_size);
 
-#ifdef DEBUG
+#ifdef TRACE
         print_graph_mt(thread_data[i].local_graph, start_col, end_col, graph_size);
         // print_graph(thread_data[i].local_graph, graph_size);
 #endif
@@ -232,7 +228,7 @@ void *prim_mst(void *arg)
             continue;
 
         // obter o vértice u
-        int u = get_u(d, visited, data->num_vertices, correction_factor);
+        int u = get_u(d, v_t, v, visited, data->num_vertices, correction_factor);
 
 #ifdef DEBUG
         printf("[thread %d] Found u: %d (v=%d)\n", data->thread_id, u, v);
@@ -313,10 +309,11 @@ void *prim_mst(void *arg)
 
         for (int i = data->start_col; i <= data->end_col; i++)
         {
-            int i_mt = get_local_vertice(i, data->num_vertices);
+            int local_i = get_local_vertice(i, correction_factor);
+            int local_u = get_local_vertice(u, correction_factor);
 
             // excluir a diagonal e v-v_t
-            if (visited[i_mt])
+            if (visited[local_i] || i == u)
             {
 #ifdef DEBUG
                 printf("Excluding v = %d\n", i);
@@ -325,20 +322,20 @@ void *prim_mst(void *arg)
             }
 
             float u_weight = get_edge(local_graph, u, i);
-            float d_weight = d[i_mt];
+            float d_weight = d[local_i];
 
             if (u_weight == INFINITE)
                 continue;
 
             if (u_weight < d_weight)
             {
-                d[i_mt] = u_weight;
+                d[local_i] = u_weight;
 
                 set_vt(v_t, i, u);
             }
 
 #ifdef TRACE
-            printf("[thread %d](%d,%d) => weight: %f | d[v]: %f | v_t[%d]: %d\n", data->thread_id, u, i, u_weight, d[v], i, v_t[i]);
+            printf("[thread %d](%d,%d) => weight: %f | d[v]: %f | v_t[%d]: %d\n", data->thread_id, u, i, u_weight, d[local_v], i, get_vt(v_t, i));
 #endif
         }
     }
@@ -347,6 +344,10 @@ void *prim_mst(void *arg)
     set_finish_count();
 
 #ifdef DEBUG
+    for (int i = 1; i <= data->num_vertices; i++)
+    {
+        printf("d[%d]=%0.2f\tv_t[%d]=%d\n", i, d[get_local_vertice(i, correction_factor)], i, get_vt(v_t, i));
+    }
     printf("Thread %d finished\n", get_finish_count());
 #endif
     free(visited);
@@ -361,15 +362,16 @@ void *prim_mst(void *arg)
     obtém o vértice com o menor peso em d
     dos que percentem a v-v_t
 */
-int get_u(float *d, bool *visited, int num_vertices, int correction_factor)
+int get_u(float *d, int *v_t, int v, bool *visited, int num_vertices, int correction_factor)
 {
-    int u_min = 0;
-    float min_weight = INFINITE;
+    int u_min = get_vt(v_t, v);
+    int local_v = get_local_vertice(v, correction_factor);
+    float min_weight = d[local_v];
 
     for (int u = 1; u <= num_vertices; u++)
     {
         // excluir os já visitados (v-vt)
-        if (visited[u])
+        if (visited[u] || u == local_v)
             continue;
 
         if (d[u] < min_weight)
