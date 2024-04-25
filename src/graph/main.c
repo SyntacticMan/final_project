@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	bool print_matrix = false;
 
 	int opt;
-	while ((opt = getopt(argc, argv, "s:f:l:p:m")) != -1)
+	while ((opt = getopt(argc, argv, "s:f:lp:m")) != -1)
 	{
 		switch (opt)
 		{
@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
 		case 'l': // grafo fixo
 			graph_size = 6;
 			lock_graph = true;
+			break;
 		case 'p': // percentagem do máximo de arestas a adicionar
 			requested_edge_percentage = atoi(optarg);
 			break;

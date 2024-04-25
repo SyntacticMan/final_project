@@ -73,7 +73,7 @@ test_graph:
 	$(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE)
 
 lock_graph:
-	$(binDir)$(graphBinaryName) -s 6 -l -f book_graph -p $(EDGE_PERCENTAGE) -m
+	$(binDir)$(graphBinaryName) -s 6 -l -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE) -m
 
 test_draw:
 	$(binDir)$(drawBinaryName) -f $(GRAPH_NAME) -t $(GRAPH_TITLE)

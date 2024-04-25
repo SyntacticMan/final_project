@@ -13,3 +13,4 @@ src/.vs/*
 *.swp
 *.dot
 x86_64
+book_graph
