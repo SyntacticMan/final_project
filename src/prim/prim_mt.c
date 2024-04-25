@@ -54,10 +54,14 @@ int *v_t;
 
 static int get_u(float *d, bool *visited, int graph_size);
 
-static void set_vt(int *v_t, int index, float value);
-
 static float *split_graph(float *graph, int start_col, int end_col, int graph_size);
+static int get_local_vertice(int v, int num_vertices);
 
+/*
+    funções de acesso a recursos partilhados
+*/
+static void set_vt(int *v_t, int index, int value);
+static int get_vt(int *v_t, int index);
 static int get_min_u(void);
 static void set_min_u(int value);
 static int get_global_u(int index);
@@ -175,42 +179,48 @@ void *prim_mst(void *arg)
     {
         set_vt(v_t, graph_root, 0);
 
-        d[graph_root] = 0;
-        visited[graph_root] = true;
+        int root_mt = get_local_vertice(graph_root, data->num_vertices);
+
+        d[root_mt] = 0;
+        visited[root_mt] = true;
     }
 
     // inicializar a árvore mínima
     for (int v = data->start_col; v <= data->end_col; v++)
     {
+        int local_v = get_local_vertice(v, data->num_vertices);
+
         if (v != graph_root)
         {
-            visited[v] = false;
+            visited[local_v] = false;
         }
 
         float weight = get_edge(local_graph, graph_root, v);
 
         if (weight < INFINITE)
         {
-            d[v] = weight;
+            d[local_v] = weight;
 
             set_vt(v_t, v, graph_root);
         }
         else
         {
-            d[v] = INFINITE;
+            d[local_v] = INFINITE;
 
             set_vt(v_t, v, 0); // marcado a 0 pois não há nenhum vértice 0
         }
 
 #ifdef DEBUG
-        printf("d[%d]=%0.2f v_t[%d]=%d\n", v, d[v], v, v_t[v]);
+        printf("d[%d]=%0.2f v_t[%d]=%d\n", v, d[local_v], v, get_vt(v_t, v));
 #endif
     }
 
     for (int v = data->start_col; v <= data->end_col; v++)
     {
+        int local_v = get_local_vertice(v, data->num_vertices);
+
         // excluir v-v_t
-        if (visited[v])
+        if (visited[local_v])
             continue;
 
         // obter o vértice u
@@ -219,13 +229,7 @@ void *prim_mst(void *arg)
 #ifdef DEBUG
         printf("[thread %d] Found u: %d (v=%d)\n", data->thread_id, u, v);
 #endif
-/* TODO: se fôr o processo 0, fica a aguardar todos os u dos outros processos
- para depois obter o global_u
- a seguir envia-o para os processos
-    se não fôr o processo 0, envia o u para o processo 0 e fica a aguardar o u_globla
-    se u == u_global então regista-o em v_t local, senão simplesmente faz u = u_global
-    e passa ao próximo
-*/
+
 // Lock and update the global result
 #ifdef TRACE
         printf("Thread %d check and update global result\n", data->thread_id);
@@ -293,26 +297,34 @@ void *prim_mst(void *arg)
         }
 
         // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
-        if (get_min_u() == u)
+        int min_u = get_min_u();
+        if (min_u == u)
             visited[u] = true;
         else
-            u = get_min_u();
+            u = min_u;
 
-        for (int i = v; i <= data->end_col; i++)
+        for (int i = data->start_col; i <= data->end_col; i++)
         {
+            int i_mt = get_local_vertice(i, data->num_vertices);
+
             // excluir a diagonal e v-v_t
-            if (visited[v])
+            if (visited[i_mt])
+            {
+#ifdef DEBUG
+                printf("Excluding v = %d\n", i);
+#endif
                 continue;
+            }
 
             float u_weight = get_edge(local_graph, u, i);
-            float d_weight = d[i];
+            float d_weight = d[i_mt];
 
             if (u_weight == INFINITE)
                 continue;
 
             if (u_weight < d_weight)
             {
-                d[i] = u_weight;
+                d[i_mt] = u_weight;
 
                 set_vt(v_t, i, u);
             }
@@ -406,14 +418,55 @@ float *split_graph(float *graph, int start_col, int end_col, int graph_size)
     return split_graph;
 }
 
+/*
+    get_local_vertice
+
+    corrige o vértice dado para o vetor local
+    apenas considera quando v > num_vertices pois isso
+    indica que está em P_i, i>0
+
+    para P_0 não é necessária correção
+*/
+int get_local_vertice(int v, int num_vertices)
+{
+#ifdef TRACE
+    int uncorrected_vertice = v;
+    if (v > num_vertices)
+    {
+        printf("vertice to correct: %d (num_vertices: %d)\n", v, num_vertices);
+        v -= num_vertices;
+    }
+#else
+
+    if (v > num_vertices)
+    {
+        v -= num_vertices;
+    }
+#endif
+
+#ifdef TRACE
+    if (uncorrected_vertice != v)
+        printf("corrected vertice: %d\n", v);
+#endif
+    return v;
+}
+
 /******************************************************************************
  * Funções para aceder aos recursos partilhados
  *******************************************************************************/
-void set_vt(int *v_t, int index, float value)
+void set_vt(int *v_t, int index, int value)
 {
     process_error("lock vt", pthread_mutex_lock(&mutex_vt));
     v_t[index] = value;
     process_error("unlock vt", pthread_mutex_unlock(&mutex_vt));
+}
+
+int get_vt(int *v_t, int index)
+{
+    process_error("lock vt", pthread_mutex_lock(&mutex_vt));
+    float result = v_t[index];
+    process_error("unlock vt", pthread_mutex_unlock(&mutex_vt));
+    return result;
 }
 
 void set_min_u(int value)

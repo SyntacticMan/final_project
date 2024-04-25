@@ -482,7 +482,7 @@ void print_graph_mt(float *graph, int start_col, int end_col, int graph_size)
 
         for (int col = start_col; col <= end_col; col++)
         {
-            float edge = get_edge(graph, col, row);
+            float edge = get_edge(graph, row, col);
             if (edge == INFINITE)
                 printf("|    \u221e");
             else
