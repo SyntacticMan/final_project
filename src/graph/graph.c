@@ -193,8 +193,25 @@ void add_random_edge(float *graph, int col, int row)
  */
 void add_edge(float *graph, int col, int row, float weight)
 {
+    // a diagonal é sempre 0, devolvido por get_edge
+    // por isso não é necessário adicionar
+    if (col == row)
+        return;
+
+    // adicionar apenas na triangular superior
+    if (col < row)
+    {
+        int temp = col;
+        col = row;
+        row = temp;
+    }
+
     int index = get_index(col, row);
     graph[index] = weight;
+
+#ifdef TRACE
+    printf("add %f to col:%d | row: %d\n", weight, col, row);
+#endif
 }
 
 /*
@@ -246,7 +263,7 @@ float get_edge(float *graph, int col, int row)
     unsigned int index = get_index(col, row);
 
 #ifdef TRACE
-    printf("(%d,%d) => index = %d || weight = %f\n", col, row, index, graph[index]);
+    printf("get_edge (%d,%d) => index = %d || weight = %f\n", col, row, index, graph[index]);
 #endif
 
     return graph[index];
@@ -482,7 +499,7 @@ void print_graph_mt(float *graph, int start_col, int end_col, int graph_size)
 
         for (int col = start_col; col <= end_col; col++)
         {
-            float edge = get_edge(graph, row, col);
+            float edge = get_edge(graph, col, row);
             if (edge == INFINITE)
                 printf("|    \u221e");
             else

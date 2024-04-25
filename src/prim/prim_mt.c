@@ -134,6 +134,11 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         // criar o subconjunto de V a alocar à tarefa
         thread_data[i].local_graph = split_graph(graph, start_col, end_col, graph_size);
 
+#ifdef DEBUG
+        print_graph_mt(thread_data[i].local_graph, start_col, end_col, graph_size);
+        // print_graph(thread_data[i].local_graph, graph_size);
+#endif
+
         process_error("worker_thread create", pthread_create(&threads[i], NULL, prim_mst, (void *)&thread_data[i]));
     }
 
@@ -173,7 +178,7 @@ void *prim_mst(void *arg)
 #ifdef DEBUG
     printf("thread %d: start_col = %d || end_col = %d || num_vertices = %d\n", data->thread_id, data->start_col, data->end_col, data->num_vertices);
 
-    print_graph_mt(local_graph, data->start_col, data->end_col, data->graph_size);
+    // print_graph_mt(local_graph, data->start_col, data->end_col, data->graph_size);
 #endif
 
     // processar graph_root apenas se estiver nos vértices
@@ -390,35 +395,35 @@ float *split_graph(float *graph, int start_col, int end_col, int graph_size)
     unsigned long long matrix_size = get_matrix_size(graph_size);
     float *split_graph = malloc(matrix_size * sizeof(float));
 
+    // inicializar o grafo
+    for (int col = 1; col < graph_size; col++)
+    {
+        for (int row = 1; row < graph_size; row++)
+        {
+            if (row >= col)
+                continue;
+
+            add_null_edge(split_graph, col, row);
+#ifdef TRACE
+            printf("(col:%d|row:%d|null)\n", col, row);
+#endif
+        }
+    }
+
     for (int col = 1; col <= graph_size; col++)
     {
         // apenas processar as linhas que pertencem
         // às colunas pedidas
         if (col >= start_col && col <= end_col)
         {
-
-            for (int row = 1; row < graph_size; row++)
+            for (int row = 1; row <= graph_size; row++)
             {
-                // se linha = coluna o vértice ligar-se-ia a ele mesmo
-                // se linha > coluna estou na triangular inferior
-                // em ambos os casos passo à frente
-                if (row >= col)
+                if (col == row)
                     continue;
-
                 add_edge(split_graph, col, row, get_edge(graph, col, row));
-            }
-        }
-        else
-        {
-            for (int row = 1; row < graph_size; row++)
-            {
-                // se linha = coluna o vértice ligar-se-ia a ele mesmo
-                // se linha > coluna estou na triangular inferior
-                // em ambos os casos passo à frente
-                if (row >= col)
-                    continue;
-
-                add_null_edge(split_graph, col, row);
+#ifdef TRACE
+                printf("(col:%d|row:%d|%f)\n", col, row, get_edge(graph, col, row));
+#endif
             }
         }
     }
