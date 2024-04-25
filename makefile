@@ -67,7 +67,7 @@ test_prim:
 	$(binDir)$(primBinaryName) -f $(GRAPH_NAME)
 
 test_mt:
-	$(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
+	$(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 3
 
 test_graph:
 	$(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE)

@@ -52,10 +52,10 @@ int *global_u;
 float *global_weight;
 int *v_t;
 
-static int get_u(float *d, bool *visited, int graph_size);
+static int get_u(float *d, bool *visited, int graph_size, int correction_factor);
 
 static float *split_graph(float *graph, int start_col, int end_col, int graph_size);
-static int get_local_vertice(int v, int num_vertices);
+static int get_local_vertice(int v, int correction_factor);
 
 /*
     funções de acesso a recursos partilhados
@@ -167,6 +167,9 @@ void *prim_mst(void *arg)
     float *d = malloc((data->num_vertices + 1) * sizeof(float));
     bool *visited = malloc((data->num_vertices + 1) * sizeof(bool));
 
+    // calcular o fator de correcção para este processo
+    int correction_factor = data->thread_id * data->num_vertices;
+
 #ifdef DEBUG
     printf("thread %d: start_col = %d || end_col = %d || num_vertices = %d\n", data->thread_id, data->start_col, data->end_col, data->num_vertices);
 
@@ -179,7 +182,7 @@ void *prim_mst(void *arg)
     {
         set_vt(v_t, graph_root, 0);
 
-        int root_mt = get_local_vertice(graph_root, data->num_vertices);
+        int root_mt = get_local_vertice(graph_root, correction_factor);
 
         d[root_mt] = 0;
         visited[root_mt] = true;
@@ -188,7 +191,7 @@ void *prim_mst(void *arg)
     // inicializar a árvore mínima
     for (int v = data->start_col; v <= data->end_col; v++)
     {
-        int local_v = get_local_vertice(v, data->num_vertices);
+        int local_v = get_local_vertice(v, correction_factor);
 
         if (v != graph_root)
         {
@@ -217,14 +220,14 @@ void *prim_mst(void *arg)
 
     for (int v = data->start_col; v <= data->end_col; v++)
     {
-        int local_v = get_local_vertice(v, data->num_vertices);
+        int local_v = get_local_vertice(v, correction_factor);
 
         // excluir v-v_t
         if (visited[local_v])
             continue;
 
         // obter o vértice u
-        int u = get_u(d, visited, data->num_vertices);
+        int u = get_u(d, visited, data->num_vertices, correction_factor);
 
 #ifdef DEBUG
         printf("[thread %d] Found u: %d (v=%d)\n", data->thread_id, u, v);
@@ -347,13 +350,18 @@ void *prim_mst(void *arg)
     pthread_exit(NULL);
 }
 
-int get_u(float *d, bool *visited, int graph_size)
-{
+/*
+    get_u
 
+    obtém o vértice com o menor peso em d
+    dos que percentem a v-v_t
+*/
+int get_u(float *d, bool *visited, int num_vertices, int correction_factor)
+{
     int u_min = 0;
     float min_weight = INFINITE;
 
-    for (int u = 1; u <= graph_size; u++)
+    for (int u = 1; u <= num_vertices; u++)
     {
         // excluir os já visitados (v-vt)
         if (visited[u])
@@ -366,7 +374,7 @@ int get_u(float *d, bool *visited, int graph_size)
         }
     }
 
-    return u_min;
+    return u_min + correction_factor;
 }
 
 /*
@@ -422,33 +430,11 @@ float *split_graph(float *graph, int start_col, int end_col, int graph_size)
     get_local_vertice
 
     corrige o vértice dado para o vetor local
-    apenas considera quando v > num_vertices pois isso
-    indica que está em P_i, i>0
 
-    para P_0 não é necessária correção
 */
-int get_local_vertice(int v, int num_vertices)
+int get_local_vertice(int v, int correction_factor)
 {
-#ifdef TRACE
-    int uncorrected_vertice = v;
-    if (v > num_vertices)
-    {
-        printf("vertice to correct: %d (num_vertices: %d)\n", v, num_vertices);
-        v -= num_vertices;
-    }
-#else
-
-    if (v > num_vertices)
-    {
-        v -= num_vertices;
-    }
-#endif
-
-#ifdef TRACE
-    if (uncorrected_vertice != v)
-        printf("corrected vertice: %d\n", v);
-#endif
-    return v;
+    return v - correction_factor;
 }
 
 /******************************************************************************
