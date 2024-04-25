@@ -256,7 +256,7 @@ void *prim_mst(void *arg)
 #endif
 
             // aguardar que as tarefas tenham encontrado o seu u
-            if (get_finish_count() <= data->num_threads - 1)
+            while (get_finish_count() <= data->num_threads - 1)
                 pthread_barrier_wait(&barrier);
 
 #ifdef DEBUG
