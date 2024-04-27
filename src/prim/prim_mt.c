@@ -43,7 +43,7 @@ pthread_mutex_t mutex_finish_count;
 
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
-pthread_barrier_t thread_barrier;
+pthread_barrier_t finish_barrier;
 pthread_barrier_t barrier;
 
 // variáveis partilhadas
@@ -234,34 +234,21 @@ void *prim_mst(void *arg)
         printf("[thread %d] Found u: %d (v=%d)\n", data->thread_id, u, v);
 #endif
 
-// Lock and update the global result
-#ifdef TRACE
-        printf("Thread %d check and update global result\n", data->thread_id);
+        set_global_u(data->thread_id, u);
+        set_global_weight(data->thread_id, get_edge(local_graph, v, u));
+
+#ifdef DEBUG
+        printf("Thread %d hold at barrier\n", data->thread_id);
 #endif
+        // sincronizar as tarefas logo após calcular o u
+        pthread_barrier_wait(&barrier);
 
-        if (get_edge(local_graph, v, u) < get_global_weight(data->thread_id))
-        {
-            set_global_u(data->thread_id, u);
-            set_global_weight(data->thread_id, get_edge(local_graph, v, u));
-        }
-
-#ifdef TRACE
-        printf("Thread %d check and update global result done\n", data->thread_id);
+#ifdef DEBUG
+        printf("Thread %d resume from barrier\n", data->thread_id);
 #endif
         // se fôr o processo 0, obter o u geral
         if (data->thread_id == 0)
         {
-#ifdef DEBUG
-            printf("Thread %d hold\n", data->thread_id);
-#endif
-
-            // aguardar que as tarefas tenham encontrado o seu u
-            while (get_finish_count() <= data->num_threads - 1)
-                pthread_barrier_wait(&barrier);
-
-#ifdef DEBUG
-            printf("Thread %d resume\n", data->thread_id);
-#endif
 
             // o processo 0 é responsável por determinar o u global
             set_min_u(0);
@@ -277,8 +264,8 @@ void *prim_mst(void *arg)
             }
 
 #ifdef DEBUG
-            printf("min_u: %d\n", get_min_u());
-            printf("finish_count: %d\n", get_finish_count());
+            printf("global_min_u: %d\n", get_min_u());
+            // printf("finish_count: %d\n", get_finish_count());
 #endif
 
             // fazer a transmissão
@@ -288,16 +275,16 @@ void *prim_mst(void *arg)
         {
 // os outros processos ficam à espera do resultado
 #ifdef DEBUG
-            printf("Thread %d hold\n", data->thread_id);
+            printf("Thread %d hold at condition\n", data->thread_id);
 #endif
 
-            pthread_barrier_wait(&barrier);
+            pthread_mutex_lock(&mutex_wait);
+            pthread_cond_wait(&cond, &mutex_wait);
+            pthread_mutex_unlock(&mutex_wait);
 
 #ifdef DEBUG
-            printf("Thread %d resume\n", data->thread_id);
+            printf("Thread %d resume from condition\n", data->thread_id);
 #endif
-
-            pthread_cond_wait(&cond, &mutex_wait);
         }
 
         // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
@@ -307,7 +294,7 @@ void *prim_mst(void *arg)
         else
             u = min_u;
 
-        for (int i = data->start_col; i <= data->end_col; i++)
+        for (int i = 1; i <= data->graph_size; i++)
         {
             int local_i = get_local_vertice(i, correction_factor);
             int local_u = get_local_vertice(u, correction_factor);
@@ -334,21 +321,20 @@ void *prim_mst(void *arg)
                 set_vt(v_t, i, u);
             }
 
-#ifdef TRACE
-            printf("[thread %d](%d,%d) => weight: %f | d[v]: %f | v_t[%d]: %d\n", data->thread_id, u, i, u_weight, d[local_v], i, get_vt(v_t, i));
-#endif
+            // #ifdef DEBUG
+            //             printf("[thread %d](%d,%d) => weight: %f | d[v]: %f | v_t[%d]: %d\n", data->thread_id, u, i, u_weight, d[local_v], i, get_vt(v_t, i));
+            // #endif
         }
     }
-
     // sinalizar que já terminou de processar o bloco
     set_finish_count();
 
 #ifdef DEBUG
-    for (int i = 1; i <= data->num_vertices; i++)
+    for (int i = data->start_col; i <= data->end_col; i++)
     {
-        printf("d[%d]=%0.2f\tv_t[%d]=%d\n", i, d[get_local_vertice(i, correction_factor)], i, get_vt(v_t, i));
+        printf("Thread %d|d[%d]=%0.2f\tv_t[%d]=%d\n", data->thread_id, i, d[get_local_vertice(i, correction_factor)], i, get_vt(v_t, i));
     }
-    printf("Thread %d finished\n", get_finish_count());
+    printf("Thread %d finished\n", data->thread_id);
 #endif
     free(visited);
     free(d);
@@ -360,7 +346,7 @@ void *prim_mst(void *arg)
     get_u
 
     obtém o vértice com o menor peso em d
-    dos que percentem a v-v_t
+    dos que pertencem a v-v_t
 */
 int get_u(float *d, int *v_t, int v, bool *visited, int num_vertices, int correction_factor)
 {
