@@ -109,11 +109,11 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         memset(global_weight, 0, (num_threads + 1) * sizeof(float));
 
     // inicializar o contador de término das tarefas
-    finish_count = 0;
+    // finish_count = 0;
 
     process_error("pthread_cond_init", pthread_cond_init(&cond, NULL));
 
-    process_error("barrier_init", pthread_barrier_init(&barrier, NULL, num_threads));
+    process_error("barrier_init", pthread_barrier_init(&barrier, NULL, num_threads + 1));
 
     initialize_mutexes();
 
@@ -143,7 +143,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         }
 
 #ifdef DEBUG
-        printf("d[%d]=%0.2f v_t[%d]=%d\n", v, d[v], v, v_t[v]);
+        printf("d[%d]=%0.2f\tv_t[%d]=%d\n", v, d[v], v, v_t[v]);
 #endif
     }
 
@@ -213,6 +213,9 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
     free(global_u);
     free(global_weight);
+    free(d);
+    free(visited);
+    free(v_t);
 
     destroy_mutexes();
     pthread_barrier_destroy(&barrier);
@@ -248,6 +251,7 @@ void *prim_mst(void *arg)
         printf("[thread %d] Found u: %d (v=%d)\n", data->thread_id, u, v);
 #endif
 
+        // enviar para ser avaliado
         set_global_u(data->thread_id, u);
         set_global_weight(data->thread_id, get_edge(data->local_graph, v, u));
 
@@ -260,7 +264,6 @@ void *prim_mst(void *arg)
         printf("Thread %d resume from barrier\n", data->thread_id);
 #endif
 
-        // os outros processos ficam à espera do resultado
 #ifdef DEBUG
         printf("Thread %d hold at condition\n", data->thread_id);
 #endif
