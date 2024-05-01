@@ -156,7 +156,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         }
 
 #ifdef DEBUG
-        printf("d[%d]=%0.2f\tv_t[%d]=%d\n", v, d[v] /*get_d(d, v)*/, v, get_vt(v));
+        printf("d[%d]=%0.2f\tv_t[%d]=%d\tvisited[%d]=%d\n", v, d[v] /*get_d(d, v)*/, v, get_vt(v), v, get_visited(v));
 #endif
     }
 
@@ -441,7 +441,7 @@ float *split_d(float *d, int start_col, int end_col, int graph_size)
 
 bool all_visited(int graph_size)
 {
-    for (int i = 0; i < graph_size; i++)
+    for (int i = 1; i <= graph_size; i++)
     {
         if (!get_visited(i))
             return false;
