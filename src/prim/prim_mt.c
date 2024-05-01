@@ -284,12 +284,13 @@ void *worker_prim(void *arg)
 #ifdef DEBUG
     for (int i = data->start_col; i <= data->end_col; i++)
     {
-        printf("[thread %d]=> d[%d]=%0.2f\tv_t[%d]=%d\n", data->thread_id, i, data->local_d[i], i, get_vt(i));
+        printf("[thread %d] set d[%d]=%0.2f\tv_t[%d]=%d\n", data->thread_id, i, data->local_d[i], i, get_vt(i));
     }
     printf("[thread %d] finished\n", data->thread_id);
 #endif
     while (!all_visited(data->graph_size))
     {
+        sleep(1);
     }
     pthread_exit(NULL);
 }
@@ -390,7 +391,7 @@ float *split_d(float *d, int start_col, int end_col, int graph_size)
             split_d[i] = -1;
         }
 #ifdef TRACE
-        printf("split_d[%d]=%0.2f\tv_t[%d]=%d\n", i, split_d[i] /*get_d(d, v)*/, i, get_vt(i));
+        printf("split_d[%d]=%0.2f\tv_t[%d]=%d\n", i, split_d[i], i, get_vt(i));
 #endif
     }
 
@@ -424,11 +425,9 @@ void cond_wait(int thread_id)
 #ifdef DEBUG
     printf("[thread %d] hold at condition \n", thread_id);
 #endif
-
     pthread_mutex_lock(&mutex_wait);
     pthread_cond_wait(&cond, &mutex_wait);
     pthread_mutex_unlock(&mutex_wait);
-
 #ifdef DEBUG
     printf("[thread %d] resume from condition\n", thread_id);
 #endif
