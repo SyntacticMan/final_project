@@ -20,18 +20,11 @@
 typedef struct _thread_data
 {
     int thread_id;
-    int num_threads;
     int graph_size;
     int start_col;
     int end_col;
     float *local_graph;
     float *local_d;
-    // bool *visited;
-    // int *v_t;
-    // float *global_weight;
-    // int *global_u;
-    int min_u;
-
 } thread_data;
 
 typedef struct _main_data
@@ -46,7 +39,6 @@ pthread_mutex_t mutex_globalweight;
 pthread_mutex_t mutex_vt;
 pthread_mutex_t mutex_finish_count;
 pthread_mutex_t mutex_visited;
-pthread_mutex_t mutex_d;
 
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
@@ -59,7 +51,6 @@ int *global_u;
 float *global_weight;
 int *v_t;
 bool *visited;
-// float *d;
 
 static int get_u(float *d, int v, int start_col, int end_col);
 
@@ -74,16 +65,12 @@ static void set_vt(int index, int value);
 static int get_vt(int index);
 static void set_visited(int index, bool value);
 static bool get_visited(int index);
-static void set_d(float *d, int index, float value);
-static float get_d(float *d, int index);
-static int get_min_u(int min_u);
-static void set_min_u(int min_u, int value);
+static int get_min_u(void);
+static void set_min_u(int value);
 static int get_global_u(int index);
 static void set_global_u(int index, int value);
 static float get_global_weight(int index);
 static void set_global_weight(int index, float value);
-// static int get_finish_count(void);
-// static void set_finish_count(void);
 
 static void process_error(char *name, int result);
 
@@ -105,7 +92,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     float *d = malloc((graph_size + 1) * sizeof(float));
     global_u = malloc((num_threads + 1) * sizeof(int));
     global_weight = malloc((num_threads + 1) * sizeof(float));
-    int min_u = graph_root;
+    min_u = graph_root;
 
     // inicializar os vetores
     if (global_u != NULL)
@@ -113,9 +100,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
     if (global_weight != NULL)
         memset(global_weight, 0, (num_threads + 1) * sizeof(float));
-
-    // inicializar o contador de término das tarefas
-    // finish_count = 0;
 
     process_error("pthread_cond_init", pthread_cond_init(&cond, NULL));
 
@@ -145,13 +129,11 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         if (weight < INFINITE)
         {
             d[v] = weight;
-            // set_d(d, v, weight);
             set_vt(v, graph_root);
         }
         else
         {
             d[v] = INFINITE;
-            // set_d(d, v, INFINITE);
             set_vt(v, 0);
         }
 
@@ -165,7 +147,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     {
         thread_data[i].thread_id = i;
         thread_data[i].graph_size = graph_size;
-        thread_data[i].num_threads = num_threads;
 
         // calcular os vértices de início e fim com base no número de vértices a processar
         int start_col = (i * num_vertices) + 1;
@@ -174,14 +155,9 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         thread_data[i].start_col = start_col;
         thread_data[i].end_col = end_col;
 
-        // criar o subconjunto de V a alocar à tarefa
         thread_data[i].local_graph = split_graph(graph, start_col, end_col, graph_size);
         thread_data[i].local_d = split_d(d, start_col, end_col, graph_size);
-        // thread_data[i].visited = visited;
-        // thread_data[i].global_u = global_u;
-        // thread_data[i].global_weight = global_weight;
-        thread_data[i].min_u = min_u;
-        // thread_data[i].v_t = v_t;
+        // thread_data[i].min_u = min_u;
 
 #ifdef TRACE
         print_graph_mt(thread_data[i].local_graph, start_col, end_col, graph_size);
@@ -202,20 +178,20 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 #ifdef DEBUG
         printf("Main resume from barrier\n");
 #endif
-        set_min_u(min_u, 0);
+        set_min_u(0);
         int min_weight = INFINITE;
 
         for (int i = 0; i < num_threads; i++)
         {
             if (get_global_weight(i) < min_weight)
             {
-                set_min_u(min_u, get_global_u(i));
+                set_min_u(get_global_u(i));
                 min_weight = get_global_weight(i);
             }
         }
 
 #ifdef DEBUG
-        printf("broadcast global_min_u: %d\n", get_min_u(min_u));
+        printf("broadcast global_min_u: %d\n", get_min_u());
 #endif
 
         // fazer a transmissão
@@ -234,8 +210,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     free(v_t);
 
     destroy_mutexes();
-    pthread_barrier_destroy(&barrier);
-
+    process_error("barrier destroy", pthread_barrier_destroy(&barrier));
     process_error("condition destroy", pthread_cond_destroy(&cond));
 
 #ifdef DEBUG
@@ -273,16 +248,16 @@ void *prim_mst(void *arg)
             set_global_weight(data->thread_id, get_edge(data->local_graph, v, u));
 
 #ifdef DEBUG
-            printf("Thread %d hold at barrier\n", data->thread_id);
+            printf("Thread %d hold at barrier [%d]\n", data->thread_id, v);
 #endif
 
             pthread_barrier_wait(&barrier);
 #ifdef DEBUG
-            printf("Thread %d resume from barrier\n", data->thread_id);
+            printf("Thread %d resume from barrier [%d]\n", data->thread_id, v);
 #endif
 
 #ifdef DEBUG
-            printf("Thread %d hold at condition\n", data->thread_id);
+            printf("Thread %d hold at condition [%d]\n", data->thread_id, v);
 #endif
 
             pthread_mutex_lock(&mutex_wait);
@@ -290,15 +265,15 @@ void *prim_mst(void *arg)
             pthread_mutex_unlock(&mutex_wait);
 
 #ifdef DEBUG
-            printf("Thread %d resume from condition\n", data->thread_id);
+            printf("Thread %d resume from condition [%d]\n", data->thread_id, v);
 #endif
 
             // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
-            int min_u = get_min_u(data->min_u);
-            if (min_u == u)
+            int local_min_u = get_min_u();
+            if (local_min_u == u)
                 set_visited(u, true);
             else
-                u = min_u;
+                u = local_min_u;
 
             for (int i = 1; i <= data->graph_size; i++)
             {
@@ -319,7 +294,7 @@ void *prim_mst(void *arg)
 
                 if (u_weight < d_weight)
                 {
-                    set_d(data->local_d, i, u_weight);
+                    data->local_d[i] = u_weight;
                     set_vt(i, u);
                 }
             }
@@ -328,7 +303,7 @@ void *prim_mst(void *arg)
 #ifdef DEBUG
     for (int i = data->start_col; i <= data->end_col; i++)
     {
-        printf("Thread %d=> d[%d]=%0.2f\tv_t[%d]=%d\n", data->thread_id, i, get_d(data->local_d, i), i, get_vt(i));
+        printf("Thread %d=> d[%d]=%0.2f\tv_t[%d]=%d\n", data->thread_id, i, data->local_d[i], i, get_vt(i));
     }
     printf("Thread %d finished\n", data->thread_id);
 #endif
@@ -379,9 +354,9 @@ float *split_graph(float *graph, int start_col, int end_col, int graph_size)
     float *split_graph = malloc(matrix_size * sizeof(float));
 
     // inicializar o grafo
-    for (int col = 1; col < graph_size; col++)
+    for (int col = 1; col <= graph_size; col++)
     {
-        for (int row = 1; row < graph_size; row++)
+        for (int row = 1; row <= graph_size; row++)
         {
             if (row >= col)
                 continue;
@@ -425,13 +400,13 @@ float *split_d(float *d, int start_col, int end_col, int graph_size)
     {
         if (i >= start_col && i <= end_col)
         {
-            split_d[i] = get_d(d, i);
+            split_d[i] = d[i];
         }
         else
         {
             split_d[i] = -1;
         }
-#ifdef DEBUG
+#ifdef TRACE
         printf("split_d[%d]=%0.2f\tv_t[%d]=%d\n", i, split_d[i] /*get_d(d, v)*/, i, get_vt(i));
 #endif
     }
@@ -482,28 +457,14 @@ bool get_visited(int index)
     return result;
 }
 
-void set_d(float *d, int index, float value)
-{
-    process_error("lock d", pthread_mutex_lock(&mutex_d));
-    d[index] = value;
-    process_error("unlock d", pthread_mutex_unlock(&mutex_d));
-}
-
-float get_d(float *d, int index)
-{
-    process_error("lock d", pthread_mutex_lock(&mutex_d));
-    float result = d[index];
-    process_error("unlock d", pthread_mutex_unlock(&mutex_d));
-    return result;
-}
-void set_min_u(int min_u, int value)
+void set_min_u(int value)
 {
     process_error("lock minu", pthread_mutex_lock(&mutex_minu));
     min_u = value;
     process_error("unlock minu", pthread_mutex_unlock(&mutex_minu));
 }
 
-int get_min_u(int min_u)
+int get_min_u()
 {
     process_error("lock minu", pthread_mutex_lock(&mutex_minu));
     int result = min_u;
@@ -541,21 +502,6 @@ float get_global_weight(int index)
     return result;
 }
 
-// void set_finish_count(void)
-// {
-//     process_error("lock finish_count", pthread_mutex_lock(&mutex_finish_count));
-//     finish_count++;
-//     process_error("unlock finish_count", pthread_mutex_unlock(&mutex_finish_count));
-// }
-
-// int get_finish_count(void)
-// {
-//     process_error("lock finish_count", pthread_mutex_lock(&mutex_finish_count));
-//     int result = finish_count;
-//     process_error("unlock finish_count", pthread_mutex_unlock(&mutex_finish_count));
-//     return result;
-// }
-
 void initialize_mutexes(void)
 {
     process_error("mutex_minu init", pthread_mutex_init(&mutex_minu, NULL));
@@ -565,7 +511,6 @@ void initialize_mutexes(void)
     process_error("mutex_wait init", pthread_mutex_init(&mutex_wait, NULL));
     process_error("mutex_finish_count init", pthread_mutex_init(&mutex_finish_count, NULL));
     process_error("mutex_visited init", pthread_mutex_init(&mutex_visited, NULL));
-    process_error("mutex_d init", pthread_mutex_init(&mutex_d, NULL));
 }
 
 void destroy_mutexes(void)
@@ -577,7 +522,6 @@ void destroy_mutexes(void)
     process_error("mutex_wait destroy", pthread_mutex_destroy(&mutex_wait));
     process_error("mutex_finish_count destroy", pthread_mutex_destroy(&mutex_finish_count));
     process_error("mutex_visited destroy", pthread_mutex_init(&mutex_visited, NULL));
-    process_error("mutex_d destroy", pthread_mutex_init(&mutex_d, NULL));
 }
 
 void process_error(char *name, int result)
