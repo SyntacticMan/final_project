@@ -26,8 +26,13 @@ typedef struct _thread_data
     int end_col;
     float *local_graph;
     float *local_d;
-    bool *visited;
-} ThreadData;
+    // bool *visited;
+    // int *v_t;
+    // float *global_weight;
+    // int *global_u;
+    int min_u;
+
+} thread_data;
 
 typedef struct _main_data
 {
@@ -49,36 +54,36 @@ pthread_barrier_t finish_barrier;
 pthread_barrier_t barrier;
 
 // variáveis partilhadas
-int min_u, finish_count;
+int min_u; //, finish_count;
 int *global_u;
 float *global_weight;
 int *v_t;
 bool *visited;
-float *d;
+// float *d;
 
-static int get_u(float *d, int *v_t, int v, bool *visited, int start_col, int end_col);
+static int get_u(float *d, int v, int start_col, int end_col);
 
 static float *split_graph(float *graph, int start_col, int end_col, int graph_size);
 static float *split_d(float *d, int start_col, int end_col, int graph_size);
-static bool all_visited(bool *visited, int graph_size);
+static bool all_visited(int graph_size);
 
 /*
     funções de acesso a recursos partilhados
 */
-static void set_vt(int *v_t, int index, int value);
-static int get_vt(int *v_t, int index);
-static void set_visited(bool *visited, int index, bool value);
-static bool get_visited(bool *visited, int index);
+static void set_vt(int index, int value);
+static int get_vt(int index);
+static void set_visited(int index, bool value);
+static bool get_visited(int index);
 static void set_d(float *d, int index, float value);
 static float get_d(float *d, int index);
-static int get_min_u(void);
-static void set_min_u(int value);
+static int get_min_u(int min_u);
+static void set_min_u(int min_u, int value);
 static int get_global_u(int index);
 static void set_global_u(int index, int value);
 static float get_global_weight(int index);
 static void set_global_weight(int index, float value);
-static int get_finish_count(void);
-static void set_finish_count(void);
+// static int get_finish_count(void);
+// static void set_finish_count(void);
 
 static void process_error(char *name, int result);
 
@@ -97,9 +102,10 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
     v_t = malloc((graph_size + 1) * sizeof(int));
     visited = malloc((graph_size + 1) * sizeof(bool));
-    d = malloc((graph_size + 1) * sizeof(float));
+    float *d = malloc((graph_size + 1) * sizeof(float));
     global_u = malloc((num_threads + 1) * sizeof(int));
     global_weight = malloc((num_threads + 1) * sizeof(float));
+    int min_u = graph_root;
 
     // inicializar os vetores
     if (global_u != NULL)
@@ -118,32 +124,39 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     initialize_mutexes();
 
     // tarefas acessórias
-    ThreadData thread_data[num_threads];
+    thread_data thread_data[num_threads];
 
     // calcular o número de vértices (n) a alocar a cada processo
     int num_vertices = graph_size / num_threads;
 
     // inicializar a árvore mínima
+
+    set_vt(graph_root, graph_root);
+    d[graph_root] = 0; // set_d(d, graph_root, 0);
+    set_visited(graph_root, true);
+
     for (int v = 1; v <= graph_size; v++)
     {
         if (v != graph_root)
-            visited[v] = false;
+            set_visited(v, false);
 
         float weight = get_edge(graph, graph_root, v);
 
         if (weight < INFINITE)
         {
             d[v] = weight;
-            v_t[v] = graph_root;
+            // set_d(d, v, weight);
+            set_vt(v, graph_root);
         }
         else
         {
             d[v] = INFINITE;
-            v_t[v] = 0; // marcado a 0 pois não há nenhum vértice 0
+            // set_d(d, v, INFINITE);
+            set_vt(v, 0);
         }
 
 #ifdef DEBUG
-        printf("d[%d]=%0.2f\tv_t[%d]=%d\n", v, d[v], v, v_t[v]);
+        printf("d[%d]=%0.2f\tv_t[%d]=%d\n", v, d[v] /*get_d(d, v)*/, v, get_vt(v));
 #endif
     }
 
@@ -164,18 +177,21 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         // criar o subconjunto de V a alocar à tarefa
         thread_data[i].local_graph = split_graph(graph, start_col, end_col, graph_size);
         thread_data[i].local_d = split_d(d, start_col, end_col, graph_size);
-        thread_data[i].visited = visited;
+        // thread_data[i].visited = visited;
+        // thread_data[i].global_u = global_u;
+        // thread_data[i].global_weight = global_weight;
+        thread_data[i].min_u = min_u;
+        // thread_data[i].v_t = v_t;
 
 #ifdef TRACE
         print_graph_mt(thread_data[i].local_graph, start_col, end_col, graph_size);
-        // print_graph(thread_data[i].local_graph, graph_size);
 #endif
 
         process_error("worker_thread create", pthread_create(&threads[i], NULL, prim_mst, (void *)&thread_data[i]));
     }
 
     // while vt != v
-    while (!all_visited(visited, graph_size))
+    while (!all_visited(graph_size))
     {
 
 #ifdef DEBUG
@@ -186,20 +202,20 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 #ifdef DEBUG
         printf("Main resume from barrier\n");
 #endif
-        set_min_u(0);
+        set_min_u(min_u, 0);
         int min_weight = INFINITE;
 
         for (int i = 0; i < num_threads; i++)
         {
             if (get_global_weight(i) < min_weight)
             {
-                set_min_u(get_global_u(i));
+                set_min_u(min_u, get_global_u(i));
                 min_weight = get_global_weight(i);
             }
         }
 
 #ifdef DEBUG
-        printf("global_min_u: %d\n", get_min_u());
+        printf("broadcast global_min_u: %d\n", get_min_u(min_u));
 #endif
 
         // fazer a transmissão
@@ -230,87 +246,89 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
 void *prim_mst(void *arg)
 {
-    ThreadData *data = (ThreadData *)arg;
+    thread_data *data = (thread_data *)arg;
 
 #ifdef DEBUG
     printf("thread %d: start_col = %d || end_col = %d\n", data->thread_id, data->start_col, data->end_col);
 
     // print_graph_mt(local_graph, data->start_col, data->end_col, data->graph_size);
 #endif
-
-    for (int v = data->start_col; v <= data->end_col; v++)
+    while (!all_visited(data->graph_size))
     {
-        // excluir v-v_t
-        if (get_visited(data->visited, v))
-            continue;
-
-        // obter o vértice u
-        int u = get_u(data->local_d, v_t, v, data->visited, data->start_col, data->end_col);
-
-#ifdef DEBUG
-        printf("[thread %d] Found u: %d (v=%d)\n", data->thread_id, u, v);
-#endif
-
-        // enviar para ser avaliado
-        set_global_u(data->thread_id, u);
-        set_global_weight(data->thread_id, get_edge(data->local_graph, v, u));
-
-#ifdef DEBUG
-        printf("Thread %d hold at barrier\n", data->thread_id);
-#endif
-
-        pthread_barrier_wait(&barrier);
-#ifdef DEBUG
-        printf("Thread %d resume from barrier\n", data->thread_id);
-#endif
-
-#ifdef DEBUG
-        printf("Thread %d hold at condition\n", data->thread_id);
-#endif
-
-        pthread_mutex_lock(&mutex_wait);
-        pthread_cond_wait(&cond, &mutex_wait);
-        pthread_mutex_unlock(&mutex_wait);
-
-#ifdef DEBUG
-        printf("Thread %d resume from condition\n", data->thread_id);
-#endif
-
-        // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
-        int min_u = get_min_u();
-        if (min_u == u)
-            set_visited(data->visited, u, true);
-        else
-            u = min_u;
-
-        for (int i = 1; i <= data->graph_size; i++)
+        for (int v = data->start_col; v <= data->end_col; v++)
         {
-            // excluir a diagonal e v-v_t
-            if (get_visited(data->visited, i) || i == u)
-            {
+            // excluir v-v_t
+            if (get_visited(v))
+                continue;
+
+            // obter o vértice u
+            int u = get_u(data->local_d, v, data->start_col, data->end_col);
+
 #ifdef DEBUG
-                printf("Excluding v = %d\n", i);
+            printf("[thread %d] Found u: %d (v=%d)\n", data->thread_id, u, v);
 #endif
-                continue;
-            }
 
-            float u_weight = get_edge(data->local_graph, u, i);
-            float d_weight = get_d(d, i);
+            // enviar para ser avaliado
+            set_global_u(data->thread_id, u);
+            set_global_weight(data->thread_id, get_edge(data->local_graph, v, u));
 
-            if (u_weight == INFINITE)
-                continue;
+#ifdef DEBUG
+            printf("Thread %d hold at barrier\n", data->thread_id);
+#endif
 
-            if (u_weight < d_weight)
+            pthread_barrier_wait(&barrier);
+#ifdef DEBUG
+            printf("Thread %d resume from barrier\n", data->thread_id);
+#endif
+
+#ifdef DEBUG
+            printf("Thread %d hold at condition\n", data->thread_id);
+#endif
+
+            pthread_mutex_lock(&mutex_wait);
+            pthread_cond_wait(&cond, &mutex_wait);
+            pthread_mutex_unlock(&mutex_wait);
+
+#ifdef DEBUG
+            printf("Thread %d resume from condition\n", data->thread_id);
+#endif
+
+            // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
+            int min_u = get_min_u(data->min_u);
+            if (min_u == u)
+                set_visited(u, true);
+            else
+                u = min_u;
+
+            for (int i = 1; i <= data->graph_size; i++)
             {
-                set_d(d, i, u_weight);
-                set_vt(v_t, i, u);
+                // excluir a diagonal e v-v_t
+                if (get_visited(i) || i == u)
+                {
+#ifdef DEBUG
+                    printf("Excluding v = %d\n", i);
+#endif
+                    continue;
+                }
+
+                float u_weight = get_edge(data->local_graph, u, i);
+                float d_weight = data->local_d[i]; // get_d(data->local_d, i);
+
+                if (u_weight == INFINITE)
+                    continue;
+
+                if (u_weight < d_weight)
+                {
+                    set_d(data->local_d, i, u_weight);
+                    set_vt(i, u);
+                }
             }
         }
     }
 #ifdef DEBUG
     for (int i = data->start_col; i <= data->end_col; i++)
     {
-        printf("Thread %d=> d[%d]=%0.2f\tv_t[%d]=%d\n", data->thread_id, i, get_d(data->local_d, i), i, get_vt(v_t, i));
+        printf("Thread %d=> d[%d]=%0.2f\tv_t[%d]=%d\n", data->thread_id, i, get_d(data->local_d, i), i, get_vt(i));
     }
     printf("Thread %d finished\n", data->thread_id);
 #endif
@@ -324,18 +342,18 @@ void *prim_mst(void *arg)
     obtém o vértice com o menor peso em d
     dos que pertencem a v-v_t
 */
-int get_u(float *d, int *v_t, int v, bool *visited, int start_col, int end_col)
+int get_u(float *d, int v, int start_col, int end_col)
 {
-    int u_min = get_vt(v_t, v);
-    float min_weight = get_d(d, v);
+    int u_min = get_vt(v);
+    float min_weight = d[v]; // get_d(d, v);
 
     for (int u = start_col; u <= end_col; u++)
     {
         // excluir os já visitados (v-vt)
-        if (get_visited(visited, u) || u == v)
+        if (get_visited(u) || u == v)
             continue;
 
-        float d_weight = get_d(d, u);
+        float d_weight = d[u]; // get_d(d, u);
 
         if (d_weight < min_weight)
         {
@@ -403,26 +421,29 @@ float *split_d(float *d, int start_col, int end_col, int graph_size)
 
     float *split_d = malloc((graph_size + 1) * sizeof(float));
 
-    for (int i = 1; i < graph_size; i++)
+    for (int i = 1; i <= graph_size; i++)
     {
         if (i >= start_col && i <= end_col)
         {
-            split_d[i] = d[i];
+            split_d[i] = get_d(d, i);
         }
         else
         {
             split_d[i] = -1;
         }
+#ifdef DEBUG
+        printf("split_d[%d]=%0.2f\tv_t[%d]=%d\n", i, split_d[i] /*get_d(d, v)*/, i, get_vt(i));
+#endif
     }
 
     return split_d;
 }
 
-bool all_visited(bool *visited, int graph_size)
+bool all_visited(int graph_size)
 {
     for (int i = 0; i < graph_size; i++)
     {
-        if (!visited[i])
+        if (!get_visited(i))
             return false;
     }
     return true;
@@ -431,14 +452,14 @@ bool all_visited(bool *visited, int graph_size)
 /******************************************************************************
  * Funções para aceder aos recursos partilhados
  *******************************************************************************/
-void set_vt(int *v_t, int index, int value)
+void set_vt(int index, int value)
 {
     process_error("lock vt", pthread_mutex_lock(&mutex_vt));
     v_t[index] = value;
     process_error("unlock vt", pthread_mutex_unlock(&mutex_vt));
 }
 
-int get_vt(int *v_t, int index)
+int get_vt(int index)
 {
     process_error("lock vt", pthread_mutex_lock(&mutex_vt));
     float result = v_t[index];
@@ -446,14 +467,14 @@ int get_vt(int *v_t, int index)
     return result;
 }
 
-void set_visited(bool *visited, int index, bool value)
+void set_visited(int index, bool value)
 {
     process_error("lock visited", pthread_mutex_lock(&mutex_visited));
     visited[index] = value;
     process_error("unlock visited", pthread_mutex_unlock(&mutex_visited));
 }
 
-bool get_visited(bool *visited, int index)
+bool get_visited(int index)
 {
     process_error("lock visited", pthread_mutex_lock(&mutex_visited));
     bool result = visited[index];
@@ -475,14 +496,14 @@ float get_d(float *d, int index)
     process_error("unlock d", pthread_mutex_unlock(&mutex_d));
     return result;
 }
-void set_min_u(int value)
+void set_min_u(int min_u, int value)
 {
     process_error("lock minu", pthread_mutex_lock(&mutex_minu));
     min_u = value;
     process_error("unlock minu", pthread_mutex_unlock(&mutex_minu));
 }
 
-int get_min_u(void)
+int get_min_u(int min_u)
 {
     process_error("lock minu", pthread_mutex_lock(&mutex_minu));
     int result = min_u;
@@ -499,17 +520,17 @@ void set_global_u(int index, int value)
 
 int get_global_u(int index)
 {
-    process_error("lock globalu", pthread_mutex_lock(&mutex_globalu));
+    process_error("lock global_u", pthread_mutex_lock(&mutex_globalu));
     int result = global_u[index];
-    process_error("unlock globalu", pthread_mutex_unlock(&mutex_globalu));
+    process_error("unlock global_u", pthread_mutex_unlock(&mutex_globalu));
     return result;
 }
 
 void set_global_weight(int index, float value)
 {
-    process_error("lock globalweight", pthread_mutex_lock(&mutex_globalweight));
+    process_error("lock global_weight", pthread_mutex_lock(&mutex_globalweight));
     global_weight[index] = value;
-    process_error("unlock globalweight", pthread_mutex_unlock(&mutex_globalweight));
+    process_error("unlock global_weight", pthread_mutex_unlock(&mutex_globalweight));
 }
 
 float get_global_weight(int index)
@@ -520,20 +541,20 @@ float get_global_weight(int index)
     return result;
 }
 
-void set_finish_count(void)
-{
-    process_error("lock finish_count", pthread_mutex_lock(&mutex_finish_count));
-    finish_count++;
-    process_error("unlock finish_count", pthread_mutex_unlock(&mutex_finish_count));
-}
+// void set_finish_count(void)
+// {
+//     process_error("lock finish_count", pthread_mutex_lock(&mutex_finish_count));
+//     finish_count++;
+//     process_error("unlock finish_count", pthread_mutex_unlock(&mutex_finish_count));
+// }
 
-int get_finish_count(void)
-{
-    process_error("lock finish_count", pthread_mutex_lock(&mutex_finish_count));
-    int result = finish_count;
-    process_error("unlock finish_count", pthread_mutex_unlock(&mutex_finish_count));
-    return result;
-}
+// int get_finish_count(void)
+// {
+//     process_error("lock finish_count", pthread_mutex_lock(&mutex_finish_count));
+//     int result = finish_count;
+//     process_error("unlock finish_count", pthread_mutex_unlock(&mutex_finish_count));
+//     return result;
+// }
 
 void initialize_mutexes(void)
 {
