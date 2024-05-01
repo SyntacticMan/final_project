@@ -219,7 +219,7 @@ void *worker_prim(void *arg)
     thread_data *data = (thread_data *)arg;
 
 #ifdef DEBUG
-    printf("thread %d: start_col = %d || end_col = %d\n", data->thread_id, data->start_col, data->end_col);
+    printf("[thread %d]: start_col = %d || end_col = %d\n", data->thread_id, data->start_col, data->end_col);
 
     // print_graph_mt(local_graph, data->start_col, data->end_col, data->graph_size);
 #endif
@@ -249,7 +249,7 @@ void *worker_prim(void *arg)
         int local_min_u = get_min_u();
 
 #ifdef DEBUG
-        printf("Thread %d received min_u = %d\n", data->thread_id, local_min_u);
+        printf("[thread %d] received min_u = %d\n", data->thread_id, local_min_u);
 #endif
 
         if (local_min_u == u)
@@ -284,9 +284,9 @@ void *worker_prim(void *arg)
 #ifdef DEBUG
     for (int i = data->start_col; i <= data->end_col; i++)
     {
-        printf("Thread %d=> d[%d]=%0.2f\tv_t[%d]=%d\n", data->thread_id, i, data->local_d[i], i, get_vt(i));
+        printf("[thread %d]=> d[%d]=%0.2f\tv_t[%d]=%d\n", data->thread_id, i, data->local_d[i], i, get_vt(i));
     }
-    printf("Thread %d finished\n", data->thread_id);
+    printf("[thread %d] finished\n", data->thread_id);
 #endif
     while (!all_visited(data->graph_size))
     {
@@ -410,19 +410,19 @@ bool all_visited(int graph_size)
 void barrier_wait(int thread_id)
 {
 #ifdef DEBUG
-    printf("Thread %d hold at barrier\n", thread_id);
+    printf("[thread %d] hold at barrier\n", thread_id);
 #endif
 
     pthread_barrier_wait(&barrier);
 #ifdef DEBUG
-    printf("Thread %d resume from barrier\n", thread_id);
+    printf("[thread %d] resume from barrier\n", thread_id);
 #endif
 }
 
 void cond_wait(int thread_id)
 {
 #ifdef DEBUG
-    printf("Thread %d hold at condition \n", thread_id);
+    printf("[thread %d] hold at condition \n", thread_id);
 #endif
 
     pthread_mutex_lock(&mutex_wait);
@@ -430,7 +430,7 @@ void cond_wait(int thread_id)
     pthread_mutex_unlock(&mutex_wait);
 
 #ifdef DEBUG
-    printf("Thread %d resume from condition\n", thread_id);
+    printf("[thread %d] resume from condition\n", thread_id);
 #endif
 }
 
@@ -439,7 +439,9 @@ void cond_broadcast(void)
 #ifdef DEBUG
     printf("condition broadcast\n");
 #endif
+    pthread_mutex_lock(&mutex_wait);
     pthread_cond_broadcast(&cond);
+    pthread_mutex_unlock(&mutex_wait);
 }
 
 /******************************************************************************
