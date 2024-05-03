@@ -17,6 +17,13 @@
 #include "prim_mt.h"
 #endif
 
+typedef struct
+{
+    pthread_mutex_t mutex;
+    pthread_cond_t condition;
+    int count;
+} CountdownLatch;
+
 typedef struct _thread_data
 {
     int thread_id;
@@ -46,6 +53,8 @@ pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
 pthread_barrier_t finish_barrier;
 pthread_barrier_t barrier;
+
+CountdownLatch finish_latch;
 
 // variáveis partilhadas
 int min_u;
@@ -90,6 +99,11 @@ static void cond_broadcast(void);
 
 static void *worker_prim(void *arg);
 
+void countdown_latch_init(CountdownLatch *latch, int initial_count);
+void countdown_latch_count_down(CountdownLatch *latch);
+void countdown_latch_await(CountdownLatch *latch);
+void countdown_latch_destroy(CountdownLatch *latch);
+
 int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 {
     // certificar que não se pedem mais processos que vértices
@@ -116,7 +130,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
     // inicializar condições e barreira
     process_error("pthread_cond_init", pthread_cond_init(&cond, NULL));
-    process_error("barrier_init", pthread_barrier_init(&barrier, NULL, num_threads + 1));
+    // process_error("barrier_init", pthread_barrier_init(&barrier, NULL, num_threads + 1));
     initialize_mutexes();
 
     // tarefas acessórias
@@ -177,20 +191,31 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     }
 
     // while vt != v
+
+    int valor = 0;
+
     while (!all_visited(graph_size))
     {
-        set_thread_counter(0);
-        barrier_wait(-1);
-        // Wait for all threads to reach the barrier
-        pthread_mutex_lock(&mutex_sync);
+        countdown_latch_init(&finish_latch, num_threads);
 
-        while (get_thread_counter() < num_threads + 1)
-        {
-            pthread_cond_wait(&cond, &mutex_sync);
-        }
+        valor++;
+        pthread_mutex_lock(&mutex_thread_counter);   // Lock the mutex
+        thread_counter = 0;                          // Reset thread_counter within the critical section
+        pthread_mutex_unlock(&mutex_thread_counter); // Unlock the mutex
 
-        pthread_mutex_unlock(&mutex_sync);
+#ifdef DEBUG
+        printf("[thread %ld] hold at barrier\n", pthread_self());
+        printf("Numero de ciclos: %d\n", valor);
+#endif
 
+        // pthread_barrier_wait(&barrier);
+        countdown_latch_await(&finish_latch);
+
+#ifdef DEBUG
+        printf("[thread %ld] resume from barrier\n", pthread_self());
+#endif
+
+        // sleep(5);
         set_min_u(0);
         float min_weight = INFINITE;
 
@@ -207,6 +232,8 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         printf("broadcast global_u: %d\tmin_weight: %0.2f\n", get_min_u(), min_weight);
 #endif
         cond_broadcast();
+
+        countdown_latch_destroy(&finish_latch);
     }
 
     for (int i = 0; i < num_threads; i++)
@@ -221,7 +248,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     free(v_t);
 
     destroy_mutexes();
-    process_error("barrier destroy", pthread_barrier_destroy(&barrier));
+    // process_error("barrier destroy", pthread_barrier_destroy(&barrier));
     process_error("condition destroy", pthread_cond_destroy(&cond));
 
 #ifdef DEBUG
@@ -259,16 +286,18 @@ void *worker_prim(void *arg)
             set_global_u(data->thread_id, u);
             set_global_weight(data->thread_id, get_edge(data->local_graph, v, u));
 
-            barrier_wait(data->thread_id);
+// barrier_wait(data->thread_id);
+#ifdef DEBUG
+            printf("[thread %d] Vai baixar o countdownLatch:", data->thread_id);
+#endif
 
-            // // Increment counter atomically
-            pthread_mutex_lock(&mutex_sync);
-            set_thread_counter(get_thread_counter() + 1);
-            pthread_cond_signal(&cond); // Signal main thread
-            pthread_mutex_unlock(&mutex_sync);
+            countdown_latch_count_down(&finish_latch);
 
-            cond_wait(data->thread_id);
+            printf("[thread %d] dos bolos = %ld\n", data->thread_id, pthread_self());
 
+            // cond_wait(data->thread_id);
+
+            // #### Aqui vai seguir a 2 fase. #####
             // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
             int local_min_u = get_min_u();
 
@@ -514,9 +543,9 @@ int get_min_u()
 
 void set_thread_counter(int value)
 {
-    process_error("lock thread_counter", pthread_mutex_lock(&mutex_thread_counter));
-    thread_counter = value;
-    process_error("unlock thread_counter", pthread_mutex_unlock(&mutex_thread_counter));
+    // process_error("lock thread_counter", pthread_mutex_lock(&mutex_thread_counter));
+    // thread_counter = value;
+    // process_error("unlock thread_counter", pthread_mutex_unlock(&mutex_thread_counter));
 }
 
 int get_thread_counter(void)
@@ -587,4 +616,38 @@ void process_error(char *name, int result)
 {
     if (result != 0)
         printf("%s has returned an error\n", name);
+}
+
+void countdown_latch_init(CountdownLatch *latch, int initial_count)
+{
+    pthread_mutex_init(&latch->mutex, NULL);
+    pthread_cond_init(&latch->condition, NULL);
+    latch->count = initial_count;
+}
+
+void countdown_latch_count_down(CountdownLatch *latch)
+{
+    pthread_mutex_lock(&latch->mutex);
+    latch->count--;
+    if (latch->count == 0)
+    {
+        pthread_cond_broadcast(&latch->condition);
+    }
+    pthread_mutex_unlock(&latch->mutex);
+}
+
+void countdown_latch_await(CountdownLatch *latch)
+{
+    pthread_mutex_lock(&latch->mutex);
+    while (latch->count > 0)
+    {
+        pthread_cond_wait(&latch->condition, &latch->mutex);
+    }
+    pthread_mutex_unlock(&latch->mutex);
+}
+
+void countdown_latch_destroy(CountdownLatch *latch)
+{
+    pthread_mutex_destroy(&latch->mutex);
+    pthread_cond_destroy(&latch->condition);
 }
