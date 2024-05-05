@@ -169,3 +169,41 @@ int *read_mst(char *filename)
 
     return v_t;
 }
+
+void write_result(char *graph_name, int graph_size, int graph_root, double elapsed_time, char *implementation_type)
+{
+    FILE *file;
+    char filename[] = "prim_results.csv";
+    // char line[100]; // Assuming maximum line length is 100 characters
+
+    // Open the file for reading and writing in append mode
+    file = fopen(filename, "a+");
+
+    // Check if the file opened successfully
+    if (file == NULL)
+    {
+        printf("Failed to open the file.\n");
+        return;
+    }
+
+    // Check if the file is empty
+    fseek(file, 0, SEEK_END);
+    if (ftell(file) == 0)
+    {
+        // File is empty, so add the header
+        fprintf(file, "graph_name;graph_size;graph_root;elapsed_time;implementation_type\n");
+    }
+
+    // Reset file pointer to the beginning of the file
+    rewind(file);
+
+    fprintf(file, "%s;%d;%d;%f;%s\n", graph_name, graph_size, graph_root, elapsed_time, implementation_type);
+    // Read and print each line until the end of the file
+    // while (fgets(line, sizeof(line), file)) {
+    //     // Print the line (assuming each line contains comma-separated values)
+    //     printf("%s", line);
+    // }
+
+    // Close the file
+    fclose(file);
+}
