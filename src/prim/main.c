@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
     int opt;
     int threads = 1; // por omissão correr apenas numa thread
     bool print_agm = false;
+    char *implementation_type;
 
     while ((opt = getopt(argc, argv, "f:t:p")) != -1)
     {
@@ -133,11 +134,13 @@ int main(int argc, char *argv[])
         // lançar single thread
         printf("Lançando Algoritmo de Prim em tarefa simples\n");
         v_t = prim_mst(graph, graph_header->graph_size, graph_root);
+        implementation_type = "ST";
     }
     else
     {
         printf("Lançando Algoritmo de Prim com %d threads\n", threads);
         v_t = prim_mt_mst(graph, graph_header->graph_size, graph_root, threads);
+        implementation_type = "MT";
     }
 
     // emitir o tempo de execução do algoritmo
@@ -160,8 +163,12 @@ int main(int argc, char *argv[])
     // actualizar o ficheiro do grafo
     write_mst(v_t, graph_header->graph_size, graph_root, graph_filename);
 
+    // guardar os resultados para estatística
+    write_result(graph_filename, graph_header->graph_size, graph_root, elapsed_time, implementation_type);
+
     free(graph);
     free(graph_header);
+    free(v_t);
 }
 
 /*
