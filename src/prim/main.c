@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
     write_mst(v_t, graph_header->graph_size, graph_root, graph_filename);
 
     // guardar os resultados para estatística
-    write_result(graph_filename, graph_header->graph_size, graph_header->graph_root, elapsed_time, implementation_type);
+    write_result(graph_filename, graph_header->graph_size, graph_root, elapsed_time, implementation_type);
 
     free(graph);
     free(graph_header);

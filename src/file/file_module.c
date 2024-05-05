@@ -173,7 +173,7 @@ int *read_mst(char *filename)
 void write_result(char *graph_name, int graph_size, int graph_root, double elapsed_time, char *implementation_type)
 {
     FILE *file;
-    char filename[] = "prim_results.csv";
+    char filename[] = "results/prim_results.csv";
     // char line[100]; // Assuming maximum line length is 100 characters
 
     // Open the file for reading and writing in append mode
