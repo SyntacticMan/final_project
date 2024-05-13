@@ -102,7 +102,7 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
                 v_t[i] = u;
 
 #ifdef DEBUG
-                printf("v= %d | d[%d] = %0.2f | v_t[%d]=%d\n", v, i, d[i], i, v_t[i]);
+                printf("set d[%d] = %0.2f | v_t[%d]=%d\n", i, d[i], i, v_t[i]);
 #endif
             }
         }
