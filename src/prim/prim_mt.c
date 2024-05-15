@@ -100,8 +100,8 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     v_t = malloc((graph_size + 1) * sizeof(int));
     visited = malloc((graph_size + 1) * sizeof(bool));
     float *d = malloc((graph_size + 1) * sizeof(float));
-    global_u = malloc((num_threads + 1) * sizeof(int));
-    global_weight = malloc((num_threads + 1) * sizeof(float));
+    global_u = malloc((num_threads) * sizeof(int));
+    global_weight = malloc((num_threads) * sizeof(float));
     min_u = graph_root;
     thread_counter = 0;
     global_u_set = false;
@@ -109,10 +109,10 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
     // inicializar os vetores globais a 0
     if (global_u != NULL)
-        memset(global_u, 0, (num_threads + 1) * sizeof(int));
+        memset(global_u, 0, (num_threads) * sizeof(int));
 
     if (global_weight != NULL)
-        memset(global_weight, 0, (num_threads + 1) * sizeof(float));
+        memset(global_weight, 0, (num_threads) * sizeof(float));
 
     // inicializar condições e barreira
     process_error("pthread_cond_init", pthread_cond_init(&cond, NULL));
@@ -129,6 +129,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     v_t[graph_root] = graph_root;
     d[graph_root] = 0;
     visited[graph_root] = true;
+    visited[0] = false;
 
     for (int v = 1; v <= graph_size; v++)
     {
@@ -238,6 +239,8 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     for (int i = 0; i < num_threads; i++)
     {
         pthread_join(threads[i], (void **)NULL);
+        free(thread_data[i].local_d);
+        free(thread_data[i].local_graph);
     }
 
     free(global_u);
@@ -491,7 +494,7 @@ float *split_d(float *d, int start_col, int end_col, int graph_size)
 
     float *split_d = malloc((graph_size + 1) * sizeof(float));
 
-    for (int i = 1; i <= graph_size; i++)
+    for (int i = 0; i <= graph_size; i++)
     {
         if (i >= start_col && i <= end_col)
         {
