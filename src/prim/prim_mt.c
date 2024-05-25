@@ -35,11 +35,6 @@ typedef struct _thread_data
     float *local_d;
 } thread_data;
 
-// typedef struct _main_data
-// {
-//     int num_threads;
-// } MainData;
-
 pthread_mutex_t mutex_minu;
 pthread_mutex_t mutex_lock;
 pthread_mutex_t mutex_sync;
@@ -53,9 +48,6 @@ pthread_mutex_t mutex_thread_counter;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 pthread_cond_t cond_wait = PTHREAD_COND_INITIALIZER;
 pthread_cond_t cond_finished = PTHREAD_COND_INITIALIZER;
-
-// pthread_barrier_t finish_barrier;
-// pthread_barrier_t barrier;
 
 CountdownLatch finish_latch;
 
@@ -83,11 +75,6 @@ static void destroy_mutexes(void);
 
 static void *worker_prim(void *arg);
 
-void countdown_latch_init(CountdownLatch *latch, int initial_count);
-void countdown_latch_count_down(CountdownLatch *latch);
-void countdown_latch_await(CountdownLatch *latch);
-void countdown_latch_destroy(CountdownLatch *latch);
-
 int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 {
     // certificar que não se pedem mais processos que vértices
@@ -114,9 +101,8 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     if (global_weight != NULL)
         memset(global_weight, 0, (num_threads) * sizeof(float));
 
-    // inicializar condições e barreira
+    // inicializar condições
     process_error("pthread_cond_init", pthread_cond_init(&cond, NULL));
-    // process_error("barrier_init", pthread_barrier_init(&barrier, NULL, num_threads + 1));
     initialize_mutexes();
 
     // tarefas acessórias
@@ -186,7 +172,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         valor++;
 
         pthread_mutex_lock(&mutex_sync);
-
         while (thread_counter < num_threads)
         {
 #ifdef DEBUG
@@ -209,7 +194,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
         for (int i = 0; i < num_threads; i++)
         {
-            printf("global_u[%d] -> global_weight[%0.3f]\n", global_u[i], global_weight[i]);
 
             if (visited[global_u[i]])
                 continue;
@@ -219,11 +203,18 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
                 min_u = global_u[i];
                 min_weight = global_weight[i];
             }
+
+            printf("global_u[%d] = %d\tglobal_weight[%d] = %0.3f\n", i, global_u[i], i, global_weight[i]);
         }
 
         global_u_set = true;
 #ifdef DEBUG
         printf("[thread main] broadcast global_u: %d\tmin_weight: %0.2f\n", min_u, min_weight);
+
+        for (int v = 1; v <= graph_size; v++)
+        {
+            printf("d[%d]=%0.2f\tv_t[%d]=%d\tvisited[%d]=%d\n", v, d[v], v, v_t[v], v, visited[v]);
+        }
 #endif
         pthread_mutex_unlock(&mutex_lock);
 
@@ -267,7 +258,7 @@ void *worker_prim(void *arg)
     printf("[thread %d]: start_col = %d || end_col = %d\n", data->thread_id, data->start_col, data->end_col);
 #endif
 
-    bool local_all_visited = all_visited(6);
+    bool local_all_visited = all_visited(data->graph_size);
 
     while (!local_all_visited)
     {
@@ -276,9 +267,11 @@ void *worker_prim(void *arg)
             pthread_mutex_lock(&mutex_lock);
             local_visited = visited[v];
             pthread_mutex_unlock(&mutex_lock);
+
             // excluir v-v_t
             if (local_visited)
                 continue;
+
             // obter o vértice u
             int u = get_u(data->local_d, v, data->start_col, data->end_col);
 
@@ -288,31 +281,34 @@ void *worker_prim(void *arg)
 
             // enviar para ser avaliado
             pthread_mutex_lock(&mutex_lock);
+
             global_u[data->thread_id] = u;
             global_weight[data->thread_id] = get_edge(data->local_graph, v, u);
-            pthread_mutex_unlock(&mutex_lock);
 
-            pthread_mutex_lock(&mutex_sync);
+            // indicar que obteve o u
             if (thread_counter < data->num_threads)
                 thread_counter++;
+
             pthread_cond_signal(&cond_wait);
+            pthread_mutex_unlock(&mutex_lock);
 
 #ifdef DEBUG
             printf("[thread %d] signal main thread to resume\tthread_counter: %d\n", data->thread_id, thread_counter);
 #endif
 
             // aguardar que o global_u tenha sido calculado
-            while (!global_u_set)
-            {
+            // while (!global_u_set)
+            // {
+            pthread_mutex_lock(&mutex_sync);
 #ifdef DEBUG
-                printf("[thread %d] waiting for main thread to compute global_u\n", data->thread_id);
+            printf("[thread %d] waiting for main thread to compute global_u\n", data->thread_id);
 #endif
-                pthread_cond_wait(&cond, &mutex_sync);
-            }
+            pthread_cond_wait(&cond, &mutex_sync);
+            pthread_mutex_unlock(&mutex_sync);
+            // }
 #ifdef DEBUG
             printf("[thread %d] main thread says resume\n", data->thread_id);
 #endif
-            pthread_mutex_unlock(&mutex_sync);
 
             // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
             pthread_mutex_lock(&mutex_lock);
@@ -329,7 +325,7 @@ void *worker_prim(void *arg)
                 visited[local_min_u] = true;
                 pthread_mutex_unlock(&mutex_lock);
 #ifdef DEBUG
-                printf("[thread %d] set %d as visited\n", data->thread_id, u);
+                printf("[thread %d]  ===== set %d as visited ===== \n", data->thread_id, u);
 #endif
             }
 
@@ -367,20 +363,21 @@ void *worker_prim(void *arg)
                     data->local_d[i] = u_weight;
                     pthread_mutex_lock(&mutex_lock);
                     v_t[i] = u;
-                    printf("[thread %d] set d[%d]=%0.2f\tv_t[%d]=%d\n", data->thread_id, i, data->local_d[i], i, v_t[i]);
+                    printf("[thread %d] ==== set d[%d]=%0.2f\tv_t[%d]=%d ==== \n", data->thread_id, i, data->local_d[i], i, v_t[i]);
                     pthread_mutex_unlock(&mutex_lock);
                 }
             }
-            local_all_visited = all_visited(6);
-        }
 
-        // se ainda existirem vértices por visitar, recomeçar
-        // pthread_mutex_lock(&mutex_lock);
-        // if (v == data->end_col && !all_vertices_visited)
-        // {
-        //     v = data->start_col;
-        // }
-        // pthread_mutex_unlock(&mutex_lock);
+            // revalidar se todos os vértices já foram visitados
+            local_all_visited = all_visited(data->graph_size);
+
+#ifdef DEBUG
+            for (int v = 1; v <= data->graph_size; v++)
+            {
+                printf("[thread %d]\td[%d]=%0.2f\n", data->thread_id, v, data->local_d[v]);
+            }
+#endif
+        }
     }
 
 #ifdef DEBUG
@@ -414,6 +411,8 @@ int get_u(float *d, int v, int start_col, int end_col)
 {
     pthread_mutex_lock(&mutex_lock);
     int u_min = v_t[v];
+    pthread_mutex_unlock(&mutex_lock);
+
     float min_weight = d[v];
 
     for (int u = start_col; u <= end_col; u++)
@@ -433,7 +432,6 @@ int get_u(float *d, int v, int start_col, int end_col)
             min_weight = d[u];
         }
     }
-    pthread_mutex_unlock(&mutex_lock);
 
     return u_min;
 }

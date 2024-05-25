@@ -14,3 +14,5 @@ src/.vs/*
 *.dot
 x86_64
 book_graph
+test_mt.txt
+test_st.txt
