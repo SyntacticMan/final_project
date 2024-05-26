@@ -1,0 +1,1 @@
+./bin/prim -f graph.grf -t 3
