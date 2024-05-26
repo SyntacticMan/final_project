@@ -267,16 +267,6 @@ void *worker_prim(void *arg)
 
     while (!local_all_visited)
     {
-        // for (int v = data->start_col; v <= data->end_col; v++)
-        // {
-        // pthread_mutex_lock(&mutex_lock);
-        // local_visited = visited[v];
-        // pthread_mutex_unlock(&mutex_lock);
-
-        // excluir v-v_t
-        // if (local_visited)
-        //     continue;
-
         // obter o vértice u
         int u = get_u(data->local_d, data->start_col, data->end_col);
 
@@ -288,7 +278,6 @@ void *worker_prim(void *arg)
         pthread_mutex_lock(&mutex_lock);
 
         global_u[data->thread_id] = u;
-        // global_weight[data->thread_id] = get_edge(data->local_graph, v, u);
         global_weight[data->thread_id] = data->local_d[u];
 
         // indicar que obteve o u
@@ -302,16 +291,12 @@ void *worker_prim(void *arg)
         printf("[thread %d] signal main thread to resume\tthread_counter: %d\n", data->thread_id, thread_counter);
 #endif
 
-        // aguardar que o global_u tenha sido calculado
-        // while (!global_u_set)
-        // {
         pthread_mutex_lock(&mutex_sync);
 #ifdef DEBUG
         printf("[thread %d] waiting for main thread to compute global_u\n", data->thread_id);
 #endif
         pthread_cond_wait(&cond, &mutex_sync);
         pthread_mutex_unlock(&mutex_sync);
-        // }
 #ifdef DEBUG
         printf("[thread %d] main thread says resume\n", data->thread_id);
 #endif
@@ -383,7 +368,6 @@ void *worker_prim(void *arg)
             printf("[thread %d]\td[%d]=%0.2f\n", data->thread_id, v, data->local_d[v]);
         }
 #endif
-        // }
     }
 
 #ifdef DEBUG
@@ -415,9 +399,6 @@ void *worker_prim(void *arg)
 */
 int get_u(float *d, int start_col, int end_col)
 {
-    // pthread_mutex_lock(&mutex_lock);
-    // int u_min = v_t[v];
-    // pthread_mutex_unlock(&mutex_lock);
     int u_min = 0;
 
     // float min_weight = d[v];
