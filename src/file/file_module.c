@@ -86,7 +86,7 @@ void write_mst(int *v_t, int graph_size, int graph_root, char *filename)
     // fseek(graph_file, array_size, SEEK_CUR);
     fseek(graph_file, sizeof(header) + array_size, SEEK_SET);
 
-    for (int i = 0; i < g_header->vt_size; i++)
+    for (int i = 1; i < g_header->vt_size; i++)
     {
         fwrite(&v_t[i], sizeof(int), 1, graph_file); // Write each integer individually
     }

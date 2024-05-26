@@ -97,7 +97,7 @@ gdb_mt:
 	gdb --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 3
 
 valgrind_mt:
-	valgrind --track-origins=yes --leak-check=full $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 3
+	valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 3
 
 valgrind_st:
 	valgrind --track-origins=yes $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 1

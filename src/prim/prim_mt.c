@@ -17,13 +17,6 @@
 #include "prim_mt.h"
 #endif
 
-typedef struct
-{
-    pthread_mutex_t mutex;
-    pthread_cond_t condition;
-    int count;
-} CountdownLatch;
-
 typedef struct _thread_data
 {
     int thread_id;
@@ -35,21 +28,11 @@ typedef struct _thread_data
     float *local_d;
 } thread_data;
 
-// pthread_mutex_t mutex_minu;
 pthread_mutex_t mutex_lock;
-// pthread_mutex_t mutex_sync;
-// pthread_mutex_t mutex_globalu;
-// pthread_mutex_t mutex_globalweight;
-// pthread_mutex_t mutex_vt;
-// pthread_mutex_t mutex_finish_count;
-// pthread_mutex_t mutex_visited;
-// pthread_mutex_t mutex_thread_counter;
 
+// condições para os processos
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 pthread_cond_t cond_wait = PTHREAD_COND_INITIALIZER;
-pthread_cond_t cond_finished = PTHREAD_COND_INITIALIZER;
-
-CountdownLatch finish_latch;
 
 // variáveis partilhadas
 int min_u;
@@ -72,9 +55,6 @@ static bool all_visited(int graph_size);
     funções para lidar com os processos
 */
 static void process_error(char *name, int result);
-
-static void initialize_mutexes(void);
-static void destroy_mutexes(void);
 
 static void *worker_prim(void *arg);
 
@@ -104,8 +84,9 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         memset(global_weight, 0, (num_threads) * sizeof(float));
 
     // inicializar condições
-    process_error("pthread_cond_init", pthread_cond_init(&cond, NULL));
-    initialize_mutexes();
+    process_error("cond init", pthread_cond_init(&cond, NULL));
+    process_error("cond_wait init", pthread_cond_init(&cond_wait, NULL));
+    process_error("mutex_lock init", pthread_mutex_init(&mutex_lock, NULL));
 
     // tarefas acessórias
     thread_data thread_data[num_threads];
@@ -229,8 +210,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     for (int i = 0; i < num_threads; i++)
     {
         pthread_join(threads[i], (void **)NULL);
-        free(thread_data[i].local_d);
-        free(thread_data[i].local_graph);
     }
 
     // libertar a memória alocada pelo processo
@@ -239,8 +218,9 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     free(d);
     free(visited);
 
-    destroy_mutexes();
+    process_error("mutex_lock destroy", pthread_mutex_destroy(&mutex_lock));
     process_error("condition destroy", pthread_cond_destroy(&cond));
+    process_error("condition wait destroy", pthread_cond_destroy(&cond_wait));
 
 #ifdef DEBUG
     printf("print_mst_mt ended\n");
@@ -477,6 +457,12 @@ float *split_graph(float *graph, int start_col, int end_col, int graph_size)
     return split_graph;
 }
 
+/*
+    split_d
+
+    cria uma versão local do vetor d que contém apenas os valores
+    que estão entre start_col e end_col
+*/
 float *split_d(float *d, int start_col, int end_col, int graph_size)
 {
     if (d == NULL)
@@ -502,81 +488,37 @@ float *split_d(float *d, int start_col, int end_col, int graph_size)
     return split_d;
 }
 
+/*
+    all_visited
+
+    avalia se todos os vértices do grafo já foram visitados
+
+    -- thread safe --
+*/
 bool all_visited(int graph_size)
 {
     bool result = true;
     pthread_mutex_lock(&mutex_lock);
     for (int i = 1; i <= graph_size; i++)
     {
+        // sair assim que aparecer o primeiro vértice não visitado
         if (!visited[i])
+        {
             result = false;
+            break;
+        }
     }
     pthread_mutex_unlock(&mutex_lock);
     return result;
 }
 
-void initialize_mutexes(void)
-{
-    // process_error("mutex_minu init", pthread_mutex_init(&mutex_minu, NULL));
-    // process_error("mutex_globalu", pthread_mutex_init(&mutex_globalu, NULL));
-    // process_error("mutex_globalweight", pthread_mutex_init(&mutex_globalweight, NULL));
-    // process_error("mutex_vt init", pthread_mutex_init(&mutex_vt, NULL));
-    process_error("mutex_lock init", pthread_mutex_init(&mutex_lock, NULL));
-    // process_error("mutex_lock init", pthread_mutex_init(&mutex_sync, NULL));
-    // process_error("mutex_finish_count init", pthread_mutex_init(&mutex_finish_count, NULL));
-    // process_error("mutex_visited init", pthread_mutex_init(&mutex_visited, NULL));
-    // process_error("mutext_thread_counter init", pthread_mutex_init(&mutex_thread_counter, NULL));
-}
+/*
+    process_error
 
-void destroy_mutexes(void)
-{
-    // process_error("mutex_minu destroy", pthread_mutex_destroy(&mutex_minu));
-    // process_error("mutex_globalu destroy", pthread_mutex_destroy(&mutex_globalu));
-    // process_error("mutex_globalweight destroy", pthread_mutex_destroy(&mutex_globalweight));
-    // process_error("mutex_vt destroy", pthread_mutex_destroy(&mutex_vt));
-    process_error("mutex_lock destroy", pthread_mutex_destroy(&mutex_lock));
-    // process_error("mutex_lock destroy", pthread_mutex_destroy(&mutex_sync));
-    // process_error("mutex_finish_count destroy", pthread_mutex_destroy(&mutex_finish_count));
-    // process_error("mutex_visited destroy", pthread_mutex_destroy(&mutex_visited));
-    // process_error("mutex_thread_counteer destroy", pthread_mutex_destroy(&mutex_thread_counter));
-}
-
+    emite o erro conforme o valor de result
+*/
 void process_error(char *name, int result)
 {
     if (result != 0)
         printf("%s has returned an error\n", name);
-}
-
-void countdown_latch_init(CountdownLatch *latch, int initial_count)
-{
-    pthread_mutex_init(&latch->mutex, NULL);
-    pthread_cond_init(&latch->condition, NULL);
-    latch->count = initial_count;
-}
-
-void countdown_latch_count_down(CountdownLatch *latch)
-{
-    pthread_mutex_lock(&latch->mutex);
-    latch->count--;
-    if (latch->count == 0)
-    {
-        pthread_cond_broadcast(&latch->condition);
-    }
-    pthread_mutex_unlock(&latch->mutex);
-}
-
-void countdown_latch_await(CountdownLatch *latch)
-{
-    pthread_mutex_lock(&latch->mutex);
-    while (latch->count > 0)
-    {
-        pthread_cond_wait(&latch->condition, &latch->mutex);
-    }
-    pthread_mutex_unlock(&latch->mutex);
-}
-
-void countdown_latch_destroy(CountdownLatch *latch)
-{
-    pthread_mutex_destroy(&latch->mutex);
-    pthread_cond_destroy(&latch->condition);
 }
