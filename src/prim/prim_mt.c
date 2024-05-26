@@ -256,12 +256,11 @@ void *worker_prim(void *arg)
 {
     thread_data *data = (thread_data *)arg;
     bool local_visited = false;
+    bool local_all_visited = false;
 
 #ifdef DEBUG
     printf("[thread %d]: start_col = %d || end_col = %d\n", data->thread_id, data->start_col, data->end_col);
 #endif
-
-    bool local_all_visited = false;
 
     do
     {
@@ -375,13 +374,11 @@ void *worker_prim(void *arg)
     }
     pthread_mutex_unlock(&mutex_lock);
 
-    printf("[thread %d] finished\n", data->thread_id);
+    printf("[thread %d] >>>>> finished <<<<<\n", data->thread_id);
 #endif
 
-    pthread_mutex_lock(&mutex_lock);
-    global_u[data->thread_id] = 0;
-    global_weight[data->thread_id] = INFINITE;
-    pthread_mutex_unlock(&mutex_lock);
+    free(data->local_d);
+    free(data->local_graph);
 
     pthread_exit(NULL);
 }
