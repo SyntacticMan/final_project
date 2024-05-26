@@ -166,7 +166,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
     int valor = 0;
 
-    while (!all_vertices_visited)
+    do
     {
         all_vertices_visited = all_visited(graph_size);
         valor++;
@@ -194,12 +194,13 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
         for (int i = 0; i < num_threads; i++)
         {
+            /* se fôr entregue um u = 0 é porque o processo
+                já visitou todos os vértices que lhe pertencem
+                ou estes não têm ligação a nenhum vértice pois
+                ainda estão como inicializados (peso infinito)
 
-            // if (visited[global_u[i]])
-            //     continue;
-            // se fôr entregue um u = 0 é porque a thread
-            // já visitou todos os vértices que lhe competiam
-            // e já não tem mais nada a oferecer
+                de qualquer maneira são omitidos do u global
+            */
             if (global_u[i] == 0)
                 continue;
 
@@ -228,7 +229,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         pthread_mutex_unlock(&mutex_sync);
 
         all_vertices_visited = all_visited(graph_size);
-    }
+    } while (!all_vertices_visited);
 
     // pthread_cond_broadcast(&cond_finished);
 
@@ -265,7 +266,7 @@ void *worker_prim(void *arg)
 
     bool local_all_visited = all_visited(data->graph_size);
 
-    while (!local_all_visited)
+    do
     {
         // obter o vértice u
         int u = get_u(data->local_d, data->start_col, data->end_col);
@@ -346,6 +347,7 @@ void *worker_prim(void *arg)
 #ifdef TRACE
             printf("[thread %d]  u_weight (%d) = %f\td_weight (%d) = %f\n", data->thread_id, u, u_weight, i, d_weight);
 #endif
+            // se não tiver ligação, omitir
             if (u_weight == INFINITE)
                 continue;
 
@@ -354,7 +356,10 @@ void *worker_prim(void *arg)
                 data->local_d[i] = u_weight;
                 pthread_mutex_lock(&mutex_lock);
                 v_t[i] = u;
+
+#ifdef DEBUG
                 printf("[thread %d] ==== set d[%d]=%0.2f\tv_t[%d]=%d ==== \n", data->thread_id, i, data->local_d[i], i, v_t[i]);
+#endif
                 pthread_mutex_unlock(&mutex_lock);
             }
         }
@@ -362,13 +367,13 @@ void *worker_prim(void *arg)
         // revalidar se todos os vértices já foram visitados
         local_all_visited = all_visited(data->graph_size);
 
-#ifdef DEBUG
+#ifdef TRACE
         for (int v = 1; v <= data->graph_size; v++)
         {
             printf("[thread %d]\td[%d]=%0.2f\n", data->thread_id, v, data->local_d[v]);
         }
 #endif
-    }
+    } while (!local_all_visited);
 
 #ifdef DEBUG
     pthread_mutex_lock(&mutex_lock);
