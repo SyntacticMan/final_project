@@ -53,7 +53,7 @@ prim_mt.o: $(primSrcDir)prim_mt.c $(primSrcDir)prim_mt.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_mt.c -o $(buildDir)prim_mt.o
 
 # test params
-GRAPH_SIZE = 8000
+GRAPH_SIZE = 600
 GRAPH_NAME = graph.grf
 EDGE_PERCENTAGE = 50
 GRAPH_TITLE = "Grafo Teste"
@@ -63,7 +63,7 @@ compare:
 	$(binDir)$(primBinaryName) -f $(GRAPH_NAME)
 	$(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 2
 
-test_prim:
+test_st:
 	$(binDir)$(primBinaryName) -f $(GRAPH_NAME)
 
 test_mt:

@@ -97,8 +97,6 @@ int main(int argc, char *argv[])
     printf("Raiz -> %d\n", graph_root);
     printf("Tamanho -> %d\n", graph_header->graph_size);
 
-    gettimeofday(&start, NULL);
-
     // se receber a opção, simplesmente ler a AGM e sair
     if (print_agm)
     {
@@ -127,6 +125,9 @@ int main(int argc, char *argv[])
         // terminar a execução
         exit(0);
     }
+
+    // começar a cronometrar a execução
+    gettimeofday(&start, NULL);
 
     // execução normal
     if (threads <= 1)
