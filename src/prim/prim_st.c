@@ -62,17 +62,14 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
 #endif
     }
 
-    for (int v = 1; v <= graph_size; v++)
+    while (!all_visited(graph_size, visited))
     {
-        // excluir v-v_t
-        if (visited[v])
-            continue;
 
         // obter o vértice u
         int u = get_u(d, visited, graph_size);
 
 #ifdef DEBUG
-        printf("Found u: %d (v=%d)\n", u, v);
+        printf("Found u: %d\n", u);
 #endif
         visited[u] = true;
 
