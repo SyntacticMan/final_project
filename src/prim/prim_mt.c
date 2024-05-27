@@ -274,7 +274,6 @@ void *worker_prim(void *arg)
         pthread_mutex_unlock(&mutex_lock);
 
 #ifdef DEBUG
-        printf("[thread %d] signal main thread to resume\tthread_counter: %d\n", data->thread_id, thread_counter);
         printf("[thread %d] waiting for main thread to compute global_u\n", data->thread_id);
 #endif
         pthread_barrier_wait(&barrier_wait);
