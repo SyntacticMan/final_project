@@ -92,7 +92,9 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     thread_data thread_data[num_threads];
 
     // calcular o número de vértices (n) a alocar a cada processo
-    int num_vertices = graph_size / num_threads;
+    // divisão pode não ser inteira, por isso o resultado é arredondado
+    int num_vertices = round(graph_size / num_threads);
+    int last_end_col = 0;
 
     // inicializar a árvore mínima
     v_t[graph_root] = graph_root;
@@ -122,7 +124,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         printf("d[%d]=%0.2f\tv_t[%d]=%d\tvisited[%d]=%d\n", v, d[v] /*get_d(d, v)*/, v, v_t[v], v, visited[v]);
 #endif
     }
-
     // lançar os processos
     for (int i = 0; i < num_threads; i++)
     {
@@ -133,8 +134,20 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         // calcular os vértices de início e fim com base no número de vértices a processar
         int start_col = (i * num_vertices) + 1;
         int end_col = start_col + num_vertices - 1;
+        last_end_col = end_col;
 
         thread_data[i].start_col = start_col;
+
+        /*
+            na preparação do último processo ter em conta
+            que a distribuição de vértices não é igual
+            quando a divisão n/p não tem resto 0
+        */
+        if (i == num_threads - 1)
+        {
+            end_col = end_col + (graph_size - last_end_col);
+        }
+
         thread_data[i].end_col = end_col;
 
         thread_data[i].local_graph = split_graph(graph, start_col, end_col, graph_size);
