@@ -12,13 +12,17 @@
  * Orientador: Paulo Shirley										*
  * ******************************************************************/
 
+#ifndef LIBS
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/time.h>
+#endif
+
 #include <stdlib.h>
 #include <stdbool.h>
-#include <string.h>
 #include <limits.h>
 #include <pthread.h>
-#include <unistd.h>
 
 #ifndef GRAPH
 #define GRAPH

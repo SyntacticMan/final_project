@@ -62,6 +62,8 @@ static void *worker_prim(void *arg);
 
 int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 {
+    struct timeval start, end;
+
     // certificar que não se pedem mais processos que vértices
     if (num_threads > graph_size)
         num_threads = graph_size;
@@ -163,6 +165,9 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         process_error("worker_thread create", pthread_create(&threads[i], NULL, worker_prim, (void *)&thread_data[i]));
     }
 
+    // começar a cronometrar a execução
+    gettimeofday(&start, NULL);
+
     do
     {
 
@@ -217,6 +222,15 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         all_vertices_visited = all_visited(graph_size);
 
     } while (!all_vertices_visited);
+
+    // emitir o tempo de execução do algoritmo
+    gettimeofday(&end, NULL);
+
+    double seconds = (double)(end.tv_sec - start.tv_sec);
+    double microseconds = (double)(end.tv_usec - start.tv_usec);
+    double elapsed_time = seconds + microseconds / 1e6;
+
+    printf("Execution time: %.6f seconds\n", elapsed_time);
 
     // recuperar os processos criados
     for (int i = 0; i < num_threads; i++)

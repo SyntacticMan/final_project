@@ -27,10 +27,12 @@
 #include "../file/file_module.h"
 #endif
 
+#ifndef LIBS
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/time.h>
+#endif
 
 void print_mst(float *graph, int *v_t, int graph_size, int graph_root);
 char get_letter(int number);
