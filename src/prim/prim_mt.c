@@ -211,14 +211,14 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
             printf("d[%d]=%0.2f\tv_t[%d]=%d\tvisited[%d]=%d\n", v, d[v], v, v_t[v], v, visited[v]);
         }
 #endif
-        // pthread_cond_broadcast(&cond);
         pthread_mutex_unlock(&mutex_lock);
-        pthread_barrier_wait(&barrier_visited);
 
+        pthread_barrier_wait(&barrier_visited);
         all_vertices_visited = all_visited(graph_size);
 
     } while (!all_vertices_visited);
 
+    // recuperar os processos criados
     for (int i = 0; i < num_threads; i++)
     {
         pthread_join(threads[i], (void **)NULL);
@@ -282,27 +282,24 @@ void *worker_prim(void *arg)
 #ifdef DEBUG
         printf("[thread %d] main thread says resume\n", data->thread_id);
 #endif
-        pthread_mutex_lock(&mutex_lock);
 
-        // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
-        int local_min_u = min_u;
+        pthread_mutex_lock(&mutex_lock);
+        u = min_u;
         pthread_mutex_unlock(&mutex_lock);
 
 #ifdef DEBUG
-        printf("[thread %d] received min_u = %d\n", data->thread_id, local_min_u);
+        printf("[thread %d] received min_u = %d\n", data->thread_id, min_u);
 #endif
-
-        if (local_min_u >= data->start_col && local_min_u <= data->end_col)
+        // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
+        if (u >= data->start_col && u <= data->end_col)
         {
             pthread_mutex_lock(&mutex_lock);
-            visited[local_min_u] = true;
-            pthread_mutex_unlock(&mutex_lock);
+            visited[u] = true;
 #ifdef DEBUG
             printf("[thread %d]  ===== set %d as visited ===== \n", data->thread_id, u);
 #endif
+            pthread_mutex_unlock(&mutex_lock);
         }
-
-        u = local_min_u;
 
         for (int i = data->start_col; i <= data->end_col; i++)
         {
