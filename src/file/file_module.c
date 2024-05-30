@@ -34,7 +34,7 @@ void write_file(header *graph_header, float *graph, char *filename)
 #endif
     fwrite(graph_header, sizeof(header), 1, graph_file);
 
-    unsigned long long array_size = (graph_header->graph_size * (graph_header->graph_size - 1)) / 2;
+    unsigned long long array_size = (graph_header->graph_size * (graph_header->graph_size - 1ULL)) / 2ULL;
 
     for (unsigned long int i = 0; i < array_size; i++)
     {
@@ -81,7 +81,7 @@ void write_mst(int *v_t, int graph_size, int graph_root, char *filename)
 
     //  v_t tem de ser escrito *após* o grafo
     // por isso é necessário fazer avançar o apontador para o fim do grafo
-    unsigned long int array_size = ((g_header->graph_size * (g_header->graph_size - 1)) / 2) * sizeof(float);
+    unsigned long int array_size = ((g_header->graph_size * (g_header->graph_size - 1ULL)) / 2ULL) * sizeof(float);
 
     // fseek(graph_file, array_size, SEEK_CUR);
     fseek(graph_file, sizeof(header) + array_size, SEEK_SET);
@@ -125,7 +125,7 @@ float *read_graph(char *filename, int graph_size)
     // avançar para lá do cabeçalho
     fseek(graph_file, sizeof(header), SEEK_SET);
 
-    unsigned long int array_size = (graph_size * (graph_size - 1)) / 2;
+    unsigned long int array_size = (graph_size * (graph_size - 1ULL)) / 2ULL;
 
     // carregar o vetor
     float *graph = malloc(array_size * sizeof(float));
