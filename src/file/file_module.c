@@ -36,12 +36,12 @@ void write_file(header *graph_header, float *graph, char *filename)
 
     unsigned long long array_size = (graph_header->graph_size * (graph_header->graph_size - 1)) / 2;
 
-    // for (unsigned long int i = 0; i < array_size; i++)
-    // {
-    //     fwrite(&graph[i], sizeof(float), 1, graph_file);
-    // }
+    for (unsigned long int i = 0; i < array_size; i++)
+    {
+        fwrite(&graph[i], sizeof(float), 1, graph_file);
+    }
 
-    fwrite(graph, sizeof(float), array_size, graph_file);
+    // fwrite(graph, sizeof(float), array_size, graph_file);
 
     fclose(graph_file);
 }

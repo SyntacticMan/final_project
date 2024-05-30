@@ -66,9 +66,9 @@ int main(int argc, char *argv[])
 	// no imediato vou limitar o grafo a um máximo de 46000 vértices
 	// mais do que isso e começa a ter problemas em alocar memória
 	// pois excede o unsigned long int de matrix_size
-	if (graph_size <= 1 || graph_size > 56000)
+	if (graph_size <= 1 || graph_size > 90000)
 	{
-		printf("Grafo tem de ter um tamanho entre 2 e 46000\n");
+		printf("Grafo tem de ter um tamanho entre 2 e 90000\n");
 		return -1;
 	}
 
