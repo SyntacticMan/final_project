@@ -31,6 +31,7 @@ typedef struct _thread_data
 typedef struct _message
 {
     pthread_cond_t wait;
+    pthread_mutex_t lock;
     int u;
     bool ready;
 } message;
@@ -79,24 +80,19 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     pthread_t threads[num_threads];
 
     // alocar os recursos partilhados
-    v_t = malloc((graph_size + 1) * sizeof(int));
-    visited = malloc((graph_size + 1) * sizeof(bool));
-    float *d = malloc((graph_size + 1) * sizeof(float));
-    global_u = malloc((num_threads) * sizeof(int));
-    global_weight = malloc((num_threads) * sizeof(float));
+    v_t = calloc(graph_size + 1, sizeof(int));
+    visited = calloc(graph_size + 1, sizeof(bool));
+    float *d = calloc(graph_size + 1, sizeof(float));
+    global_u = calloc(num_threads, sizeof(int));
+    global_weight = calloc(num_threads, sizeof(float));
+
     // min_u = graph_root;
     all_vertices_visited = false;
 
     broadcast_message.ready = false;
     broadcast_message.u = 0;
     process_error("broadcast_message condition init", pthread_cond_init(&broadcast_message.wait, NULL));
-
-    // inicializar os vetores globais a 0
-    if (global_u != NULL)
-        memset(global_u, 0, (num_threads) * sizeof(int));
-
-    if (global_weight != NULL)
-        memset(global_weight, 0, (num_threads) * sizeof(float));
+    process_error("broadcast_message lock init", pthread_mutex_init(&broadcast_message.lock, NULL));
 
     // inicializar condições
     process_error("cond init", pthread_cond_init(&cond, NULL));
@@ -116,31 +112,16 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     // inicializar a árvore mínima
     v_t[graph_root] = graph_root;
     d[graph_root] = 0;
-    visited[graph_root] = true;
     visited[0] = false;
 
     for (int v = 1; v <= graph_size; v++)
     {
-        if (v != graph_root)
-            visited[v] = false;
-
+        visited[v] = (v == graph_root);
         float weight = get_edge(graph, graph_root, v);
-
-        if (weight < INFINITE)
-        {
-            d[v] = weight;
-            v_t[v] = graph_root;
-        }
-        else
-        {
-            d[v] = INFINITE;
-            v_t[v] = 0;
-        }
-
-#ifdef TRACE
-        printf("d[%d]=%0.2f\tv_t[%d]=%d\tvisited[%d]=%d\n", v, d[v] /*get_d(d, v)*/, v, v_t[v], v, visited[v]);
-#endif
+        d[v] = (weight < INFINITE) ? weight : INFINITE;
+        v_t[v] = (weight < INFINITE) ? graph_root : 0;
     }
+
     // lançar os processos
     for (int i = 0; i < num_threads; i++)
     {
@@ -192,14 +173,12 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         printf("[thread main] compute global_u\n");
 #endif
 
-        pthread_mutex_lock(&mutex_lock);
+        pthread_mutex_lock(&broadcast_message.lock);
 
         broadcast_message.ready = false;
         broadcast_message.u = 0;
-        pthread_cond_broadcast(&broadcast_message.wait);
-        pthread_mutex_unlock(&mutex_lock);
 
-        pthread_mutex_lock(&mutex_lock);
+        pthread_cond_broadcast(&broadcast_message.wait);
 
         int min_u = 0;
         float min_weight = INFINITE;
@@ -213,10 +192,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
                 de qualquer maneira são omitidos do u global
             */
-            if (global_u[i] == 0)
-                continue;
-
-            if (global_weight[i] < min_weight)
+            if (global_u[i] != 0 && global_weight[i] < min_weight)
             {
                 min_u = global_u[i];
                 min_weight = global_weight[i];
@@ -231,7 +207,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         broadcast_message.u = min_u;
         pthread_cond_broadcast(&broadcast_message.wait);
 
-#ifdef TRACE
+#ifdef DEBUG
         printf("[thread main] broadcast global_u: %d\tmin_weight: %0.2f\n", min_u, min_weight);
 
         for (int v = 1; v <= graph_size; v++)
@@ -239,7 +215,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
             printf("d[%d]=%0.2f\tv_t[%d]=%d\tvisited[%d]=%d\n", v, d[v], v, v_t[v], v, visited[v]);
         }
 #endif
-        pthread_mutex_unlock(&mutex_lock);
+        pthread_mutex_unlock(&broadcast_message.lock);
 
         pthread_barrier_wait(&barrier_visited);
         all_vertices_visited = all_visited(graph_size);
@@ -267,6 +243,9 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     free(d);
     free(visited);
 
+    process_error("broadcast_message cond destroy", pthread_cond_destroy(&broadcast_message.wait));
+    process_error("broadcast_message mutex destory", pthread_mutex_destroy(&broadcast_message.lock));
+
     process_error("mutex_lock destroy", pthread_mutex_destroy(&mutex_lock));
     process_error("condition destroy", pthread_cond_destroy(&cond));
     process_error("condition wait destroy", pthread_cond_destroy(&cond_wait));
@@ -287,7 +266,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 void *worker_prim(void *arg)
 {
     thread_data *data = (thread_data *)arg;
-    bool local_visited = false;
     bool local_all_visited = false;
 
 #ifdef DEBUG
@@ -316,44 +294,35 @@ void *worker_prim(void *arg)
 #endif
         pthread_barrier_wait(&barrier_wait);
 
-        pthread_mutex_lock(&mutex_lock);
+        pthread_mutex_lock(&broadcast_message.lock);
 
         while (!broadcast_message.ready)
-            pthread_cond_wait(&broadcast_message.wait, &mutex_lock);
+        {
+            printf("[thread %d] holding\n", data->thread_id);
+            pthread_cond_wait(&broadcast_message.wait, &broadcast_message.lock);
+        }
 
         u = broadcast_message.u;
-        pthread_mutex_unlock(&mutex_lock);
-
-#ifdef DEBUG
-        printf("[thread %d] main thread says resume\n", data->thread_id);
-#endif
-
-        // pthread_mutex_lock(&mutex_lock);
-        // u = min_u;
-        // pthread_mutex_unlock(&mutex_lock);
-
 #ifdef DEBUG
         printf("[thread %d] received u = %d\n", data->thread_id, u);
 #endif
+        pthread_mutex_unlock(&broadcast_message.lock);
+
         // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
         if (u >= data->start_col && u <= data->end_col)
         {
             pthread_mutex_lock(&mutex_lock);
             visited[u] = true;
+            pthread_mutex_unlock(&mutex_lock);
 #ifdef DEBUG
             printf("[thread %d]  ===== set %d as visited ===== \n", data->thread_id, u);
 #endif
-            pthread_mutex_unlock(&mutex_lock);
         }
 
         for (int i = data->start_col; i <= data->end_col; i++)
         {
-            // pthread_mutex_lock(&mutex_lock);
-            local_visited = visited[i];
-            // pthread_mutex_unlock(&mutex_lock);
-
             // excluir a diagonal e v-v_t
-            if (local_visited || i == u)
+            if (visited[i] || i == u)
             {
 #ifdef TRACE
                 printf("[thread %d] excluding v = %d\n", data->thread_id, i);
@@ -366,22 +335,23 @@ void *worker_prim(void *arg)
 #endif
 
             float u_weight = get_edge(data->local_graph, u, i);
-            float d_weight = data->local_d[i];
-#ifdef TRACE
-            printf("[thread %d]  u_weight (%d) = %f\td_weight (%d) = %f\n", data->thread_id, u, u_weight, i, d_weight);
-#endif
+
             // se não tiver ligação, omitir
             if (u_weight == INFINITE)
                 continue;
 
-            if (u_weight < d_weight)
+#ifdef TRACE
+            printf("[thread %d]  u_weight (%d) = %f\td_weight (%d) = %f\n", data->thread_id, u, u_weight, i, data->local_d[i]);
+#endif
+
+            if (u_weight < data->local_d[i])
             {
                 data->local_d[i] = u_weight;
                 pthread_mutex_lock(&mutex_lock);
                 v_t[i] = u;
 
 #ifdef DEBUG
-                printf("[thread %d] ==== set d[%d]=%0.2f\tv_t[%d]=%d ==== \n", data->thread_id, i, data->local_d[i], i, v_t[i]);
+                printf("[thread %d] ===> set d[%d]=%0.2f\tv_t[%d]=%d <=== \n", data->thread_id, i, data->local_d[i], i, v_t[i]);
 #endif
                 pthread_mutex_unlock(&mutex_lock);
             }
@@ -426,21 +396,12 @@ void *worker_prim(void *arg)
 int get_u(float *d, int start_col, int end_col)
 {
     int u_min = 0;
-
     float min_weight = INFINITE;
 
     for (int u = start_col; u <= end_col; u++)
     {
         // excluir os já visitados (v-vt)
-        if (visited[u])
-        {
-#ifdef TRACE
-            printf("[get_u] excluding u = %d\n", u);
-#endif
-            continue;
-        }
-
-        if (d[u] < min_weight)
+        if (!visited[u] && d[u] < min_weight)
         {
             u_min = u;
             min_weight = d[u];
@@ -461,37 +422,15 @@ float *split_graph(float *graph, int start_col, int end_col, int graph_size)
         return NULL;
 
     unsigned long long matrix_size = get_matrix_size(graph_size);
-    float *split_graph = malloc(matrix_size * sizeof(float));
+    float *split_graph = calloc(matrix_size, sizeof(float));
 
-    // inicializar o grafo
-    for (int col = 1; col <= graph_size; col++)
+    for (int col = start_col; col <= end_col; col++)
     {
         for (int row = 1; row <= graph_size; row++)
         {
-            if (row >= col)
-                continue;
-
-            add_null_edge(split_graph, col, row);
-#ifdef TRACE
-            printf("(col:%d|row:%d|null)\n", col, row);
-#endif
-        }
-    }
-
-    for (int col = 1; col <= graph_size; col++)
-    {
-        // apenas processar as linhas que pertencem
-        // às colunas pedidas
-        if (col >= start_col && col <= end_col)
-        {
-            for (int row = 1; row <= graph_size; row++)
+            if (col != row)
             {
-                if (col == row)
-                    continue;
                 add_edge(split_graph, col, row, get_edge(graph, col, row));
-#ifdef TRACE
-                printf("(col:%d|row:%d|%f)\n", col, row, get_edge(graph, col, row));
-#endif
             }
         }
     }
@@ -507,24 +446,14 @@ float *split_graph(float *graph, int start_col, int end_col, int graph_size)
 */
 float *split_d(float *d, int start_col, int end_col, int graph_size)
 {
-    if (d == NULL)
-        return NULL;
-
     float *split_d = malloc((graph_size + 1) * sizeof(float));
 
-    for (int i = 0; i <= graph_size; i++)
+    memset(split_d, INFINITE, (graph_size + 1) * sizeof(float));
+    // memcpy(split_d, d, (graph_size + 1) * sizeof(float));
+
+    for (int i = start_col; i <= end_col; i++)
     {
-        if (i >= start_col && i <= end_col)
-        {
-            split_d[i] = d[i];
-        }
-        else
-        {
-            split_d[i] = INFINITE;
-        }
-#ifdef TRACE
-        printf("split_d[%d]=%0.2f\tv_t[%d]=%d\n", i, split_d[i], i, v_t[i]);
-#endif
+        split_d[i] = d[i];
     }
 
     return split_d;
@@ -539,19 +468,18 @@ float *split_d(float *d, int start_col, int end_col, int graph_size)
 */
 bool all_visited(int graph_size)
 {
-    bool result = true;
     pthread_mutex_lock(&mutex_lock);
     for (int i = 1; i <= graph_size; i++)
     {
         // sair assim que aparecer o primeiro vértice não visitado
         if (!visited[i])
         {
-            result = false;
-            break;
+            pthread_mutex_unlock(&mutex_lock);
+            return false;
         }
     }
     pthread_mutex_unlock(&mutex_lock);
-    return result;
+    return true;
 }
 
 /*
