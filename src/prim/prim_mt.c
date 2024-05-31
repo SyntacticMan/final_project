@@ -296,7 +296,7 @@ void *worker_prim(void *arg)
 
         pthread_mutex_lock(&broadcast_message.lock);
 
-        while (!broadcast_message.ready)
+        while (!broadcast_message.ready && u == broadcast_message.u)
         {
             printf("[thread %d] holding\n", data->thread_id);
             pthread_cond_wait(&broadcast_message.wait, &broadcast_message.lock);
