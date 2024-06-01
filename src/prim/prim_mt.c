@@ -210,6 +210,8 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 #ifdef DEBUG
         printf("[thread main] broadcast global_u: %d\tmin_weight: %0.2f\n", min_u, min_weight);
 
+#endif
+#ifdef TRACE
         for (int v = 1; v <= graph_size; v++)
         {
             printf("d[%d]=%0.2f\tv_t[%d]=%d\tvisited[%d]=%d\n", v, d[v], v, v_t[v], v, visited[v]);
@@ -418,9 +420,6 @@ int get_u(float *d, int start_col, int end_col)
 */
 float *split_graph(float *graph, int start_col, int end_col, int graph_size)
 {
-    if (graph == NULL)
-        return NULL;
-
     unsigned long long matrix_size = get_matrix_size(graph_size);
     float *split_graph = calloc(matrix_size, sizeof(float));
 
@@ -428,7 +427,7 @@ float *split_graph(float *graph, int start_col, int end_col, int graph_size)
     {
         for (int row = 1; row <= graph_size; row++)
         {
-            if (col != row)
+            if (col > row)
             {
                 add_edge(split_graph, col, row, get_edge(graph, col, row));
             }
