@@ -33,7 +33,7 @@ typedef struct _message
     pthread_cond_t wait;
     pthread_mutex_t lock;
     int u;
-    bool ready;
+    bool *ready;
 } message;
 
 pthread_mutex_t mutex_lock;
@@ -46,7 +46,8 @@ pthread_barrier_t barrier_wait;
 pthread_barrier_t barrier_visited;
 
 // variáveis partilhadas
-// int min_u;
+int min_u;
+float min_weight;
 int *global_u;
 float *global_weight;
 int *v_t;
@@ -86,11 +87,14 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     global_u = calloc(num_threads, sizeof(int));
     global_weight = calloc(num_threads, sizeof(float));
 
-    // min_u = graph_root;
+    min_u = 0;
+    min_weight = INFINITE;
     all_vertices_visited = false;
 
     broadcast_message.ready = false;
     broadcast_message.u = 0;
+    broadcast_message.ready = calloc(num_threads, sizeof(bool));
+
     process_error("broadcast_message condition init", pthread_cond_init(&broadcast_message.wait, NULL));
     process_error("broadcast_message lock init", pthread_mutex_init(&broadcast_message.lock, NULL));
 
@@ -175,13 +179,12 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
         pthread_mutex_lock(&broadcast_message.lock);
 
-        broadcast_message.ready = false;
         broadcast_message.u = 0;
 
         pthread_cond_broadcast(&broadcast_message.wait);
 
-        int min_u = 0;
-        float min_weight = INFINITE;
+        min_u = 0;
+        min_weight = INFINITE;
 
         for (int i = 0; i < num_threads; i++)
         {
@@ -201,9 +204,9 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 #ifdef TRACE
             printf("global_u[%d] = %d\tglobal_weight[%d] = %0.3f\n", i, global_u[i], i, global_weight[i]);
 #endif
+            broadcast_message.ready[i] = true;
         }
 
-        broadcast_message.ready = true;
         broadcast_message.u = min_u;
         pthread_cond_broadcast(&broadcast_message.wait);
 
@@ -298,13 +301,14 @@ void *worker_prim(void *arg)
 
         pthread_mutex_lock(&broadcast_message.lock);
 
-        while (!broadcast_message.ready && u == broadcast_message.u)
+        while (!broadcast_message.ready[data->thread_id])
         {
-            printf("[thread %d] holding\n", data->thread_id);
+            // printf("[thread %d] holding\n", data->thread_id);
             pthread_cond_wait(&broadcast_message.wait, &broadcast_message.lock);
         }
 
         u = broadcast_message.u;
+        broadcast_message.ready[data->thread_id] = false;
 #ifdef DEBUG
         printf("[thread %d] received u = %d\n", data->thread_id, u);
 #endif
@@ -427,7 +431,7 @@ float *split_graph(float *graph, int start_col, int end_col, int graph_size)
     {
         for (int row = 1; row <= graph_size; row++)
         {
-            if (col > row)
+            if (col != row)
             {
                 add_edge(split_graph, col, row, get_edge(graph, col, row));
             }
