@@ -13,8 +13,11 @@ fi
 for file in "$input_directory"/*.grf; do
     # Verifica se o arquivo é um arquivo .grf
     if [ -f "$file" ]; then
-        echo "Executando comando para $file:"
-        ./bin/prim -f "$file" -t 3
+        for t in 2 4 6 8; do
+        echo "Processando $file com $t processos:"
+            ./bin/prim -f "$file" -t "$t"
+        done
         echo "-----------------------------------"
     fi
 done
+
