@@ -183,8 +183,8 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
         pthread_cond_broadcast(&broadcast_message.wait);
 
-        min_u = 0;
-        min_weight = INFINITE;
+        // min_u = 0;
+        // min_weight = INFINITE;
 
         for (int i = 0; i < num_threads; i++)
         {
@@ -195,11 +195,11 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
                 de qualquer maneira são omitidos do u global
             */
-            if (global_u[i] != 0 && global_weight[i] < min_weight)
-            {
-                min_u = global_u[i];
-                min_weight = global_weight[i];
-            }
+            // if (global_u[i] != 0 && global_weight[i] < min_weight)
+            // {
+            //     min_u = global_u[i];
+            //     min_weight = global_weight[i];
+            // }
 
 #ifdef TRACE
             printf("global_u[%d] = %d\tglobal_weight[%d] = %0.3f\n", i, global_u[i], i, global_weight[i]);
@@ -224,6 +224,8 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
         pthread_barrier_wait(&barrier_visited);
         all_vertices_visited = all_visited(graph_size);
+        min_u = 0;
+        min_weight = INFINITE;
 
     } while (!all_vertices_visited);
 
@@ -289,8 +291,11 @@ void *worker_prim(void *arg)
         // enviar para ser avaliado
         pthread_mutex_lock(&mutex_lock);
 
-        global_u[data->thread_id] = u;
-        global_weight[data->thread_id] = data->local_d[u];
+        // global_u[data->thread_id] = u;
+        // global_weight[data->thread_id] = data->local_d[u];
+
+        if (data->local_d[u] < min_weight)
+            min_u = u;
 
         pthread_mutex_unlock(&mutex_lock);
 
@@ -303,7 +308,6 @@ void *worker_prim(void *arg)
 
         while (!broadcast_message.ready[data->thread_id])
         {
-            // printf("[thread %d] holding\n", data->thread_id);
             pthread_cond_wait(&broadcast_message.wait, &broadcast_message.lock);
         }
 
@@ -350,7 +354,7 @@ void *worker_prim(void *arg)
             printf("[thread %d]  u_weight (%d) = %f\td_weight (%d) = %f\n", data->thread_id, u, u_weight, i, data->local_d[i]);
 #endif
 
-            if (u_weight < data->local_d[i])
+            if (/*u_weight != INFINITE &&*/ u_weight < data->local_d[i])
             {
                 data->local_d[i] = u_weight;
                 pthread_mutex_lock(&mutex_lock);

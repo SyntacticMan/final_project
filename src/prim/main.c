@@ -131,6 +131,11 @@ int main(int argc, char *argv[])
     // começar a cronometrar a execução
     gettimeofday(&start, NULL);
 
+#ifdef LOCK_MT
+    printf("Lançando Algoritmo de Prim com 1 processo fixo\n");
+    v_t = prim_mt_mst(graph, graph_header->graph_size, graph_root, 1);
+    implementation_type = "MT";
+#else
     // execução normal
     if (threads <= 1)
     {
@@ -145,7 +150,7 @@ int main(int argc, char *argv[])
         v_t = prim_mt_mst(graph, graph_header->graph_size, graph_root, threads);
         implementation_type = "MT";
     }
-
+#endif
     // emitir o tempo de execução do algoritmo
     gettimeofday(&end, NULL);
 
