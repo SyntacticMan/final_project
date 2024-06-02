@@ -198,13 +198,12 @@ int *read_mst(char *filename)
 
     guarda os resultados do processamento dum dado grafo
 */
-void write_result(char *graph_name, int graph_size, int graph_root, double elapsed_time, char *implementation_type)
+void write_result(char *graph_name, int graph_size, int graph_root, double elapsed_time, char *implementation_type, int num_threads)
 {
     FILE *file;
     char filename[] = "results/prim_results.csv";
     file = fopen(filename, "a+");
 
-    // Check if the file opened successfully
     if (file == NULL)
     {
         printf("Failed to open the file.\n");
@@ -216,14 +215,14 @@ void write_result(char *graph_name, int graph_size, int graph_root, double elaps
 
     if (ftell(file) == 0)
     {
-        fprintf(file, "graph_name;graph_size;graph_root;elapsed_time;implementation_type\n");
+        fprintf(file, "graph_name;graph_size;graph_root;elapsed_time;implementation_type;num_threads\n");
     }
 
     // fazer regressar o apontador ao início do ficheiro
     rewind(file);
 
     // emitir os resultados
-    fprintf(file, "%s;%d;%d;%f;%s\n", graph_name, graph_size, graph_root, elapsed_time, implementation_type);
+    fprintf(file, "%s;%d;%d;%f;%s;%d\n", graph_name, graph_size, graph_root, elapsed_time, implementation_type, num_threads);
 
     // fechar o ficheiro
     fclose(file);

@@ -169,16 +169,15 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
         thread_data[i].end_col = end_col;
 
+#ifdef DEBUG
+        printf("Numero cpus disponiveis: %d\tAtribuindo [thread %d] ao CPU %d\n", num_available_cpus, i, cpu_step);
+#endif
         cpu_step++;
 
         // se o número de processos pedidos exceder o número de cpus
         // é feito aqui o reset de novo para 0
         if (cpu_step > num_available_cpus)
             cpu_step = 0;
-
-#ifdef TRACE
-        print_graph_mt(thread_data[i].local_graph, start_col, end_col, graph_size);
-#endif
 
         process_error("worker_thread create", pthread_create(&threads[i], NULL, worker_prim, (void *)&thread_data[i]));
     }
@@ -292,7 +291,7 @@ void *worker_prim(void *arg)
     process_error("thread affinity set", pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset));
 
 #ifdef DEBUG
-    printf("[thread %d] -> CPU requested: %d\tCPU set: %d\n", data->thread_id, data->cpu_id, pthread_getaffinity_np(thread, sizeof(cpu_set_t), &cpuset));
+    printf("[thread %d] -> CPU requested: %d\n", data->thread_id, data->cpu_id);
 #endif
 
     bool local_all_visited = false;
