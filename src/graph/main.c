@@ -70,8 +70,8 @@ int main(int argc, char *argv[])
 	// mais do que isso e começa a ter problemas em alocar memória
 	if (graph_size <= 1 || graph_size > 90000)
 	{
-		printf("Grafo tem de ter um tamanho entre 2 e 90000\n");
-		return -1;
+		graph_size = 90000;
+		printf("Tamanho do grafo corrigido para o maximo de 90000 vertices\n");
 	}
 
 	// percentagens a 0 ou negativas
