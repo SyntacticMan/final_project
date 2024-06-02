@@ -17,6 +17,11 @@
 #include "file_module.h"
 #endif
 
+/*
+    write_file
+
+    grava o grafo no ficheiro .grf
+*/
 void write_file(header *graph_header, float *graph, char *filename)
 {
     // abrir o ficheiro em modo de escrita binária
@@ -41,11 +46,14 @@ void write_file(header *graph_header, float *graph, char *filename)
         fwrite(&graph[i], sizeof(float), 1, graph_file);
     }
 
-    // fwrite(graph, sizeof(float), array_size, graph_file);
-
     fclose(graph_file);
 }
 
+/*
+    write_mst
+
+    grava a àrvore geradora mínima no ficheiro do grafo
+*/
 void write_mst(int *v_t, int graph_size, int graph_root, char *filename)
 {
     // abrir o ficheiro em modo de leitura e escrita binária
@@ -95,6 +103,11 @@ void write_mst(int *v_t, int graph_size, int graph_root, char *filename)
     fclose(graph_file);
 }
 
+/*
+    read_header
+
+    lê o cabeçalho do ficheiro do grafo
+*/
 header *read_header(char *filename)
 {
     FILE *graph_file = fopen(filename, "rb");
@@ -112,6 +125,11 @@ header *read_header(char *filename)
     return graph_header;
 }
 
+/*
+    read_graph
+
+    lê o grafo a partir do ficheiro indicado
+*/
 float *read_graph(char *filename, int graph_size)
 {
     FILE *graph_file = fopen(filename, "rb");
@@ -139,6 +157,11 @@ float *read_graph(char *filename, int graph_size)
     return graph;
 }
 
+/*
+    read_mst
+
+    lê a árvore mínima no ficheiro de grafo indicado
+*/
 int *read_mst(char *filename)
 {
     // aberto em modo de leitura apenas
@@ -156,7 +179,7 @@ int *read_mst(char *filename)
 
     // o v_t está a seguir ao grafo, por isso tenho de fazer avançar o ponteiro
     unsigned long int array_size = ((graph_header->graph_size * (graph_header->graph_size - 1)) / 2) * sizeof(float);
-    // fseek(graph_file, array_size, SEEK_CUR);
+
     fseek(graph_file, sizeof(header) + array_size, SEEK_SET);
 
     // carregar v_t
@@ -170,13 +193,15 @@ int *read_mst(char *filename)
     return v_t;
 }
 
+/*
+    write_result
+
+    guarda os resultados do processamento dum dado grafo
+*/
 void write_result(char *graph_name, int graph_size, int graph_root, double elapsed_time, char *implementation_type)
 {
     FILE *file;
     char filename[] = "results/prim_results.csv";
-    // char line[100]; // Assuming maximum line length is 100 characters
-
-    // Open the file for reading and writing in append mode
     file = fopen(filename, "a+");
 
     // Check if the file opened successfully
@@ -186,24 +211,20 @@ void write_result(char *graph_name, int graph_size, int graph_root, double elaps
         return;
     }
 
-    // Check if the file is empty
+    // se o ficheiro estiver vazio, adicionar o cabeçalho
     fseek(file, 0, SEEK_END);
+
     if (ftell(file) == 0)
     {
-        // File is empty, so add the header
         fprintf(file, "graph_name;graph_size;graph_root;elapsed_time;implementation_type\n");
     }
 
-    // Reset file pointer to the beginning of the file
+    // fazer regressar o apontador ao início do ficheiro
     rewind(file);
 
+    // emitir os resultados
     fprintf(file, "%s;%d;%d;%f;%s\n", graph_name, graph_size, graph_root, elapsed_time, implementation_type);
-    // Read and print each line until the end of the file
-    // while (fgets(line, sizeof(line), file)) {
-    //     // Print the line (assuming each line contains comma-separated values)
-    //     printf("%s", line);
-    // }
 
-    // Close the file
+    // fechar o ficheiro
     fclose(file);
 }
