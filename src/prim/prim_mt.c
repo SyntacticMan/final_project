@@ -35,10 +35,10 @@ typedef struct _message
     bool *ready;
 } message;
 
+// mutexes e condições
 pthread_mutex_t mutex_lock;
 pthread_mutex_t mutex_visited;
 
-// condições para os processos
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 pthread_cond_t cond_wait = PTHREAD_COND_INITIALIZER;
 
@@ -50,8 +50,10 @@ int min_u;
 float min_weight;
 int *global_u;
 float *global_weight;
+
 int *v_t;
 bool *visited;
+
 bool all_vertices_visited;
 message broadcast_message;
 
@@ -64,9 +66,6 @@ float *local_graph;
 static int get_u(float *d, int start_col, int end_col);
 static bool all_visited(int graph_size);
 
-/*
-    funções para lidar com os processos
-*/
 static void process_error(char *name, int result);
 
 static void *worker_prim(void *arg);
@@ -80,7 +79,9 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         num_threads = graph_size;
 
     pthread_t threads[num_threads];
-    int cpu_ids[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+
+    // determinar o número de cpus disponíveis
+    int num_available_cpus = sysconf(_SC_NPROCESSORS_ONLN);
 
     // alocar os recursos partilhados
     v_t = calloc(graph_size + 1, sizeof(int));
@@ -97,14 +98,17 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     broadcast_message.u = 0;
     broadcast_message.ready = calloc(num_threads, sizeof(bool));
 
+    // inicializar mutexes e condições
+
     process_error("broadcast_message condition init", pthread_cond_init(&broadcast_message.wait, NULL));
     process_error("broadcast_message lock init", pthread_mutex_init(&broadcast_message.lock, NULL));
 
-    // inicializar condições
     process_error("cond init", pthread_cond_init(&cond, NULL));
     process_error("cond_wait init", pthread_cond_init(&cond_wait, NULL));
+
     process_error("mutex_lock init", pthread_mutex_init(&mutex_lock, NULL));
     process_error("mutex lock visited init", pthread_mutex_init(&mutex_visited, NULL));
+
     process_error("barrier_wait init", pthread_barrier_init(&barrier_wait, NULL, num_threads + 1));
     process_error("barrier_visited init", pthread_barrier_init(&barrier_visited, NULL, num_threads + 1));
 
@@ -132,13 +136,16 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         v_t[v] = (weight < INFINITE) ? graph_root : 0;
     }
 
+    // variável para controlar o cpu ao qual entregar o processo que está a ser criado
+    int cpu_step = 0;
+
     // lançar os processos
     for (int i = 0; i < num_threads; i++)
     {
         thread_data[i].thread_id = i;
         thread_data[i].graph_size = graph_size;
         thread_data[i].num_threads = num_threads;
-        thread_data[i].cpu_id = cpu_ids[i];
+        thread_data[i].cpu_id = cpu_step;
 
         // calcular os vértices de início e fim com base no número de vértices a processar
         int start_col = (i * num_vertices) + 1;
@@ -159,8 +166,12 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
         thread_data[i].end_col = end_col;
 
-        // thread_data[i].local_graph = graph;
-        // thread_data[i].local_d = d;
+        cpu_step++;
+
+        // se o número de processos pedidos exceder o número de cpus
+        // é feito aqui o reset de novo para 0
+        if (cpu_step > num_available_cpus)
+            cpu_step = 0;
 
 #ifdef TRACE
         print_graph_mt(thread_data[i].local_graph, start_col, end_col, graph_size);
@@ -168,9 +179,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
         process_error("worker_thread create", pthread_create(&threads[i], NULL, worker_prim, (void *)&thread_data[i]));
     }
-
-    // começar a cronometrar a execução
-    gettimeofday(&start, NULL);
 
     do
     {
@@ -228,6 +236,8 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
         pthread_barrier_wait(&barrier_visited);
         all_vertices_visited = all_visited(graph_size);
+
+        // fazer reset ao u encontrado previamente
         min_u = 0;
         min_weight = INFINITE;
 
@@ -239,21 +249,13 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         pthread_join(threads[i], (void **)NULL);
     }
 
-    // emitir o tempo de execução do algoritmo
-    gettimeofday(&end, NULL);
-
-    double seconds = (double)(end.tv_sec - start.tv_sec);
-    double microseconds = (double)(end.tv_usec - start.tv_usec);
-    double elapsed_time = seconds + microseconds / 1e6;
-
-    printf("Execution time: %.6f seconds\n", elapsed_time);
-
     // libertar a memória alocada pelo processo
     free(global_u);
     free(global_weight);
     free(d);
     free(visited);
 
+    // destruir os mutexes e condições
     process_error("broadcast_message cond destroy", pthread_cond_destroy(&broadcast_message.wait));
     process_error("broadcast_message mutex destroy", pthread_mutex_destroy(&broadcast_message.lock));
 
@@ -263,11 +265,9 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     process_error("condition destroy", pthread_cond_destroy(&cond));
     process_error("condition wait destroy", pthread_cond_destroy(&cond_wait));
     process_error("barrier_wait destroy", pthread_barrier_destroy(&barrier_wait));
+
     process_error("barrier_visited destroy", pthread_barrier_destroy(&barrier_visited));
 
-#ifdef DEBUG
-    printf("print_mst_mt ended\n");
-#endif
     return v_t;
 }
 
@@ -284,6 +284,7 @@ void *worker_prim(void *arg)
     CPU_ZERO(&cpuset);
     CPU_SET(data->cpu_id, &cpuset);
 
+    // enviar o processo para o cpu que lhe foi atribuído
     pthread_t thread = pthread_self();
     process_error("thread affinity set", pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset));
 
@@ -319,6 +320,7 @@ void *worker_prim(void *arg)
 #endif
         pthread_barrier_wait(&barrier_wait);
 
+        // aguardar pela mensagem com o u mínimo
         pthread_mutex_lock(&broadcast_message.lock);
 
         while (!broadcast_message.ready[data->thread_id])
@@ -328,12 +330,13 @@ void *worker_prim(void *arg)
 
         u = broadcast_message.u;
         broadcast_message.ready[data->thread_id] = false;
+
 #ifdef DEBUG
         printf("[thread %d] received u = %d\n", data->thread_id, u);
 #endif
         pthread_mutex_unlock(&broadcast_message.lock);
 
-        // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
+        // se tiver sido escolhido o u deste processo adicioná-lo a v-v_t
         if (u >= data->start_col && u <= data->end_col)
         {
             pthread_mutex_lock(&mutex_visited);
@@ -344,6 +347,7 @@ void *worker_prim(void *arg)
 #endif
         }
 
+        // processar todos os vértices que lhe foram atribuídos em relação a u
         for (int i = data->start_col; i <= data->end_col; i++)
         {
             // excluir a diagonal e v-v_t
