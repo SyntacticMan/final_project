@@ -75,6 +75,12 @@ int main(int argc, char *argv[])
 
     print_banner();
 
+    if (graph_filename == NULL)
+    {
+        printf("E necessario fornecer o nome do ficheiro com o grafo\n");
+        return -1;
+    }
+
     printf("Carregando grafo %s\n", graph_filename);
 
     header *graph_header = read_header(graph_filename);

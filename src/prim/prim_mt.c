@@ -17,6 +17,7 @@
 #include "prim_mt.h"
 #endif
 
+// argumentos para os processos
 typedef struct _thread_data
 {
     int thread_id;
@@ -27,6 +28,7 @@ typedef struct _thread_data
     int cpu_id;
 } thread_data;
 
+// mensagem
 typedef struct _message
 {
     pthread_cond_t wait;
@@ -118,6 +120,9 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     int num_vertices = round(graph_size / num_threads);
     int last_end_col = 0;
 
+    int start_col = 0;
+    int end_col = 0;
+
     // inicializar a árvore mínima
     v_t[graph_root] = graph_root;
     d[graph_root] = 0;
@@ -146,8 +151,8 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         thread_data[i].cpu_id = cpu_step;
 
         // calcular os vértices de início e fim com base no número de vértices a processar
-        int start_col = (i * num_vertices) + 1;
-        int end_col = start_col + num_vertices - 1;
+        start_col = (i * num_vertices) + 1;
+        end_col = start_col + num_vertices - 1;
         last_end_col = end_col;
 
         thread_data[i].start_col = start_col;
@@ -262,8 +267,8 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
     process_error("condition destroy", pthread_cond_destroy(&cond));
     process_error("condition wait destroy", pthread_cond_destroy(&cond_wait));
-    process_error("barrier_wait destroy", pthread_barrier_destroy(&barrier_wait));
 
+    process_error("barrier_wait destroy", pthread_barrier_destroy(&barrier_wait));
     process_error("barrier_visited destroy", pthread_barrier_destroy(&barrier_visited));
 
     return v_t;
