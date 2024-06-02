@@ -72,8 +72,6 @@ static void *worker_prim(void *arg);
 
 int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 {
-    struct timeval start, end;
-
     // certificar que não se pedem mais processos que vértices
     if (num_threads > graph_size)
         num_threads = graph_size;

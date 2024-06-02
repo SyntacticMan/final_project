@@ -27,6 +27,8 @@
 #include "../file/file_module.h"
 #endif
 
+void print_banner(void);
+
 int main(int argc, char *argv[])
 {
 
@@ -63,9 +65,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	// no imediato vou limitar o grafo a um máximo de 46000 vértices
+	print_banner();
+	// no imediato vou limitar o grafo a um máximo de 90000 vértices
 	// mais do que isso e começa a ter problemas em alocar memória
-	// pois excede o unsigned long int de matrix_size
 	if (graph_size <= 1 || graph_size > 90000)
 	{
 		printf("Grafo tem de ter um tamanho entre 2 e 90000\n");
@@ -125,4 +127,11 @@ int main(int argc, char *argv[])
 
 	free(graph);
 	return 0;
+}
+
+void print_banner(void)
+{
+	printf("Gerador de grafos\n"
+		   "Cria um grafo com o numero de vertices e percentagem de arestas pedidas\n"
+		   "com pesos gerados aleatoriamente\n");
 }

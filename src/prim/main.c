@@ -35,6 +35,7 @@
 #endif
 
 void print_mst(float *graph, int *v_t, int graph_size, int graph_root);
+void print_banner(void);
 char get_letter(int number);
 
 int main(int argc, char *argv[])
@@ -47,7 +48,7 @@ int main(int argc, char *argv[])
 
     char *graph_filename;
     int opt;
-    int threads = 1; // por omissão correr apenas numa thread
+    int threads = 1; // por omissão correr apenas num processo
     bool print_agm = false;
     char *implementation_type;
 
@@ -72,6 +73,10 @@ int main(int argc, char *argv[])
         }
     }
 
+    print_banner();
+
+    printf("Carregando grafo %s\n", graph_filename);
+
     header *graph_header = read_header(graph_filename);
 
     if (graph_header == NULL)
@@ -87,7 +92,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    // se não tiver graph_root no ficheiro, gerar uma
+    // se não tiver raíz no ficheiro, escolher uma aleatóriamente
     int graph_root;
     if (graph_header->graph_root > 0)
         graph_root = graph_header->graph_root;
@@ -95,15 +100,14 @@ int main(int argc, char *argv[])
         graph_root = pick_graph_root(graph_header->graph_size);
 
     // emissão de relatório e gravação do mst no grafo
-    printf("Grafo -> %s\n", graph_filename);
-    printf("Raiz -> %d\n", graph_root);
-    printf("Tamanho -> %d\n", graph_header->graph_size);
+    printf("Raiz: %d\tNúmero de vértices:%d\n", graph_root, graph_header->graph_size);
 
     // se receber a opção, simplesmente ler a AGM e sair
     if (print_agm)
     {
         if (graph_header->graph_size <= 20)
             print_graph(graph, graph_header->graph_size);
+
         // se tiver mst, imprimir
         if (graph_header->vt_size > 0)
         {
@@ -128,7 +132,7 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
-    // começar a cronometrar a execução
+    // começar a cronometrar a execução da implementação do algoritmo
     gettimeofday(&start, NULL);
 
 #ifdef LOCK_MT
@@ -149,26 +153,28 @@ int main(int argc, char *argv[])
     // execução normal
     if (threads <= 1)
     {
-        // lançar single thread
-        printf("Lançando Algoritmo de Prim em tarefa simples\n");
+        // lançar em tarefa simples
+        printf("Processando o grafo em tarefa simples\n");
         v_t = prim_mst(graph, graph_header->graph_size, graph_root);
         implementation_type = "ST";
     }
     else
     {
-        printf("Lançando Algoritmo de Prim com %d threads\n", threads);
+        // lançar em multi-tarefa
+        printf("Processando o grafo com %d processos\n", threads);
         v_t = prim_mt_mst(graph, graph_header->graph_size, graph_root, threads);
         implementation_type = "MT";
     }
 #endif
-    // emitir o tempo de execução do algoritmo
+
+    // emitir o tempo de execução do algoritmo, em segundos
     gettimeofday(&end, NULL);
 
     double seconds = (double)(end.tv_sec - start.tv_sec);
     double microseconds = (double)(end.tv_usec - start.tv_usec);
     double elapsed_time = seconds + microseconds / 1e6;
 
-    printf("Execution time: %.6f seconds\n", elapsed_time);
+    printf("Tempo de processamento: %.6f segundos\n", elapsed_time);
 
 #ifdef DEBUG
     // acima dum certo tamanho é inútil
@@ -217,6 +223,18 @@ void print_mst(float *graph, int *v_t, int graph_size, int graph_root)
     }
 
     printf("\n");
+}
+
+/*
+    print_banner
+
+    imprime os dados do executável
+*/
+void print_banner()
+{
+    printf("* Implementação do Algoritmo de Prim\n"
+           "* para obter uma Árvore Geradora Mínima\n"
+           "* num grafo\n\n");
 }
 
 char get_letter(int number)

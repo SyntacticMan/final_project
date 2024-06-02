@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <string.h>
 
+void print_banner(void);
+
 int main(int argc, char *argv[])
 {
     char *graph_filename;
@@ -78,4 +80,10 @@ int main(int argc, char *argv[])
     free(graph);
     free(graph_header);
     return 0;
+}
+
+void print_banner(void)
+{
+    printf("Ferramenta para desenhar o grafo\n"
+           "e respetiva arvore minima, se existir\n");
 }
