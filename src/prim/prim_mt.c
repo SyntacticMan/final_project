@@ -85,7 +85,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     // alocar os recursos partilhados
     v_t = calloc(graph_size + 1, sizeof(int));
     visited = calloc(graph_size + 1, sizeof(bool));
-    float *d = calloc(graph_size + 1, sizeof(float));
+    d = calloc(graph_size + 1, sizeof(float));
     global_u = calloc(num_threads, sizeof(int));
     global_weight = calloc(num_threads, sizeof(float));
 
@@ -120,6 +120,9 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     v_t[graph_root] = graph_root;
     d[graph_root] = 0;
     visited[0] = false;
+
+    // enviar graph para o local de MT
+    local_graph = graph;
 
     for (int v = 1; v <= graph_size; v++)
     {
