@@ -24,8 +24,7 @@ typedef struct _thread_data
     int start_col;
     int end_col;
     int num_threads;
-    float *local_graph;
-    float *local_d;
+    int cpu_id;
 } thread_data;
 
 typedef struct _message
@@ -37,6 +36,7 @@ typedef struct _message
 } message;
 
 pthread_mutex_t mutex_lock;
+pthread_mutex_t mutex_visited;
 
 // condições para os processos
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
@@ -55,12 +55,13 @@ bool *visited;
 bool all_vertices_visited;
 message broadcast_message;
 
+float *d;
+float *local_graph;
+
 /*
     funções internas
 */
 static int get_u(float *d, int start_col, int end_col);
-static float *split_graph(float *graph, int start_col, int end_col, int graph_size);
-static float *split_d(float *d, int start_col, int end_col, int graph_size);
 static bool all_visited(int graph_size);
 
 /*
@@ -79,6 +80,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         num_threads = graph_size;
 
     pthread_t threads[num_threads];
+    int cpu_ids[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
     // alocar os recursos partilhados
     v_t = calloc(graph_size + 1, sizeof(int));
@@ -102,6 +104,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     process_error("cond init", pthread_cond_init(&cond, NULL));
     process_error("cond_wait init", pthread_cond_init(&cond_wait, NULL));
     process_error("mutex_lock init", pthread_mutex_init(&mutex_lock, NULL));
+    process_error("mutex lock visited init", pthread_mutex_init(&mutex_visited, NULL));
     process_error("barrier_wait init", pthread_barrier_init(&barrier_wait, NULL, num_threads + 1));
     process_error("barrier_visited init", pthread_barrier_init(&barrier_visited, NULL, num_threads + 1));
 
@@ -132,6 +135,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         thread_data[i].thread_id = i;
         thread_data[i].graph_size = graph_size;
         thread_data[i].num_threads = num_threads;
+        thread_data[i].cpu_id = cpu_ids[i];
 
         // calcular os vértices de início e fim com base no número de vértices a processar
         int start_col = (i * num_vertices) + 1;
@@ -152,8 +156,8 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
         thread_data[i].end_col = end_col;
 
-        thread_data[i].local_graph = split_graph(graph, start_col, end_col, graph_size);
-        thread_data[i].local_d = split_d(d, start_col, end_col, graph_size);
+        // thread_data[i].local_graph = graph;
+        // thread_data[i].local_d = d;
 
 #ifdef TRACE
         print_graph_mt(thread_data[i].local_graph, start_col, end_col, graph_size);
@@ -183,9 +187,6 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
         pthread_cond_broadcast(&broadcast_message.wait);
 
-        // min_u = 0;
-        // min_weight = INFINITE;
-
         for (int i = 0; i < num_threads; i++)
         {
             /* se fôr entregue um u = 0 é porque o processo
@@ -195,11 +196,11 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 
                 de qualquer maneira são omitidos do u global
             */
-            // if (global_u[i] != 0 && global_weight[i] < min_weight)
-            // {
-            //     min_u = global_u[i];
-            //     min_weight = global_weight[i];
-            // }
+            if (global_u[i] != 0 && global_weight[i] < min_weight)
+            {
+                min_u = global_u[i];
+                min_weight = global_weight[i];
+            }
 
 #ifdef TRACE
             printf("global_u[%d] = %d\tglobal_weight[%d] = %0.3f\n", i, global_u[i], i, global_weight[i]);
@@ -251,9 +252,11 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     free(visited);
 
     process_error("broadcast_message cond destroy", pthread_cond_destroy(&broadcast_message.wait));
-    process_error("broadcast_message mutex destory", pthread_mutex_destroy(&broadcast_message.lock));
+    process_error("broadcast_message mutex destroy", pthread_mutex_destroy(&broadcast_message.lock));
 
     process_error("mutex_lock destroy", pthread_mutex_destroy(&mutex_lock));
+    process_error("mutex lock visited destroy", pthread_mutex_destroy(&mutex_visited));
+
     process_error("condition destroy", pthread_cond_destroy(&cond));
     process_error("condition wait destroy", pthread_cond_destroy(&cond_wait));
     process_error("barrier_wait destroy", pthread_barrier_destroy(&barrier_wait));
@@ -273,6 +276,18 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
 void *worker_prim(void *arg)
 {
     thread_data *data = (thread_data *)arg;
+    cpu_set_t cpuset;
+
+    CPU_ZERO(&cpuset);
+    CPU_SET(data->cpu_id, &cpuset);
+
+    pthread_t thread = pthread_self();
+    process_error("thread affinity set", pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset));
+
+#ifdef DEBUG
+    printf("[thread %d] -> CPU requested: %d\tCPU set: %d\n", data->thread_id, data->cpu_id, pthread_getaffinity_np(thread, sizeof(cpu_set_t), &cpuset));
+#endif
+
     bool local_all_visited = false;
 
 #ifdef DEBUG
@@ -282,20 +297,17 @@ void *worker_prim(void *arg)
     do
     {
         // obter o vértice u
-        int u = get_u(data->local_d, data->start_col, data->end_col);
+        int u = get_u(d, data->start_col, data->end_col);
 
 #ifdef DEBUG
-        printf("[thread %d] Found u: %d (weight = %0.3f)\n", data->thread_id, u, data->local_d[u]);
+        printf("[thread %d] Found u: %d (weight = %0.3f)\n", data->thread_id, u, d[u]);
 #endif
 
         // enviar para ser avaliado
         pthread_mutex_lock(&mutex_lock);
 
-        // global_u[data->thread_id] = u;
-        // global_weight[data->thread_id] = data->local_d[u];
-
-        if (data->local_d[u] < min_weight)
-            min_u = u;
+        global_u[data->thread_id] = u;
+        global_weight[data->thread_id] = d[u];
 
         pthread_mutex_unlock(&mutex_lock);
 
@@ -321,9 +333,9 @@ void *worker_prim(void *arg)
         // se tiver sido escolhido o u deste processo, adicioná-lo a v_t
         if (u >= data->start_col && u <= data->end_col)
         {
-            pthread_mutex_lock(&mutex_lock);
+            pthread_mutex_lock(&mutex_visited);
             visited[u] = true;
-            pthread_mutex_unlock(&mutex_lock);
+            pthread_mutex_unlock(&mutex_visited);
 #ifdef DEBUG
             printf("[thread %d]  ===== set %d as visited ===== \n", data->thread_id, u);
 #endif
@@ -344,24 +356,24 @@ void *worker_prim(void *arg)
                 printf("[thread %d] processing v = %d for u = %d\n", data->thread_id, i, u);
 #endif
 
-            float u_weight = get_edge(data->local_graph, u, i);
+            float u_weight = get_edge(local_graph, u, i);
 
             // se não tiver ligação, omitir
             if (u_weight == INFINITE)
                 continue;
 
 #ifdef TRACE
-            printf("[thread %d]  u_weight (%d) = %f\td_weight (%d) = %f\n", data->thread_id, u, u_weight, i, data->local_d[i]);
+            printf("[thread %d]  u_weight (%d) = %f\td_weight (%d) = %f\n", data->thread_id, u, u_weight, i, d[i]);
 #endif
 
-            if (/*u_weight != INFINITE &&*/ u_weight < data->local_d[i])
+            if (/*u_weight != INFINITE &&*/ u_weight < d[i])
             {
-                data->local_d[i] = u_weight;
                 pthread_mutex_lock(&mutex_lock);
+                d[i] = u_weight;
                 v_t[i] = u;
 
 #ifdef DEBUG
-                printf("[thread %d] ===> set d[%d]=%0.2f\tv_t[%d]=%d <=== \n", data->thread_id, i, data->local_d[i], i, v_t[i]);
+                printf("[thread %d] ===> set d[%d]=%0.2f\tv_t[%d]=%d <=== \n", data->thread_id, i, d[i], i, v_t[i]);
 #endif
                 pthread_mutex_unlock(&mutex_lock);
             }
@@ -374,7 +386,7 @@ void *worker_prim(void *arg)
 #ifdef TRACE
         for (int v = 1; v <= data->graph_size; v++)
         {
-            printf("[thread %d]\td[%d]=%0.2f\n", data->thread_id, v, data->local_d[v]);
+            printf("[thread %d]\td[%d]=%0.2f\n", data->thread_id, v, d[v]);
         }
 #endif
     } while (!local_all_visited);
@@ -384,15 +396,12 @@ void *worker_prim(void *arg)
 
     for (int i = data->start_col; i <= data->end_col; i++)
     {
-        printf("[thread %d] set d[%d]=%0.2f\tv_t[%d]=%d\n", data->thread_id, i, data->local_d[i], i, v_t[i]);
+        printf("[thread %d] set d[%d]=%0.2f\tv_t[%d]=%d\n", data->thread_id, i, d[i], i, v_t[i]);
     }
     pthread_mutex_unlock(&mutex_lock);
 
     printf("[thread %d] >>>>> finished <<<<<\n", data->thread_id);
 #endif
-
-    free(data->local_d);
-    free(data->local_graph);
 
     pthread_exit(NULL);
 }
@@ -422,51 +431,6 @@ int get_u(float *d, int start_col, int end_col)
 }
 
 /*
-    split_graph
-
-    cria um subconjunto de graph, com início em start_col e fim em end_col
-*/
-float *split_graph(float *graph, int start_col, int end_col, int graph_size)
-{
-    unsigned long long matrix_size = get_matrix_size(graph_size);
-    float *split_graph = calloc(matrix_size, sizeof(float));
-
-    for (int col = start_col; col <= end_col; col++)
-    {
-        for (int row = 1; row <= graph_size; row++)
-        {
-            if (col != row)
-            {
-                add_edge(split_graph, col, row, get_edge(graph, col, row));
-            }
-        }
-    }
-
-    return split_graph;
-}
-
-/*
-    split_d
-
-    cria uma versão local do vetor d que contém apenas os valores
-    que estão entre start_col e end_col
-*/
-float *split_d(float *d, int start_col, int end_col, int graph_size)
-{
-    float *split_d = malloc((graph_size + 1) * sizeof(float));
-
-    memset(split_d, INFINITE, (graph_size + 1) * sizeof(float));
-    // memcpy(split_d, d, (graph_size + 1) * sizeof(float));
-
-    for (int i = start_col; i <= end_col; i++)
-    {
-        split_d[i] = d[i];
-    }
-
-    return split_d;
-}
-
-/*
     all_visited
 
     avalia se todos os vértices do grafo já foram visitados
@@ -475,17 +439,17 @@ float *split_d(float *d, int start_col, int end_col, int graph_size)
 */
 bool all_visited(int graph_size)
 {
-    pthread_mutex_lock(&mutex_lock);
+    pthread_mutex_lock(&mutex_visited);
     for (int i = 1; i <= graph_size; i++)
     {
         // sair assim que aparecer o primeiro vértice não visitado
         if (!visited[i])
         {
-            pthread_mutex_unlock(&mutex_lock);
+            pthread_mutex_unlock(&mutex_visited);
             return false;
         }
     }
-    pthread_mutex_unlock(&mutex_lock);
+    pthread_mutex_unlock(&mutex_visited);
     return true;
 }
 

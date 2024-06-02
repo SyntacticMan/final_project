@@ -114,8 +114,11 @@ debug_draw: draw
 debug_graph: CCFLAGS += -DDEBUG -g
 debug_graph: graph
 
-lock_mt	:	CCFLAGS += -DLOCK_MT -DDEBUG -g
+lock_mt	:	CCFLAGS += -DLOCK_MT -g
 lock_mt :	prim
+
+debug_lock_mt	:	CCFLAGS += -DLOCK_MT -g
+debug_lock_mt 	:	debug_prim
 
 trace_graph: CCFLAGS += -DTRACE -DDEBUG -g
 trace_graph: graph

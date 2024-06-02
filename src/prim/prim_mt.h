@@ -12,6 +12,8 @@
  * Orientador: Paulo Shirley										*
  * ******************************************************************/
 
+#define _GNU_SOURCE
+
 #ifndef LIBS
 #include <stdio.h>
 #include <string.h>
@@ -23,6 +25,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <pthread.h>
+#include <sched.h>
 
 #ifndef GRAPH
 #define GRAPH

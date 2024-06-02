@@ -132,9 +132,19 @@ int main(int argc, char *argv[])
     gettimeofday(&start, NULL);
 
 #ifdef LOCK_MT
-    printf("Lançando Algoritmo de Prim com 1 processo fixo\n");
-    v_t = prim_mt_mst(graph, graph_header->graph_size, graph_root, 1);
-    implementation_type = "MT";
+    if (threads <= 1)
+    {
+        // lançar single thread
+        printf("Lançando Algoritmo de Prim em tarefa simples\n");
+        v_t = prim_mst(graph, graph_header->graph_size, graph_root);
+        implementation_type = "ST";
+    }
+    else
+    {
+        printf("Lançando Algoritmo de Prim MT com 1 thread fixa\n");
+        v_t = prim_mt_mst(graph, graph_header->graph_size, graph_root, 1);
+        implementation_type = "MT";
+    }
 #else
     // execução normal
     if (threads <= 1)
