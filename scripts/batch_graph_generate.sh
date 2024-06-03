@@ -3,44 +3,15 @@
 # Definição das opções padrão do comando
 prefix="graph"
 extension=".grf"
-percentage=45
-size=10
 
-# Número de grafos padrão
-default_num_graphs=5
-default_size= 10
-
-# Função para exibir o uso do script
-usage() {
-    echo "Uso: $0 [-n <num_graphs>] [-s <size_increment>]"
-    echo "   -n <num_graphs>: Número de grafos a serem gerados (padrão: $default_num_graphs)"
-    echo "   -s <size_increment>: Tamanho dos grafos a serem gerados (padrão: $default_size)"
-    exit 1
-}
-
-# Parsing dos argumentos usando getopts
-while getopts ":n:s:" opt; do
-    case ${opt} in
-        n )
-            num_graphs=$OPTARG
-            ;;
-        s)
-            size_increment=$OPTARG
-            ;;
-        \? )
-            echo "Opção inválida: -$OPTARG" 1>&2
-            usage
-            ;;
-        : )
-            echo "Opção -$OPTARG requer um argumento." 1>&2
-            usage
-            ;;
-    esac
-done
+# valores iniciais para percentagem de arestas e número de vértices
+percentage=25
+size=500
 
 # Definindo o número de grafos como o padrão se não fornecido
-num_graphs=${num_graphs:-$default_num_graphs}
-size_increment=${size_increment:-$default_size}
+num_graphs=3
+size_increment=500
+percentage_increment=25
 
 # Diretório para armazenar os grafos
 output_directory="graphs"
@@ -50,12 +21,14 @@ mkdir -p "$output_directory"
 
 # Loop para gerar múltiplos grafos
 for ((i=1; i<=num_graphs; i++)); do
+    for ((j=1; j<=3; j++)); do
+        output_file="$output_directory/${prefix}_s${size}_p${percentage}${extension}"
 
-    output_file="$output_directory/${prefix}_s${size}_p${percentage}${extension}"
-
-    echo "Geração do Grafo $i de $num_graphs:"
-    ./bin/gengraph -s $size -f $output_file -p $percentage
-    echo "-----------------------------------"
-
+        echo "Geração do Grafo $i de $num_graphs:"
+        ./bin/gengraph -s $size -f $output_file -p $percentage
+        echo "-----------------------------------"
+        percentage=$((percentage + percentage_increment));
+    done
     size=$((size + size_increment))
+    percentage=25
 done
