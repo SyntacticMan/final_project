@@ -9,7 +9,7 @@ percentage=25
 size=500
 
 # Definindo o número de grafos como o padrão se não fornecido
-num_graphs=3
+num_graphs=150
 size_increment=500
 percentage_increment=25
 
