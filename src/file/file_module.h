@@ -28,4 +28,4 @@ header *read_header(char *filename);
 float *read_graph(char *filename, int graph_size);
 void write_mst(int *v_t, int vt_size, int graph_root, char *filename);
 int *read_mst(char *filename);
-void write_result(char *graph_name, int graph_size, int graph_root, double elapsed_time, char *implementation_type, int num_threads);
+void write_result(char *graph_name, int graph_size, double elapsed_time, int edge_percentage, int num_threads);

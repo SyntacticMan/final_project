@@ -50,7 +50,6 @@ int main(int argc, char *argv[])
     int opt;
     int threads = 1; // por omissão correr apenas num processo
     bool print_agm = false;
-    char *implementation_type;
 
     while ((opt = getopt(argc, argv, "f:t:p")) != -1)
     {
@@ -162,14 +161,12 @@ int main(int argc, char *argv[])
         // lançar em tarefa simples
         printf("Processando o grafo em tarefa simples\n");
         v_t = prim_mst(graph, graph_header->graph_size, graph_root);
-        implementation_type = "ST";
     }
     else
     {
         // lançar em multi-tarefa
-        printf("Processando o grafo com %d processos\n", threads);
+        printf("Processando o grafo com %d tarefas\n", threads);
         v_t = prim_mt_mst(graph, graph_header->graph_size, graph_root, threads);
-        implementation_type = "MT";
     }
 #endif
 
@@ -194,7 +191,7 @@ int main(int argc, char *argv[])
     write_mst(v_t, graph_header->graph_size, graph_root, graph_filename);
 
     // guardar os resultados para estatística
-    write_result(graph_filename, graph_header->graph_size, graph_root, elapsed_time, implementation_type, threads);
+    write_result(graph_filename, graph_header->graph_size, elapsed_time, graph_header->edge_percentage, threads);
 
     free(graph);
     free(graph_header);
