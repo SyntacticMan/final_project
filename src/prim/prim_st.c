@@ -132,10 +132,7 @@ int get_u(float *d, bool *visited, int graph_size)
     for (int u = 1; u <= graph_size; u++)
     {
         // excluir os já visitados (v-vt)
-        if (visited[u])
-            continue;
-
-        if (d[u] < min_weight)
+        if (!visited[u] && d[u] < min_weight)
         {
             u_min = u;
             min_weight = d[u];
@@ -153,15 +150,14 @@ int get_u(float *d, bool *visited, int graph_size)
 */
 bool all_visited(int graph_size, bool *visited)
 {
-    bool result = true;
     for (int i = 1; i <= graph_size; i++)
     {
         // sair assim que aparecer o primeiro vértice não visitado
         if (!visited[i])
         {
-            result = false;
+            return false;
             break;
         }
     }
-    return result;
+    return true;
 }
