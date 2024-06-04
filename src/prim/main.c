@@ -36,7 +36,6 @@
 
 void print_mst(float *graph, int *v_t, int graph_size, int graph_root);
 void print_banner(void);
-char get_letter(int number);
 
 int main(int argc, char *argv[])
 {
@@ -216,9 +215,9 @@ void print_mst(float *graph, int *v_t, int graph_size, int graph_root)
             continue;
 
         if (graph_size <= 26)
-            printf("(%c)-[%0.2f]-(%c)", get_letter(i), get_edge(graph, v_t[i], i), get_letter(v_t[i]));
+            printf("(%c)-[%0.2f]-(%c)", i, get_edge(graph, v_t[i], i), v_t[i]);
         else
-            printf("(%d)-[%0.2f]-(%c)", i, get_edge(graph, v_t[i], i), get_letter(v_t[i]));
+            printf("(%d)-[%0.2f]-(%c)", i, get_edge(graph, v_t[i], i), v_t[i]);
 
         // omitir na última iteração
         if (i < graph_size - 1)
@@ -238,14 +237,4 @@ void print_banner()
     printf("* Implementação do Algoritmo de Prim\n"
            "* para obter uma Árvore Geradora Mínima\n"
            "* num grafo\n\n");
-}
-
-char get_letter(int number)
-{
-    if (number < 1 || number > 26)
-    {
-        return 'Z';
-    }
-
-    return 'a' + (number - 1);
 }
