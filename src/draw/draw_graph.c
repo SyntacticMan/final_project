@@ -74,8 +74,7 @@ void draw_graph(float *graph, int graph_size, int graph_root, int *v_t, int vt_s
     count = 0;
     for (int col = 2; col <= graph_size; col++)
     {
-        // processar apenas a parte triangular superior da matriz
-        for (int row = 1; row < col; row++)
+        for (int row = 1; row <= graph_size; row++)
         {
             // procurar os vértices, por nome
             sprintf(string_temp, "%d", col);
@@ -95,7 +94,7 @@ void draw_graph(float *graph, int graph_size, int graph_root, int *v_t, int vt_s
                 agsafeset(edge, "fontsize", "8", "");
 
                 // se fizer parte da MST então a aresta será mais grossa
-                if (v_t[col] == row || v_t[row] == col)
+                if (v_t[col] == row)
                 {
                     agsafeset(edge, "penwidth", "1.0", "");
                 }
