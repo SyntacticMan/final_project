@@ -34,7 +34,7 @@
 #include <sys/time.h>
 #endif
 
-void print_mst(float *graph, int *v_t, int graph_size, int graph_root);
+void print_mst(float *graph, int *v_t, int graph_size, int graph_root, bool with_weights);
 void print_banner(void);
 
 int main(int argc, char *argv[])
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
                 return -1;
             }
 
-            print_mst(graph, v_t, graph_header->vt_size, graph_header->graph_root);
+            print_mst(graph, v_t, graph_header->vt_size, graph_header->graph_root, false);
         }
         else
         {
@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
     if (graph_header->graph_size <= 20)
         print_graph(graph, graph_header->graph_size);
 
-    print_mst(graph, v_t, graph_header->graph_size + 1, graph_header->graph_root);
+    print_mst(graph, v_t, graph_header->graph_size + 1, graph_header->graph_root, false);
 #endif
 
     // actualizar o ficheiro do grafo
@@ -202,26 +202,20 @@ int main(int argc, char *argv[])
 
     imprime a versão textual da árvore mínima
 */
-void print_mst(float *graph, int *v_t, int graph_size, int graph_root)
+void print_mst(float *graph, int *v_t, int graph_size, int graph_root, bool with_weights)
 {
     printf("\n");
 
     for (int i = 1; i < graph_size; i++)
     {
-        if ((graph_size > 50) && (i > 25) && (i < graph_size - 20))
-            continue;
-
-        if (i == graph_root)
-            continue;
-
-        if (graph_size <= 26)
-            printf("(%c)-[%0.2f]-(%c)", i, get_edge(graph, v_t[i], i), v_t[i]);
+        if (with_weights)
+            printf("(%d)-[%0.2f]-(%d)", i, get_edge(graph, v_t[i], i), v_t[i]);
         else
-            printf("(%d)-[%0.2f]-(%c)", i, get_edge(graph, v_t[i], i), v_t[i]);
+            printf("(%d)-(%d)", i, v_t[i]);
 
         // omitir na última iteração
         if (i < graph_size - 1)
-            printf("||");
+            printf("--");
     }
 
     printf("\n");
