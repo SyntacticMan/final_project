@@ -74,6 +74,7 @@ void draw_graph(float *graph, int graph_size, int graph_root, int *v_t, int vt_s
     count = 0;
     for (int col = 2; col <= graph_size; col++)
     {
+        // processar apenas a parte triangular superior da matriz
         for (int row = 1; row < col; row++)
         {
             // procurar os vértices, por nome

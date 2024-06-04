@@ -185,7 +185,7 @@ int *read_mst(char *filename)
     // carregar v_t
     int *v_t = (int *)malloc(graph_header->vt_size * sizeof(int));
 
-    for (int i = 0; i < graph_header->vt_size; i++)
+    for (int i = 1; i < graph_header->vt_size; i++)
     {
         fread(&v_t[i], sizeof(int), 1, graph_file);
     }
