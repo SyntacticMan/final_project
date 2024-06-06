@@ -12,7 +12,12 @@
  * Orientador: Paulo Shirley										*
  * ******************************************************************/
 
+#ifndef LIBS
 #include <stdio.h>
+#include <string.h>
+#define LIBS
+#endif
+
 #include <stdlib.h>
 
 typedef struct _file_header

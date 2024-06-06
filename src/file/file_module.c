@@ -201,12 +201,20 @@ int *read_mst(char *filename)
 void write_result(char *graph_name, int graph_size, double elapsed_time, int edge_percentage, int num_threads)
 {
     FILE *file;
-    char filename[] = "results/prim_results.csv";
+
+    // construir o nome do ficheiro
+    char filename[] = "results/prim_";
+    char threads[50];
+    sprintf(threads, "%d", num_threads);
+
+    strcat(filename, threads);
+    strcat(filename, "_threads.csv");
+
     file = fopen(filename, "a+");
 
     if (file == NULL)
     {
-        printf("Failed to open the file.\n");
+        printf("Failed to open the %s.\n", filename);
         return;
     }
 

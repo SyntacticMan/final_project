@@ -30,9 +30,9 @@
 #ifndef LIBS
 #include <stdio.h>
 #include <string.h>
+#endif
 #include <unistd.h>
 #include <sys/time.h>
-#endif
 
 void print_mst(float *graph, int *v_t, int graph_size, int graph_root, bool with_weights);
 void print_banner(void);
@@ -49,8 +49,9 @@ int main(int argc, char *argv[])
     int opt;
     int threads = 1; // por omissão correr apenas num processo
     bool print_agm = false;
+    bool print_results = false;
 
-    while ((opt = getopt(argc, argv, "f:t:p")) != -1)
+    while ((opt = getopt(argc, argv, "f:t:pr")) != -1)
     {
         switch (opt)
         {
@@ -62,6 +63,9 @@ int main(int argc, char *argv[])
             break;
         case 'p':
             print_agm = true;
+            break;
+        case 'r':
+            print_results = true;
             break;
         default:
             fprintf(stderr, "Algoritmo de Prim\n");
@@ -190,7 +194,8 @@ int main(int argc, char *argv[])
     write_mst(v_t, graph_header->graph_size, graph_root, graph_filename);
 
     // guardar os resultados para estatística
-    write_result(graph_filename, graph_header->graph_size, elapsed_time, graph_header->edge_percentage, threads);
+    if (print_results)
+        write_result(graph_filename, graph_header->graph_size, elapsed_time, graph_header->edge_percentage, threads);
 
     free(graph);
     free(graph_header);
