@@ -1,3 +1,18 @@
+/********************************************************************
+ *  Projecto Final em Engenharia Informática                        *
+ *                                                                  *
+ * Programação Paralela Multi tarefa								*
+ * Algoritmo de Prim para obter uma árvore geradora mínima			*
+ * 																	*
+ * Ferramenta para criar a representação gráfica do grafo           *
+ * e sua Àrvore Geradora Miníma
+ * 																	*
+ * Nuno Méren														*
+ * 1902937															*
+ * 																	*
+ * Orientador: Paulo Shirley										*
+ * ******************************************************************/
+
 #ifndef DRAW_GRAPH
 #define DRAW_GRAPH
 #include "draw_graph.h"
@@ -12,14 +27,17 @@
 #include <string.h>
 
 void print_banner(void);
+void print_usage(void);
 
 int main(int argc, char *argv[])
 {
-    char *graph_filename;
+    char *graph_filename = NULL;
     int opt;
     char *graph_title;
     float *graph;
     int *v_t;
+
+    print_banner();
 
     // processar as opções da linha de comandos
     while ((opt = getopt(argc, argv, "f:t:")) != -1)
@@ -33,11 +51,14 @@ int main(int argc, char *argv[])
             graph_title = optarg;
             break;
         default:
-            fprintf(stderr, "Draw Graph\n");
-            fprintf(stderr, "Usage: %s [-f filename] [-t graph title]\n", argv[0]);
-            exit(EXIT_FAILURE);
             break;
         }
+    }
+
+    // se não houver um ficheiro com o grafo não é possível prosseguir
+    if (graph_filename == NULL)
+    {
+        print_usage();
     }
 
     // carregar o ficheiro
@@ -50,8 +71,8 @@ int main(int argc, char *argv[])
 
     if (graph == NULL)
     {
-        printf("Nao foi possivel carregar o grafo\n");
-        return -1;
+        printf("Não foi possível carregar o grafo\n");
+        exit(EXIT_FAILURE);
     }
 
     if (graph_header->vt_size > 0)
@@ -82,8 +103,30 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+/*
+    print_banner
+
+    imprime os dados do executável
+*/
 void print_banner(void)
 {
-    printf("Ferramenta para desenhar o grafo\n"
-           "e respetiva arvore minima, se existir\n");
+    printf("*****************************************************\n"
+           "* Projecto de Final de Curso - Engenharia Informática\n"
+           "* Ferramenta para criar a representação gráfica\n"
+           "* do grafo indicado e respetiva AGM\n"
+           "* Nuno Méren\n"
+           "* Aluno 1902937\n"
+           "*****************************************************\n\n");
+}
+
+/*
+    print_usage
+
+    imprime as opções de utilização
+    e termina a execução do programa
+*/
+void print_usage(void)
+{
+    printf("Utilização:\ndrawgraph [-f ficheiro com o grafo] [-t titulo do grafo]\n");
+    exit(EXIT_SUCCESS);
 }
