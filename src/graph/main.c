@@ -28,12 +28,13 @@
 #endif
 
 void print_banner(void);
+void print_usage(void);
 
 int main(int argc, char *argv[])
 {
 
 	int graph_size, requested_edge_percentage;
-	char *graph_filename;
+	char *graph_filename = NULL;
 	float *graph;
 	bool lock_graph = false;
 	bool print_matrix = false;
@@ -60,12 +61,19 @@ int main(int argc, char *argv[])
 			print_matrix = true;
 			break;
 		default:
-			fprintf(stderr, "Usage: %s [-s graph_size] [-f filename] [-p requested_edge_percentage]\n", argv[0]);
-			exit(EXIT_FAILURE);
+			break;
 		}
 	}
 
 	print_banner();
+
+	// se não tiver recebido o nome do ficheiro com o grafo
+	// imprimir as opções de utilização e sair
+	if (graph_filename == NULL)
+	{
+		print_usage();
+	}
+
 	// no imediato vou limitar o grafo a um máximo de 90000 vértices
 	// mais do que isso e começa a ter problemas em alocar memória
 	if (graph_size <= 1 || graph_size > 90000)
@@ -78,9 +86,10 @@ int main(int argc, char *argv[])
 	if (requested_edge_percentage < 0 || requested_edge_percentage > 100)
 	{
 		printf("Percentagem de arestas deve ser escolhida entre 0 e 100\n");
-		return -1;
+		return EXIT_FAILURE;
 	}
 
+	// esta opção cria o grafo do livro
 	if (lock_graph)
 	{
 		graph = create_locked_graph();
@@ -93,11 +102,11 @@ int main(int argc, char *argv[])
 	if (graph == NULL)
 	{
 		printf("Nao foi possivel criar o grafo.\n");
-		return -1;
+		return EXIT_FAILURE;
 	}
 
 	// obter as contagens das arestas
-	// número máximo de arestas é simplesmente o número de elementos da matriz de adjacência
+	// número máximo de arestas é simplesmente o número de elementos da matriz de adjacênciae percentagem de arestas pedidas
 	unsigned long long max_edge_count = get_matrix_size(graph_size);
 	int actual_edge_percentage = (int)get_edge_percentage(graph, graph_size);
 
@@ -118,6 +127,7 @@ int main(int argc, char *argv[])
 	graph_header->edge_percentage = actual_edge_percentage;
 	graph_header->vt_size = 0; // como não há mst ainda, vt_size vai a 0
 
+	// na criação do grafo do livro a raíz é predeterminada aqui
 	if (lock_graph)
 		graph_header->graph_root = 2;
 	else
@@ -126,12 +136,35 @@ int main(int argc, char *argv[])
 	write_file(graph_header, graph, graph_filename);
 
 	free(graph);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
+/*
+	print_banner
+
+	imprime os dados do executável
+*/
 void print_banner(void)
 {
-	printf("Gerador de grafos\n"
-		   "Cria um grafo com o numero de vertices e percentagem de arestas pedidas\n"
-		   "com pesos gerados aleatoriamente\n");
+	printf("*****************************************************\n"
+		   "* Projecto de Final de Curso - Engenharia Informática\n"
+		   "* Gerador de grafos\n"
+		   "* Cria um grafo com o numero de vertices\n"
+		   "* com pesos gerados aleatoriamente\n"
+		   "* atribuindo percentagem de arestas conforme indicado\n"
+		   "* Nuno Méren\n"
+		   "* Aluno 1902937\n"
+		   "*****************************************************\n\n");
+}
+
+/*
+	print_usage
+
+	imprime as opções de utilização
+	e termina a execução do programa
+*/
+void print_usage(void)
+{
+	printf("Utilização: gengraph [-s tamanho do grafo] [-f nome do ficheiro a criar] [-p percentagem do máximo de arestas a atribuir]\n");
+	exit(EXIT_SUCCESS);
 }
