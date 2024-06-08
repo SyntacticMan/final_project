@@ -40,9 +40,10 @@ void draw_graph(float *graph, int graph_size, int graph_root, int *v_t, int vt_s
 
     // definir algoritmo de colocação, tipo e nome da imagem a gerar
     char *args[] = {
-        "neato",
+        // "neato",
+        "dot",
         "-Tsvg",
-        "-Goverlap=scale",
+        // "-Goverlap=scale",
         // "-Gsize=67!",
         // "-Goutputorder=nodesfirst",
         // "-Gsplines=curved",
@@ -62,7 +63,7 @@ void draw_graph(float *graph, int graph_size, int graph_root, int *v_t, int vt_s
     // Definir atributos para evitar sobreposição
     // agsafeset(g, "splines", "true", "");
     // agsafeset(g, "overlap", "false", "");
-    agsafeset(g, "nodesep", "0.7", ""); // Separação entre nós
+    // agsafeset(g, "nodesep", "0.7", ""); // Separação entre nós
     // agsafeset(g, "ranksep", "1.0", ""); // Separação entre níveis hierárquicos
 
     int count = 0;
@@ -90,94 +91,15 @@ void draw_graph(float *graph, int graph_size, int graph_root, int *v_t, int vt_s
 #endif
 
     count = 0;
+
     // adicionar as arestas
-    /* for (int col = 1; col <= graph_size; col++)
-    {
-        float min_weight = INFINITE;
-        float max_weight = -INFINITE;
-        int min_row = -1;
-        int max_row = -1;
-
-        // Encontrar a maior e a menor aresta para o nó atual
-        for (int row = 1; row <= graph_size; row++)
-        {
-            float weight = get_edge(graph, col, row);
-            if (v_t[col] == min_row || v_t[min_row] == col)
-                min_row = row;
-            else
-            {
-                if (weight < INFINITE && weight > 0)
-                {
-                    if (weight < min_weight)
-                    {
-                        min_weight = weight;
-                        min_row = row;
-                    }
-                    if (weight > max_weight)
-                    {
-                        max_weight = weight;
-                        max_row = row;
-                    }
-                }
-            }
-        }
-
-        // Adicionar apenas as arestas maior e menor
-        if (min_row != -1)
-        {
-            sprintf(string_temp, "%d", col);
-            n_node = agnode(g, string_temp, 0);
-            sprintf(string_temp, "%d", min_row);
-            m_node = agnode(g, string_temp, 0);
-
-            edge = agedge(g, n_node, m_node, NULL, 1);
-
-            // as arestas têm o seu peso inscrito como label
-            sprintf(string_temp, "%3.3f", min_weight);
-            agsafeset(edge, "label", string_temp, "");
-            agsafeset(edge, "fontsize", "8", "");
-
-            if (v_t[col] == min_row || v_t[min_row] == col)
-            {
-                agsafeset(edge, "penwidth", "1.0", "");
-            }
-            else
-            {
-                agsafeset(edge, "penwidth", "0.5", "");
-                agsafeset(edge, "color", "#808080B3", "");
-            }
-        }
-
-        if (max_row != -1 && max_row != min_row)
-        { // Evitar duplicar a aresta
-            sprintf(string_temp, "%d", col);
-            n_node = agnode(g, string_temp, 0);
-            sprintf(string_temp, "%d", max_row);
-            m_node = agnode(g, string_temp, 0);
-
-            edge = agedge(g, n_node, m_node, NULL, 1);
-
-            // as arestas têm o seu peso inscrito como label
-            sprintf(string_temp, "%3.3f", max_weight);
-            agsafeset(edge, "label", string_temp, "");
-            agsafeset(edge, "fontsize", "8", "");
-
-            if (v_t[col] == max_row || v_t[max_row] == col)
-            {
-                agsafeset(edge, "penwidth", "1.0", "");
-            }
-            else
-            {
-                agsafeset(edge, "penwidth", "0.5", "");
-                agsafeset(edge, "color", "#808080B3", "");
-            }
-        }
-    }
-    */
     for (int col = 2; col <= graph_size; col++)
     {
         for (int row = 1; row <= graph_size; row++)
         {
+            if (col < row)
+                continue;
+
             // procurar os vértices, por nome
             sprintf(string_temp, "%d", col);
             n_node = agnode(g, string_temp, 0);
@@ -196,7 +118,7 @@ void draw_graph(float *graph, int graph_size, int graph_root, int *v_t, int vt_s
                 // agsafeset(edge, "fontsize", "8", "");
 
                 // se fizer parte da MST então a aresta será mais grossa
-                if (v_t[col] == row)
+                if (v_t[col] == row || v_t[row] == col)
                 {
                     agsafeset(edge, "penwidth", "1.0", "");
                 }
