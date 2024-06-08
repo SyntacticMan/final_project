@@ -1,3 +1,16 @@
+/********************************************************************
+ *  Projecto Final em Engenharia Informática                        *
+ *                                                                  *
+ * Programação Paralela Multi tarefa								*
+ * Algoritmo de Prim para obter uma árvore geradora mínima			*
+ * 																	*
+ * Ferramenta para criar uma representação gráfica da AGM           *
+ * 																	*
+ * Nuno Méren														*
+ * 1902937															*
+ * 																	*
+ * Orientador: Paulo Shirley										*
+ * ******************************************************************/
 
 #ifndef GRAPH
 #define GRAPH
