@@ -100,7 +100,10 @@ valgrind_mt:
 	valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 3
 
 valgrind_st:
-	valgrind --track-origins=yes $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 1
+	valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all $(binDir)$(primBinaryName) -f $(GRAPH_NAME) -t 1
+
+valgrind_draw:
+	valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all $(binDir)$(drawBinaryName) -f $(GRAPH_NAME)
 
 debug_prim: CCFLAGS += -DDEBUG -g
 debug_prim: prim

@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
         v_t = read_mst(graph_filename);
 
 #ifdef DEBUG
-        printf("v_t[1]: %d\nv_t[vt_size]: %d\nvt_size:%d\n", v_t[1], v_t[graph_header->vt_size], graph_header->vt_size);
+        printf("v_t[1]: %d\nv_t[vt_size]: %d\nvt_size:%d\n", v_t[1], v_t[graph_header->vt_size - 1], graph_header->vt_size);
 #endif
     }
 

@@ -35,8 +35,9 @@ void draw_graph(float *graph, int graph_size, int graph_root, int edge_percentag
     // criar o contexto de visualização
     gvc = gvContext();
 
-    // preparar a opção com o nome do ficheiro a gerar
-    char image_name[100] = "-o ";
+    // construir o nome da imagem a gerar
+    // formato: draw_v<vertices>_p<percentagem arestas>.<ext>
+    char image_name[200] = "-o ";
     strcat(image_name, "draw_v");
     sprintf(string_temp, "%d_", graph_size);
     strcat(image_name, string_temp);
@@ -50,19 +51,23 @@ void draw_graph(float *graph, int graph_size, int graph_root, int edge_percentag
     sprintf(string_temp, "%d vertices", graph_size);
     strcat(graph_title, string_temp);
 
+    // se tiver AGM indicar no título
+    if (vt_size > 0)
+        strcat(graph_title, " (com AGM)");
+
 #ifdef DEBUG
-    printf("%s\n%s", image_name, graph_title);
+    printf("%s\n%s\n", image_name, graph_title);
 #endif
 
     // definir algoritmo de colocação, tipo e nome da imagem a gerar
     char *args[] = {
-        // "neato",
-        "dot",
+        "neato",
+        // "dot",
         "-Tsvg",
-        // "-Goverlap=scale",
+        "-Goverlap=scale",
         // "-Gsize=67!",
         // "-Goutputorder=nodesfirst",
-        // "-Gsplines=curved",
+        "-Gsplines=curved",
         // "-GK=3",
         // "-Gmaxiter=500",
         image_name};
@@ -77,20 +82,24 @@ void draw_graph(float *graph, int graph_size, int graph_root, int edge_percentag
     agsafeset(g, "labelloc", "t", "");
 
     // Definir atributos para evitar sobreposição
-    // agsafeset(g, "splines", "true", "");
-    // agsafeset(g, "overlap", "false", "");
+    agsafeset(g, "splines", "true", "");
+    agsafeset(g, "overlap", "false", "");
     // agsafeset(g, "nodesep", "0.7", ""); // Separação entre nós
     // agsafeset(g, "ranksep", "1.0", ""); // Separação entre níveis hierárquicos
 
+#ifdef DEBUG
     int count = 0;
+#endif
     // criar os vértices
     for (int i = 1; i <= graph_size; i++)
     {
         sprintf(string_temp, "%d", i);
         n_node = agnode(g, string_temp, 1);
         agsafeset(n_node, "shape", "circle", ""); // círculos
+        agsafeset(n_node, "style", "filled", ""); // Define que o nó deve ser preenchido
+        agsafeset(n_node, "fillcolor", "white", "");
 
-        // raíz fica com o texto a preto
+        // raíz fica com o texto de côr diferente
         if (i == graph_root)
         {
             agsafeset(n_node, "fontcolor", "red", ""); // texto a azul
@@ -99,17 +108,19 @@ void draw_graph(float *graph, int graph_size, int graph_root, int edge_percentag
         {
             agsafeset(n_node, "fontcolor", "blue", ""); // texto a azul
         }
+#ifdef DEBUG
         count++;
+#endif
     }
 
 #ifdef DEBUG
     printf("%d nodes added\n", count);
-#endif
 
     count = 0;
+#endif
 
     // adicionar as arestas
-    for (int col = 2; col <= graph_size; col++)
+    for (int col = 2; col < graph_size; col++)
     {
         for (int row = 1; row <= graph_size; row++)
         {
@@ -134,7 +145,8 @@ void draw_graph(float *graph, int graph_size, int graph_root, int edge_percentag
                 // agsafeset(edge, "fontsize", "8", "");
 
                 // se fizer parte da MST então a aresta será mais grossa
-                if (v_t[col] == row || v_t[row] == col)
+
+                if (vt_size > 0 && (v_t[col] == row || v_t[row] == col))
                 {
                     agsafeset(edge, "penwidth", "1.0", "");
                 }
@@ -143,8 +155,9 @@ void draw_graph(float *graph, int graph_size, int graph_root, int edge_percentag
                     agsafeset(edge, "penwidth", "0.5", "");
                     agsafeset(edge, "color", "#808080B3", "");
                 }
-
+#ifdef DEBUG
                 count++;
+#endif
             }
         }
     }
