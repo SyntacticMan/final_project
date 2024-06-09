@@ -33,22 +33,18 @@ int main(int argc, char *argv[])
 {
     char *graph_filename = NULL;
     int opt;
-    char *graph_title;
     float *graph;
     int *v_t;
 
     print_banner();
 
     // processar as opções da linha de comandos
-    while ((opt = getopt(argc, argv, "f:t:")) != -1)
+    while ((opt = getopt(argc, argv, "f:")) != -1)
     {
         switch (opt)
         {
         case 'f':
             graph_filename = optarg;
-            break;
-        case 't':
-            graph_title = optarg;
             break;
         default:
             break;
@@ -65,7 +61,10 @@ int main(int argc, char *argv[])
     header *graph_header = read_header(graph_filename);
 
     if (graph_header == NULL)
-        return -1;
+    {
+        printf("Não foi possível carregar o cabeçalho do grafo\n");
+        exit(EXIT_FAILURE);
+    }
 
     graph = read_graph(graph_filename, graph_header->graph_size);
 
@@ -84,23 +83,16 @@ int main(int argc, char *argv[])
 #endif
     }
 
-    // preparar o título do grafo
-    char string_temp[50];
-
-    sprintf(string_temp, " (%d ", graph_header->graph_size);
-    strcat(graph_title, string_temp);
-    strcat(graph_title, "vertices)");
-
     // emitir o relatório do grafo carregado
     printf("Grafo carregado\n");
     printf("Tamanho do grafo: %d\n", graph_header->graph_size);
     printf("Numero arestas: %d\n", get_edge_count(graph, graph_header->graph_size));
 
-    draw_graph(graph, graph_header->graph_size, graph_header->graph_root, v_t, graph_header->vt_size, "graph_draw.svg", graph_title);
+    draw_graph(graph, graph_header->graph_size, graph_header->graph_root, graph_header->edge_percentage, v_t, graph_header->vt_size);
 
     free(graph);
     free(graph_header);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 /*

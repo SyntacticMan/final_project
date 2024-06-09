@@ -23,4 +23,4 @@
 
 // extern GVC_t *gvc;
 
-void draw_graph(float *graph, int graph_size, int graph_root, int *v_t, int vt_size, const char *filename, char *graph_title);
+void draw_graph(float *graph, int graph_size, int graph_root, int edge_percentage, int *v_t, int vt_size);

@@ -24,19 +24,35 @@ GVC_t *gvc;
 
     cria uma representação gráfica do grafo em contexto
 */
-void draw_graph(float *graph, int graph_size, int graph_root, int *v_t, int vt_size, const char *filename, char *graph_title)
+void draw_graph(float *graph, int graph_size, int graph_root, int edge_percentage, int *v_t, int vt_size)
 {
     Agraph_t *g;
     Agnode_t *n_node, *m_node;
     Agedge_t *edge;
+    char graph_title[50];
     char string_temp[50];
 
     // criar o contexto de visualização
     gvc = gvContext();
 
     // preparar a opção com o nome do ficheiro a gerar
-    char image_name[50] = "-o";
-    strcat(image_name, filename);
+    char image_name[100] = "-o ";
+    strcat(image_name, "draw_v");
+    sprintf(string_temp, "%d_", graph_size);
+    strcat(image_name, string_temp);
+    strcat(image_name, "p");
+    sprintf(string_temp, "%d", edge_percentage);
+    strcat(image_name, string_temp);
+    strcat(image_name, ".svg");
+
+    // preparar título
+    sprintf(graph_title, "Grafo ");
+    sprintf(string_temp, "%d vertices", graph_size);
+    strcat(graph_title, string_temp);
+
+#ifdef DEBUG
+    printf("%s\n%s", image_name, graph_title);
+#endif
 
     // definir algoritmo de colocação, tipo e nome da imagem a gerar
     char *args[] = {
