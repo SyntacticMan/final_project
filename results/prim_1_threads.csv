@@ -183,11 +183,6 @@ graphs/graph_s39000_p75.grf;39000;74;35.423253;1
 graphs/graph_s39500_p25.grf;39500;24;35.877812;1
 graphs/graph_s39500_p50.grf;39500;49;37.179113;1
 graphs/graph_s39500_p75.grf;39500;74;36.329057;1
-graphs/graph_s50000_p25.grf;50000;24;61.567304;1
-graphs/graph_s50000_p50.grf;50000;49;63.896714;1
-graphs/graph_s50500_p25.grf;50500;24;63.267310;1
-graphs/graph_s50500_p50.grf;50500;49;65.254468;1
-graphs/graph_s50500_p75.grf;50500;74;64.191812;1
 graphs/graph_s10500_p75.grf;10500;74;2.333512;1
 graphs/graph_s11000_p25.grf;11000;24;2.528406;1
 graphs/graph_s11000_p50.grf;11000;49;2.655659;1
@@ -291,5 +286,7 @@ graphs/graph_s17500_p75.grf;17500;74;7.299916;1
 graphs/graph_s5500_p25.grf;5500;24;0.757011;1
 graphs/graph_s5500_p50.grf;5500;49;0.700548;1
 graphs/graph_s5500_p75.grf;5500;74;0.725758;1
-graphs/graph_s50000_p75.grf;50000;74;71.318621;1
 graphs/graph_s500_p75.grf;500;74;0.003388;1
+graphs/graph_s50000_p50.grf;50000;49;67.852824;1
+graphs/graph_s50000_p75.grf;50000;74;63.212528;1
+graphs/graph_s50000_p25.grf;50000;24;63.152218;1
