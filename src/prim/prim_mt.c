@@ -78,10 +78,14 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     if (num_threads > graph_size)
         num_threads = graph_size;
 
-    pthread_t threads[num_threads];
-
     // determinar o número de cpus disponíveis
     int num_available_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+
+    // não criar mais processos que os cpus disponíveis
+    if (num_threads > num_available_cpus)
+        num_threads = num_available_cpus;
+
+    pthread_t threads[num_threads];
 
     // alocar os recursos partilhados
     v_t = calloc(graph_size + 1, sizeof(int));
