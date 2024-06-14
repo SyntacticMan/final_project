@@ -182,14 +182,6 @@ int main(int argc, char *argv[])
 
     printf("\nAGM calculada em %.6f segundos\n", elapsed_time);
 
-#ifdef DEBUG
-    // acima dum certo tamanho é inútil
-    if (graph_header->graph_size <= 20)
-        print_graph(graph, graph_header->graph_size);
-
-    print_mst(graph, v_t, graph_header->graph_size + 1, graph_header->graph_root, false);
-#endif
-
     // actualizar o ficheiro do grafo
     write_mst(v_t, graph_header->graph_size, graph_root, graph_filename);
 

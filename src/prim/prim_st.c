@@ -56,10 +56,6 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
             d[v] = INFINITE;
             v_t[v] = 0; // marcado a 0 pois não há nenhum vértice 0
         }
-
-#ifdef DEBUG
-        printf("d[%d]=%0.2f v_t[%d]=%d\n", v, d[v], v, v_t[v]);
-#endif
     }
 
     while (!all_visited(graph_size, visited))
@@ -67,10 +63,6 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
 
         // obter o vértice u
         int u = get_u(d, visited, graph_size);
-
-#ifdef DEBUG
-        printf("Found u: %d\n", u);
-#endif
         visited[u] = true;
 
         for (int i = 1; i <= graph_size; i++)
@@ -78,9 +70,6 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
             // excluir os já visitados
             if (visited[i] || i == u)
             {
-#ifdef TRACE
-                printf("Excluding v = %d\n", i);
-#endif
                 continue;
             }
 
@@ -91,28 +80,13 @@ int *prim_mst(float *graph, int graph_size, int graph_root)
             if (u_weight == INFINITE)
                 continue;
 
-#ifdef TRACE
-            printf("Evaluating v = %d for u = %d\n", i, u);
-#endif
             if (u_weight < d_weight)
             {
                 d[i] = u_weight;
                 v_t[i] = u;
-
-#ifdef DEBUG
-                printf("set d[%d] = %0.2f | v_t[%d]=%d\n", i, d[i], i, v_t[i]);
-#endif
             }
         }
     }
-
-#ifdef DEBUG
-    for (int i = 1; i <= graph_size; i++)
-    {
-        printf("d[%d]=%0.2f\tv_t[%d]=%d\n", i, d[i], i, v_t[i]);
-    }
-
-#endif
 
     free(d);
     free(visited);

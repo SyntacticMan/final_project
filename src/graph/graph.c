@@ -28,10 +28,6 @@ static float random_float_generator(float max, float min);
 static double random_coordinate_generator(int graph_size);
 static void print_line(int graph_size);
 
-#ifdef TRACE
-static void print_progress_bar(int progress, int total, int barWidth);
-#endif
-
 /*
  * create_graph
 
@@ -43,14 +39,6 @@ float *create_graph(int graph_size, int edge_percentage)
 
     // alocar as colunas
     unsigned long long matrix_size = get_matrix_size(graph_size);
-
-#ifdef DEBUG
-    // unsigned int matrix_size = get_matrix_size(graph_size);
-    unsigned long int ram_kb = (matrix_size * sizeof(float)) / 1024;
-    unsigned long int ram_mb = ram_kb / 1024;
-    unsigned long int ram_gb = ram_mb / 1024;
-    printf("Allocating %lu kb | %lu mb | %lu gb (matrix size: %llu)\n", ram_kb, ram_mb, ram_gb, matrix_size);
-#endif
 
     float *graph = malloc(matrix_size * sizeof(float));
 
@@ -86,10 +74,6 @@ float *create_graph(int graph_size, int edge_percentage)
     // excluindo as que já têm
     double num_edges = ((double)matrix_size * (edge_percentage / 100.0));
     num_edges -= num_edges_count;
-
-#ifdef DEBUG
-    printf("num_edges= %f\n", num_edges);
-#endif
 
     for (int i = 0; i < num_edges; i++)
     {
@@ -208,10 +192,6 @@ void add_edge(float *graph, int col, int row, float weight)
 
     int index = get_index(col, row);
     graph[index] = weight;
-
-#ifdef TRACE
-    printf("add %f to col:%d | row: %d\n", weight, col, row);
-#endif
 }
 
 /*
@@ -262,10 +242,6 @@ float get_edge(float *graph, int col, int row)
 
     unsigned int index = get_index(col, row);
 
-#ifdef TRACE
-    printf("get_edge (%d,%d) => index = %d || weight = %f\n", col, row, index, graph[index]);
-#endif
-
     return graph[index];
 }
 
@@ -285,10 +261,6 @@ unsigned long long get_index(int col, int row)
     if (row > 1)
         index += row - 1;
 
-#ifdef TRACE
-    if (col > 46000)
-        printf("index for col: %d, row :%d => %lli\n", col, row, index);
-#endif
     return index;
 }
 
@@ -313,10 +285,6 @@ int get_edge_count(float *graph, int graph_size)
             }
         }
     }
-
-#ifdef DEBUG
-    printf("edge count: %d\n", edge_count);
-#endif
 
     return edge_count;
 }
@@ -404,9 +372,6 @@ double random_coordinate_generator(int graph_size)
     if (z1 > graph_size)
         z1 = graph_size - (double)rand() / RAND_MAX;
 
-#ifdef TRACE
-    printf("z0->%f\nz1->%f\n", z0, z1);
-#endif
     return z0;
 }
 
@@ -528,26 +493,3 @@ void print_line(int graph_size)
 
     printf("\n");
 }
-
-#ifdef TRACE
-void print_progress_bar(int progress, int total, int barWidth)
-{
-    float percentage = (float)progress / total;
-    int numBarToPrint = percentage * barWidth;
-
-    printf("[");
-    for (int i = 0; i < barWidth; i++)
-    {
-        if (i < numBarToPrint)
-        {
-            printf("=");
-        }
-        else
-        {
-            printf(" ");
-        }
-    }
-    printf("] %.1f%%\r", percentage * 100);
-    fflush(stdout);
-}
-#endif

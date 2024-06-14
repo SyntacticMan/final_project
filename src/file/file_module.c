@@ -34,9 +34,6 @@ void write_file(header *graph_header, float *graph, char *filename)
         return;
     }
 
-#ifdef DEBUG
-    printf("writing %s\n", filename);
-#endif
     fwrite(graph_header, sizeof(header), 1, graph_file);
 
     unsigned long long array_size = (graph_header->graph_size * (graph_header->graph_size - 1ULL)) / 2ULL;
@@ -74,10 +71,6 @@ void write_mst(int *v_t, int graph_size, int graph_root, char *filename)
     }
 
     fread(g_header, sizeof(header), 1, graph_file);
-
-#ifdef DEBUG
-    printf("graph_root: %d\nvt_size: %d\n", graph_root, graph_size + 1);
-#endif
 
     // registar o tamanho de vt, raíz da mst e atualizar o cabeçalho
     g_header->vt_size = graph_size + 1;
