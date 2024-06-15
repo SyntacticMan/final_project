@@ -144,7 +144,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
     }
 
     // variável para controlar o cpu ao qual entregar o processo que está a ser criado
-    int cpu_step = 0;
+    // int cpu_step = 0;
 
     // lançar os processos
     for (int i = 0; i < num_threads; i++)
@@ -152,7 +152,7 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         thread_data[i].thread_id = i;
         thread_data[i].graph_size = graph_size;
         thread_data[i].num_threads = num_threads;
-        thread_data[i].cpu_id = cpu_step;
+        thread_data[i].cpu_id = i;
 
         // calcular os vértices de início e fim com base no número de vértices a processar
         start_col = (i * num_vertices) + 1;
@@ -172,12 +172,12 @@ int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
         }
 
         thread_data[i].end_col = end_col;
-        cpu_step++;
+        // cpu_step++;
 
         // se o número de processos pedidos exceder o número de cpus
         // é feito aqui o reset de novo para 0
-        if (cpu_step > num_available_cpus)
-            cpu_step = 0;
+        // if (cpu_step > num_available_cpus)
+        //     cpu_step = 0;
 
         process_error("worker_thread create", pthread_create(&threads[i], NULL, worker_prim, (void *)&thread_data[i]));
     }
@@ -320,7 +320,7 @@ void *worker_prim(void *arg)
             if (u_weight == INFINITE)
                 continue;
 
-            if (/*u_weight != INFINITE &&*/ u_weight < d[i])
+            if (u_weight < d[i])
             {
                 pthread_mutex_lock(&mutex_lock);
                 d[i] = u_weight;
