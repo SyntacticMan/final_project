@@ -76,7 +76,7 @@ lock_graph:
 	$(binDir)$(graphBinaryName) -s 6 -l -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE) -m
 
 test_draw:
-	$(binDir)$(drawBinaryName) -f $(GRAPH_NAME) -t $(GRAPH_TITLE)
+	$(binDir)$(drawBinaryName) -f $(GRAPH_NAME)
 
 test_debug_graph:
 	$(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE) -m
@@ -88,7 +88,7 @@ gdb_graph:
 	 gdb --args $(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE)
 
 gdb_draw:
-	 gdb --args $(binDir)$(drawBinaryName) -f $(GRAPH_NAME) -t $(GRAPH_TITLE)
+	 gdb --args $(binDir)$(drawBinaryName) -f $(GRAPH_NAME)
 
 gdb_prim:
 	gdb -ex 'b file_module.c:65' --args $(binDir)$(primBinaryName) -f $(GRAPH_NAME)

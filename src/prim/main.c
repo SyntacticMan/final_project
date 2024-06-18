@@ -112,8 +112,8 @@ int main(int argc, char *argv[])
     // se receber a opção, simplesmente ler a AGM e sair
     if (print_agm)
     {
-        if (graph_header->graph_size <= 20)
-            print_graph(graph, graph_header->graph_size);
+        // if (graph_header->graph_size <= 20)
+        print_graph(graph, graph_header->graph_size);
 
         // se tiver mst, imprimir
         if (graph_header->vt_size > 0)

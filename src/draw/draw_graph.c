@@ -120,7 +120,7 @@ void draw_graph(float *graph, int graph_size, int graph_root, int edge_percentag
 #endif
 
     // adicionar as arestas
-    for (int col = 2; col < graph_size; col++)
+    for (int col = 2; col <= graph_size; col++)
     {
         for (int row = 1; row <= graph_size; row++)
         {
