@@ -17,11 +17,9 @@
 #include "graph.h"
 #endif
 
-// float *graph;
+static void add_random_edge(unsigned short int *graph, int u, int v);
 
-static void add_random_edge(float *graph, int u, int v);
-
-static void create_valid_edge(float *graph, int graph_size);
+static void create_valid_edge(unsigned short int *graph, int graph_size);
 
 static int random_generator(int max, int min);
 static float random_float_generator(float max, float min);
@@ -37,7 +35,7 @@ static void print_progress_bar(int progress, int total, int barWidth);
 
  * cria um novo grafo, com lista de vértices e arestas
  */
-float *create_graph(int graph_size, int edge_percentage)
+unsigned short int *create_graph(int graph_size, int edge_percentage)
 {
     srand(time(NULL));
 
@@ -45,14 +43,14 @@ float *create_graph(int graph_size, int edge_percentage)
     unsigned long long matrix_size = get_matrix_size(graph_size);
 
 #ifdef DEBUG
-    // unsigned int matrix_size = get_matrix_size(graph_size);
-    unsigned long int ram_kb = (matrix_size * sizeof(float)) / 1024;
+    unsigned long int ram_b = (matrix_size * sizeof(unsigned short int));
+    unsigned long int ram_kb = ram_b / 1024;
     unsigned long int ram_mb = ram_kb / 1024;
     unsigned long int ram_gb = ram_mb / 1024;
-    printf("Allocating %lu kb | %lu mb | %lu gb (matrix size: %llu)\n", ram_kb, ram_mb, ram_gb, matrix_size);
+    printf("Allocating %lu b | %lu kb | %lu mb | %lu gb (matrix size: %llu)\n", ram_b, ram_kb, ram_mb, ram_gb, matrix_size);
 #endif
 
-    float *graph = malloc(matrix_size * sizeof(float));
+    unsigned short int *graph = malloc(matrix_size * sizeof(unsigned short int));
 
     if (graph == NULL)
     {
@@ -84,11 +82,11 @@ float *create_graph(int graph_size, int edge_percentage)
 
     // obter o número de arestas correspondentes à percentagem pedida
     // excluindo as que já têm
-    double num_edges = ((double)matrix_size * (edge_percentage / 100.0));
+    int num_edges = (matrix_size * (edge_percentage / 100.0));
     num_edges -= num_edges_count;
 
 #ifdef DEBUG
-    printf("num_edges= %f\n", num_edges);
+    printf("num_edges= %d\n", num_edges);
 #endif
 
     for (int i = 0; i < num_edges; i++)
@@ -104,17 +102,28 @@ float *create_graph(int graph_size, int edge_percentage)
 
     recria o grafo do livro fixo para validar funcionamento do algoritmo
 */
-float *create_locked_graph()
+unsigned short int *create_locked_graph()
 {
     srand(time(NULL));
 
     // alocar as colunas
-    float *graph = (float *)malloc(get_matrix_size(6) * sizeof(float));
+    unsigned short int *graph = (unsigned short int *)malloc(get_matrix_size(6) * sizeof(unsigned short int));
 
     if (graph == NULL)
     {
         return NULL;
     }
+
+#ifdef DEBUG
+    // unsigned int matrix_size = get_matrix_size(graph_size);
+    unsigned long long matrix_size = get_matrix_size(6);
+
+    unsigned long int ram_b = (matrix_size * sizeof(unsigned short int));
+    unsigned long int ram_kb = ram_b / 1024;
+    unsigned long int ram_mb = ram_kb / 1024;
+    unsigned long int ram_gb = ram_mb / 1024;
+    printf("Allocating %lu b | %lu kb | %lu mb | %lu gb (matrix size: %llu)\n", ram_b, ram_kb, ram_mb, ram_gb, matrix_size);
+#endif
 
     for (int col = 1; col <= 6; col++)
     {
@@ -144,7 +153,7 @@ float *create_locked_graph()
     função recursiva para atribuir uma aresta
     no vértice válido que ainda não tenha aresta
 */
-void create_valid_edge(float *graph, int graph_size)
+void create_valid_edge(unsigned short int *graph, int graph_size)
 {
     int col, row;
 
@@ -168,7 +177,7 @@ void create_valid_edge(float *graph, int graph_size)
 
  * cria uma aresta entre os vértices u e v com um peso aleatório
  */
-void add_random_edge(float *graph, int col, int row)
+void add_random_edge(unsigned short int *graph, int col, int row)
 {
     int index = get_index(col, row);
 
@@ -183,7 +192,7 @@ void add_random_edge(float *graph, int col, int row)
     if (weight > MAX_WEIGHT)
         weight = MAX_WEIGHT;
 
-    graph[index] = weight;
+    graph[index] = weight * SCALE_FACTOR;
 }
 
 /*
@@ -191,7 +200,7 @@ void add_random_edge(float *graph, int col, int row)
 
  * cria uma aresta entre os vértices u e v com o peso indicado
  */
-void add_edge(float *graph, int col, int row, float weight)
+void add_edge(unsigned short int *graph, int col, int row, float weight)
 {
     // a diagonal é sempre 0, devolvido por get_edge
     // por isso não é necessário adicionar
@@ -207,7 +216,7 @@ void add_edge(float *graph, int col, int row, float weight)
     }
 
     int index = get_index(col, row);
-    graph[index] = weight;
+    graph[index] = (unsigned short int)(weight * SCALE_FACTOR);
 
 #ifdef TRACE
     printf("add %f to col:%d | row: %d\n", weight, col, row);
@@ -220,9 +229,12 @@ void add_edge(float *graph, int col, int row, float weight)
     adiciona uma "não-ligação" entre os vértices u e v
     representada por um infinito
 */
-void add_null_edge(float *graph, int col, int row)
+void add_null_edge(unsigned short int *graph, int col, int row)
 {
-    graph[get_index(col, row)] = INFINITE;
+#ifdef TRACE
+    printf("infinite = %f | null_edge = %hu\n", SCALED_INFINITE, (unsigned short int)(INFINITE));
+#endif
+    graph[get_index(col, row)] = (unsigned int short)INFINITE;
 }
 
 /*
@@ -242,7 +254,7 @@ unsigned long long get_matrix_size(int graph_size)
     obtém a aresta, ou a ausência dela,
     correspondente à coluna e linha indicada
 */
-float get_edge(float *graph, int col, int row)
+float get_edge(unsigned short int *graph, int col, int row)
 {
 
     // um vértice não tem ligação com ele mesmo
@@ -263,10 +275,20 @@ float get_edge(float *graph, int col, int row)
     unsigned int index = get_index(col, row);
 
 #ifdef TRACE
-    printf("get_edge (%d,%d) => index = %d || weight = %f\n", col, row, index, graph[index]);
+    printf("get_edge (%d,%d) => index = %d || stored_weight = %d || weight = %f\n", col, row, index, graph[index], ((float)graph[index] / SCALE_FACTOR));
 #endif
+    unsigned int short edge = graph[index];
 
-    return graph[index];
+    // como INFINITE é simplesmente guardado no vector
+    // é preciso determinar se aplico o SCALE_FACTOR ou não
+    if (edge == (unsigned int short)INFINITE)
+    {
+        return (float)edge;
+    }
+    else
+    {
+        return ((float)(edge / SCALE_FACTOR));
+    }
 }
 
 /*
@@ -297,7 +319,7 @@ unsigned long long get_index(int col, int row)
 
     obtém o número de arestas existentes no grafo
 */
-int get_edge_count(float *graph, int graph_size)
+int get_edge_count(unsigned short int *graph, int graph_size)
 {
     int edge_count = 0;
 
@@ -327,7 +349,7 @@ int get_edge_count(float *graph, int graph_size)
     calcula a percentagem de arestas existentes no grafo
     contra o número máximo de arestas que pode ter
 */
-double get_edge_percentage(float *graph, int graph_size)
+double get_edge_percentage(unsigned short int *graph, int graph_size)
 {
     return ((double)get_edge_count(graph, graph_size) / get_matrix_size(graph_size)) * 100.0;
 }
@@ -342,13 +364,13 @@ int pick_graph_root(int graph_size)
     return random_generator(graph_size - 1, 1);
 }
 
-void print_array(float *graph, int graph_size)
+void print_array(unsigned short int *graph, int graph_size)
 {
     unsigned long int array_size = get_matrix_size(graph_size);
 
     for (int i = 0; i < array_size; i++)
     {
-        printf(" i: %d -> %3.3f", i, graph[i]);
+        printf(" i: %d -> %3.3f", i, ((float)graph[i] / SCALE_FACTOR));
     }
 
     printf("\n");
@@ -415,7 +437,7 @@ double random_coordinate_generator(int graph_size)
 
     imprime a matriz de adjacência do grafo na linha de comandos
 */
-void print_graph(float *graph, int graph_size)
+void print_graph(unsigned short int *graph, int graph_size)
 {
 
     print_line(graph_size);
@@ -467,7 +489,7 @@ void print_graph(float *graph, int graph_size)
 
     imprime a matriz de adjacência divida do grafo na linha de comandos
 */
-void print_graph_mt(float *graph, int start_col, int end_col, int graph_size)
+void print_graph_mt(unsigned short int *graph, int start_col, int end_col, int graph_size)
 {
     int cols = end_col - start_col;
     print_line(cols + 1);

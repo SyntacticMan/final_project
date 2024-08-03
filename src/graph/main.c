@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
 	int graph_size, requested_edge_percentage;
 	char *graph_filename = NULL;
-	float *graph;
+	unsigned short int *graph;
 	bool lock_graph = false;
 	bool print_matrix = false;
 

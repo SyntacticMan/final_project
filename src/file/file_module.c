@@ -22,7 +22,7 @@
 
     grava o grafo no ficheiro .grf
 */
-void write_file(header *graph_header, float *graph, char *filename)
+void write_file(header *graph_header, unsigned short int *graph, char *filename)
 {
     // abrir o ficheiro em modo de escrita binária
     // assim certifico-me que, se ele já existir, é apagado
@@ -43,7 +43,7 @@ void write_file(header *graph_header, float *graph, char *filename)
 
     for (unsigned long int i = 0; i < array_size; i++)
     {
-        fwrite(&graph[i], sizeof(float), 1, graph_file);
+        fwrite(&graph[i], sizeof(unsigned short int), 1, graph_file);
     }
 
     fclose(graph_file);
@@ -130,7 +130,7 @@ header *read_header(char *filename)
 
     lê o grafo a partir do ficheiro indicado
 */
-float *read_graph(char *filename, int graph_size)
+unsigned short int *read_graph(char *filename, int graph_size)
 {
     FILE *graph_file = fopen(filename, "rb");
 
@@ -146,7 +146,7 @@ float *read_graph(char *filename, int graph_size)
     unsigned long int array_size = (graph_size * (graph_size - 1ULL)) / 2ULL;
 
     // carregar o vetor
-    float *graph = malloc(array_size * sizeof(float));
+    unsigned short int *graph = malloc(array_size * sizeof(unsigned short int));
 
     for (unsigned long int i = 0; i < array_size; i++)
     {
@@ -178,7 +178,7 @@ int *read_mst(char *filename)
     fread(graph_header, sizeof(header), 1, graph_file);
 
     // o v_t está a seguir ao grafo, por isso tenho de fazer avançar o ponteiro
-    unsigned long int array_size = ((graph_header->graph_size * (graph_header->graph_size - 1)) / 2) * sizeof(float);
+    unsigned long int array_size = ((graph_header->graph_size * (graph_header->graph_size - 1)) / 2) * sizeof(unsigned short int);
 
     fseek(graph_file, sizeof(header) + array_size, SEEK_SET);
 

@@ -53,7 +53,7 @@ prim_mt.o: $(primSrcDir)prim_mt.c $(primSrcDir)prim_mt.h
 	$(CC) $(CCFLAGS) -c $(primSrcDir)prim_mt.c -o $(buildDir)prim_mt.o
 
 # test params
-GRAPH_SIZE = 6000
+GRAPH_SIZE = 60
 GRAPH_NAME = graph.grf
 EDGE_PERCENTAGE = 65
 GRAPH_TITLE = "Grafo Teste"
@@ -104,6 +104,9 @@ valgrind_st:
 
 valgrind_draw:
 	valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all $(binDir)$(drawBinaryName) -f $(GRAPH_NAME)
+
+valgrind_graph:
+	valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all $(binDir)$(graphBinaryName) -s $(GRAPH_SIZE) -f $(GRAPH_NAME) -p $(EDGE_PERCENTAGE)
 
 debug_prim: CCFLAGS += -DDEBUG -g
 debug_prim: prim
