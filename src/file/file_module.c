@@ -89,7 +89,7 @@ void write_mst(int *v_t, int graph_size, int graph_root, char *filename)
 
     //  v_t tem de ser escrito *após* o grafo
     // por isso é necessário fazer avançar o apontador para o fim do grafo
-    unsigned long int array_size = ((g_header->graph_size * (g_header->graph_size - 1ULL)) / 2ULL) * sizeof(float);
+    unsigned long int array_size = ((g_header->graph_size * (g_header->graph_size - 1ULL)) / 2ULL) * sizeof(unsigned short int);
 
     // fseek(graph_file, array_size, SEEK_CUR);
     fseek(graph_file, sizeof(header) + array_size, SEEK_SET);

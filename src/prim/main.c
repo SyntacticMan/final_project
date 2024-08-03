@@ -34,7 +34,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-void print_mst(float *graph, int *v_t, int graph_size, int graph_root, bool with_weights);
+void print_mst(unsigned short int *graph, int *v_t, int graph_size, int graph_root, bool with_weights);
 void print_banner(void);
 void print_usage(void);
 
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     srand(time NULL);
     struct timeval start, end;
     int *v_t;
-    float *graph;
+    unsigned short int *graph;
 
     char *graph_filename = NULL;
     int opt;
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
 
     imprime a versão textual da árvore mínima
 */
-void print_mst(float *graph, int *v_t, int graph_size, int graph_root, bool with_weights)
+void print_mst(unsigned short int *graph, int *v_t, int graph_size, int graph_root, bool with_weights)
 {
     printf("\n");
 

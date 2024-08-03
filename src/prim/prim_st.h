@@ -19,4 +19,4 @@
 #include "../graph/graph.h"
 #endif
 
-int *prim_mst(float *graph, int graph_size, int graph_root);
+int *prim_mst(unsigned short int *graph, int graph_size, int graph_root);

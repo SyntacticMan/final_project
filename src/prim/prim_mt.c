@@ -60,7 +60,7 @@ bool all_vertices_visited;
 message broadcast_message;
 
 float *d;
-float *local_graph;
+unsigned short int *local_graph;
 
 /*
     funções internas
@@ -72,7 +72,7 @@ static void process_error(char *name, int result);
 
 static void *worker_prim(void *arg);
 
-int *prim_mt_mst(float *graph, int graph_size, int graph_root, int num_threads)
+int *prim_mt_mst(unsigned short int *graph, int graph_size, int graph_root, int num_threads)
 {
     // certificar que não se pedem mais processos que vértices
     if (num_threads > graph_size)

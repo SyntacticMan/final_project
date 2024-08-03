@@ -26,7 +26,7 @@ static bool all_visited(int graph_size, bool *visited);
     implementação do algoritmo de prim
     versão em tarefa simples
 */
-int *prim_mst(float *graph, int graph_size, int graph_root)
+int *prim_mst(unsigned short int *graph, int graph_size, int graph_root)
 {
     // como vou usar de 1 a graph_size e o vetor vai de 0 a graph_size - 1
     // é necessário adicionar o elemento em falta
