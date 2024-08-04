@@ -12,6 +12,8 @@
  * Orientador: Paulo Shirley										*
  * ******************************************************************/
 
+#define _GNU_SOURCE
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -29,7 +31,7 @@
 #define GRAPH_SIZE_MAX 50
 
 #define INFINITE MAX_WEIGHT + 2.0
-#define SCALED_INFINITE INFINITE *SCALE_FACTOR
+#define THREADS 1
 
 unsigned short int *create_graph(int graph_size, int edge_percentage);
 unsigned short int *create_locked_graph();

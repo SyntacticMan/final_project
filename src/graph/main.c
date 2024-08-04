@@ -67,6 +67,9 @@ int main(int argc, char *argv[])
 
 	print_banner();
 
+	// inicializar gerador aleatório
+	srand(time(NULL));
+
 	// se não tiver recebido o nome do ficheiro com o grafo
 	// imprimir as opções de utilização e sair
 	if (graph_filename == NULL)
@@ -136,6 +139,7 @@ int main(int argc, char *argv[])
 	write_file(graph_header, graph, graph_filename);
 
 	free(graph);
+	free(graph_header);
 	return EXIT_SUCCESS;
 }
 

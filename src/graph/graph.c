@@ -17,13 +17,38 @@
 #include "graph.h"
 #endif
 
+#include <pthread.h>
+#include <sched.h>
+
+// argumentos para os processos
+typedef struct _thread_data
+{
+    int start_col;
+    int end_col;
+    int cpu_id;
+    unsigned long long matrix_size;
+    int edge_percentage;
+    int local_graph_size;
+} thread_data;
+
+typedef struct _random_coordinates
+{
+    int column;
+    int row;
+} random_coordinates;
+
+// variáveis partilhadas
+unsigned short int *graph;
+
+static void *initialize_graph(void *arg);
+
 static void add_random_edge(unsigned short int *graph, int u, int v);
 
-static void create_valid_edge(unsigned short int *graph, int graph_size);
+static void create_valid_edge(unsigned short int *graph, int start_col, int end_col);
 
 static int random_generator(int max, int min);
 static float random_float_generator(float max, float min);
-static double random_coordinate_generator(int graph_size);
+static random_coordinates *random_coordinate_generator(int start_col, int end_col);
 static void print_line(int graph_size);
 
 #ifdef TRACE
@@ -37,10 +62,13 @@ static void print_progress_bar(int progress, int total, int barWidth);
  */
 unsigned short int *create_graph(int graph_size, int edge_percentage)
 {
-    srand(time(NULL));
-
     // alocar as colunas
     unsigned long long matrix_size = get_matrix_size(graph_size);
+
+    pthread_t threads[THREADS];
+
+    // tarefas acessórias
+    thread_data thread_data[THREADS];
 
 #ifdef DEBUG
     unsigned long int ram_b = (matrix_size * sizeof(unsigned short int));
@@ -50,7 +78,7 @@ unsigned short int *create_graph(int graph_size, int edge_percentage)
     printf("Allocating %lu b | %lu kb | %lu mb | %lu gb (matrix size: %llu)\n", ram_b, ram_kb, ram_mb, ram_gb, matrix_size);
 #endif
 
-    unsigned short int *graph = malloc(matrix_size * sizeof(unsigned short int));
+    graph = malloc(matrix_size * sizeof(unsigned short int) + 1);
 
     if (graph == NULL)
     {
@@ -58,18 +86,69 @@ unsigned short int *create_graph(int graph_size, int edge_percentage)
         return NULL;
     }
 
-    double num_edges_count = 0;
-    // uma primeira passagem para preencher a matriz com infinitos
-    for (int col = 2; col <= graph_size; col++)
+    for (int i = 0; i < THREADS; i++)
     {
+        // calcular o número de vértices (n) a alocar a cada processo
+        // divisão pode não ser inteira, por isso o resultado é arredondado
+        int num_vertices = round(graph_size / THREADS);
+        int last_end_col = 0;
+
+        // calcular os vértices de início e fim com base no número de vértices a processar
+        int start_col = (i * num_vertices) + 1;
+        int end_col = start_col + num_vertices - 1;
+
+        last_end_col = end_col;
+
+        thread_data[i].start_col = start_col;
+
+        /*
+            na preparação do último processo ter em conta
+            que a distribuição de vértices não é igual
+            quando a divisão n/p não tem resto 0
+        */
+        if (i == THREADS - 1)
+        {
+            end_col = end_col + (graph_size - last_end_col);
+        }
+
+        thread_data[i].end_col = start_col + num_vertices - 1;
+        thread_data[i].cpu_id = i;
+        thread_data[i].matrix_size = matrix_size;
+        thread_data[i].edge_percentage = edge_percentage;
+        thread_data[i].local_graph_size = end_col - start_col;
+
+        pthread_create(&threads[i], NULL, initialize_graph, (void *)&thread_data[i]);
+    }
+
+    // recuperar os processos criados
+    for (int i = 0; i < THREADS; i++)
+    {
+        pthread_join(threads[i], (void **)NULL);
+    }
+
+#ifdef DEBUG
+    printf("Inicializacao completa, adicionando arestas aleatorias\n");
+#endif
+
+    return graph;
+}
+
+void *initialize_graph(void *arg)
+{
+    thread_data *data = (thread_data *)arg;
+
+#ifdef DEBUG
+    printf("start_col = %d\tend_col = %d\tthread_id = %d\n", data->start_col, data->end_col, data->cpu_id);
+#endif
+
+    // uma primeira passagem para preencher a matriz com infinitos
+    for (int col = data->start_col; col <= data->end_col; col++)
+    {
+        // se linha = coluna o vértice ligar-se-ia a ele mesmo
+        // se linha > coluna estou na triangular inferior
+        // por isso apenas é feita a iteração até linha < coluna
         for (int row = 1; row < col; row++)
         {
-            // se linha = coluna o vértice ligar-se-ia a ele mesmo
-            // se linha > coluna estou na triangular inferior
-            // em ambos os casos passo à frente
-            if (row >= col)
-                continue;
-
             add_null_edge(graph, col, row);
         }
 
@@ -77,13 +156,12 @@ unsigned short int *create_graph(int graph_size, int edge_percentage)
         int row = random_generator(col, 1);
 
         add_random_edge(graph, col, row);
-        num_edges_count++;
     }
 
     // obter o número de arestas correspondentes à percentagem pedida
     // excluindo as que já têm
-    int num_edges = (matrix_size * (edge_percentage / 100.0));
-    num_edges -= num_edges_count;
+    int num_edges = (data->matrix_size * (data->edge_percentage / 100.0));
+    num_edges -= data->local_graph_size;
 
 #ifdef DEBUG
     printf("num_edges= %d\n", num_edges);
@@ -91,10 +169,10 @@ unsigned short int *create_graph(int graph_size, int edge_percentage)
 
     for (int i = 0; i < num_edges; i++)
     {
-        create_valid_edge(graph, graph_size);
+        create_valid_edge(graph, data->start_col, data->end_col);
     }
 
-    return graph;
+    pthread_exit(NULL);
 }
 
 /*
@@ -153,23 +231,26 @@ unsigned short int *create_locked_graph()
     função recursiva para atribuir uma aresta
     no vértice válido que ainda não tenha aresta
 */
-void create_valid_edge(unsigned short int *graph, int graph_size)
+void create_valid_edge(unsigned short int *graph, int start_col, int end_col)
 {
-    int col, row;
+    random_coordinates *coords = random_coordinate_generator(start_col, end_col);
 
-    col = random_coordinate_generator(graph_size);
+    float edge = get_edge(graph, coords->column, coords->row);
 
-    row = random_coordinate_generator(col);
-
+#ifdef TRACE
+    printf("col = %d | row = %d | found_edge = %f\n", coords->column, coords->row, edge);
+#endif
     // apenas aceitar coordenadas de forem válidas
-    if (get_edge(graph, col, row) == INFINITE && col <= graph_size && row < col)
+    if (edge == INFINITE && coords->column <= end_col && coords->row < coords->column)
     {
-        add_random_edge(graph, col, row);
+        add_random_edge(graph, coords->column, coords->row);
     }
     else
     {
-        create_valid_edge(graph, graph_size);
+        create_valid_edge(graph, start_col, end_col);
     }
+
+    free(coords);
 }
 
 /*
@@ -179,8 +260,6 @@ void create_valid_edge(unsigned short int *graph, int graph_size)
  */
 void add_random_edge(unsigned short int *graph, int col, int row)
 {
-    int index = get_index(col, row);
-
     // o peso é atribuído ao acaso
     float weight = random_float_generator(MAX_WEIGHT, MIN_WEIGHT);
 
@@ -192,7 +271,7 @@ void add_random_edge(unsigned short int *graph, int col, int row)
     if (weight > MAX_WEIGHT)
         weight = MAX_WEIGHT;
 
-    graph[index] = weight * SCALE_FACTOR;
+    add_edge(graph, col, row, weight);
 }
 
 /*
@@ -232,7 +311,7 @@ void add_edge(unsigned short int *graph, int col, int row, float weight)
 void add_null_edge(unsigned short int *graph, int col, int row)
 {
 #ifdef TRACE
-    printf("infinite = %f | null_edge = %hu\n", SCALED_INFINITE, (unsigned short int)(INFINITE));
+    printf("col = %d | row = %d | null_edge = %hu\n", col, row, (unsigned short int)(INFINITE));
 #endif
     graph[get_index(col, row)] = (unsigned int short)INFINITE;
 }
@@ -397,14 +476,16 @@ float random_float_generator(float max, float min)
  * implementa o método Box-Muller para gerar uma coordenada aleatoriamente
  * tendendo para uma distribuição normal
 */
-double random_coordinate_generator(int graph_size)
+random_coordinates *random_coordinate_generator(int start_col, int end_col)
 {
     double u1, u2, z0, z1;
     static int generate = 0;
     generate = 1 - generate;
 
-    if (!generate)
-        return z1;
+    random_coordinates *coords = (random_coordinates *)(malloc(sizeof(random_coordinates)));
+
+    // if (!generate)
+    //     return z1;
 
     do
     {
@@ -416,20 +497,23 @@ double random_coordinate_generator(int graph_size)
     z1 = sqrt(-2.0 * log(u1)) * sin(2.0 * M_PI * u2);
 
     // ajustar os valores para ficarem entre 1 e graph_size
-    z0 = ((z0 + 2.0) * (graph_size - 1) / 4.0) + 1;
-    z1 = ((z1 + 2.0) * (graph_size - 1) / 4.0) + 1;
+    z0 = ((z0 + 2.0) * (end_col - 1) / 4.0) + start_col;
+    z1 = ((z1 + 2.0) * (end_col - 1) / 4.0) + start_col;
 
     // Para graph_size muito grande está a exceder
     // por isso limito-o a graph_size e subtraio um número ao acaso
-    if (z0 > graph_size)
-        z0 = graph_size - (double)rand() / RAND_MAX;
-    if (z1 > graph_size)
-        z1 = graph_size - (double)rand() / RAND_MAX;
+    if (z0 > start_col)
+        z0 = start_col - (double)rand() / end_col;
+    if (z1 > start_col)
+        z1 = start_col - (double)rand() / end_col;
 
 #ifdef TRACE
     printf("z0->%f\nz1->%f\n", z0, z1);
 #endif
-    return z0;
+
+    coords->column = z0;
+    coords->row = z1;
+    return coords;
 }
 
 /*
