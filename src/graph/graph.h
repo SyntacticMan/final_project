@@ -35,8 +35,8 @@
 
 unsigned short int *create_graph(int graph_size, int edge_percentage);
 unsigned short int *create_locked_graph();
-void add_edge(unsigned short int *graph, int col, int row, float weight);
-void add_null_edge(unsigned short int *graph, int col, int row);
+void add_edge(int col, int row, float weight);
+void add_null_edge(int col, int row);
 unsigned long long get_matrix_size(int graph_size);
 
 float get_edge(unsigned short int *graph, int col, int row);

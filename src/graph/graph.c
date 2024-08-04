@@ -40,11 +40,12 @@ typedef struct _random_coordinates
 // variáveis partilhadas
 unsigned short int *graph;
 
-static void *initialize_graph(void *arg);
+static void *build_graph(void *arg);
 
-static void add_random_edge(unsigned short int *graph, int u, int v);
+static void add_remaining_edges(int start_col, int end_col, int local_graph_size, int matrix_size, int edge_percentage);
+static void add_random_edge(int u, int v);
 
-static void create_valid_edge(unsigned short int *graph, int start_col, int end_col);
+static void create_valid_edge(int start_col, int end_col);
 
 static int random_generator(int max, int min);
 static float random_float_generator(float max, float min);
@@ -117,7 +118,7 @@ unsigned short int *create_graph(int graph_size, int edge_percentage)
         thread_data[i].edge_percentage = edge_percentage;
         thread_data[i].local_graph_size = end_col - start_col;
 
-        pthread_create(&threads[i], NULL, initialize_graph, (void *)&thread_data[i]);
+        pthread_create(&threads[i], NULL, build_graph, (void *)&thread_data[i]);
     }
 
     // recuperar os processos criados
@@ -133,7 +134,7 @@ unsigned short int *create_graph(int graph_size, int edge_percentage)
     return graph;
 }
 
-void *initialize_graph(void *arg)
+void *build_graph(void *arg)
 {
     thread_data *data = (thread_data *)arg;
 
@@ -149,19 +150,26 @@ void *initialize_graph(void *arg)
         // por isso apenas é feita a iteração até linha < coluna
         for (int row = 1; row < col; row++)
         {
-            add_null_edge(graph, col, row);
+            add_null_edge(col, row);
         }
 
         // todos os vértices têm de ter pelo menos uma ligação
         int row = random_generator(col, 1);
 
-        add_random_edge(graph, col, row);
+        add_random_edge(col, row);
     }
 
+    add_remaining_edges(data->start_col, data->end_col, data->local_graph_size, data->matrix_size, data->edge_percentage);
+
+    pthread_exit(NULL);
+}
+
+void add_remaining_edges(int start_col, int end_col, int local_graph_size, int matrix_size, int edge_percentage)
+{
     // obter o número de arestas correspondentes à percentagem pedida
     // excluindo as que já têm
-    int num_edges = (data->matrix_size * (data->edge_percentage / 100.0));
-    num_edges -= data->local_graph_size;
+    int num_edges = (matrix_size * (edge_percentage / 100.0));
+    num_edges -= local_graph_size;
 
 #ifdef DEBUG
     printf("num_edges= %d\n", num_edges);
@@ -169,10 +177,8 @@ void *initialize_graph(void *arg)
 
     for (int i = 0; i < num_edges; i++)
     {
-        create_valid_edge(graph, data->start_col, data->end_col);
+        create_valid_edge(start_col, end_col);
     }
-
-    pthread_exit(NULL);
 }
 
 /*
@@ -207,20 +213,20 @@ unsigned short int *create_locked_graph()
     {
         for (int row = 1; row < col; row++)
         {
-            add_null_edge(graph, col, row);
+            add_null_edge(col, row);
         }
     }
 
     //            --c  r  w
-    add_edge(graph, 2, 1, 1);
-    add_edge(graph, 3, 1, 3);
-    add_edge(graph, 6, 1, 3);
-    add_edge(graph, 3, 2, 5);
-    add_edge(graph, 4, 2, 1);
-    add_edge(graph, 4, 3, 2);
-    add_edge(graph, 5, 3, 1);
-    add_edge(graph, 5, 4, 4);
-    add_edge(graph, 6, 5, 5);
+    add_edge(2, 1, 1);
+    add_edge(3, 1, 3);
+    add_edge(6, 1, 3);
+    add_edge(3, 2, 5);
+    add_edge(4, 2, 1);
+    add_edge(4, 3, 2);
+    add_edge(5, 3, 1);
+    add_edge(5, 4, 4);
+    add_edge(6, 5, 5);
 
     return graph;
 }
@@ -231,7 +237,7 @@ unsigned short int *create_locked_graph()
     função recursiva para atribuir uma aresta
     no vértice válido que ainda não tenha aresta
 */
-void create_valid_edge(unsigned short int *graph, int start_col, int end_col)
+void create_valid_edge(int start_col, int end_col)
 {
     random_coordinates *coords = random_coordinate_generator(start_col, end_col);
 
@@ -243,11 +249,11 @@ void create_valid_edge(unsigned short int *graph, int start_col, int end_col)
     // apenas aceitar coordenadas de forem válidas
     if (edge == INFINITE && coords->column <= end_col && coords->row < coords->column)
     {
-        add_random_edge(graph, coords->column, coords->row);
+        add_random_edge(coords->column, coords->row);
     }
     else
     {
-        create_valid_edge(graph, start_col, end_col);
+        create_valid_edge(start_col, end_col);
     }
 
     free(coords);
@@ -258,7 +264,7 @@ void create_valid_edge(unsigned short int *graph, int start_col, int end_col)
 
  * cria uma aresta entre os vértices u e v com um peso aleatório
  */
-void add_random_edge(unsigned short int *graph, int col, int row)
+void add_random_edge(int col, int row)
 {
     // o peso é atribuído ao acaso
     float weight = random_float_generator(MAX_WEIGHT, MIN_WEIGHT);
@@ -271,7 +277,7 @@ void add_random_edge(unsigned short int *graph, int col, int row)
     if (weight > MAX_WEIGHT)
         weight = MAX_WEIGHT;
 
-    add_edge(graph, col, row, weight);
+    add_edge(col, row, weight);
 }
 
 /*
@@ -279,7 +285,7 @@ void add_random_edge(unsigned short int *graph, int col, int row)
 
  * cria uma aresta entre os vértices u e v com o peso indicado
  */
-void add_edge(unsigned short int *graph, int col, int row, float weight)
+void add_edge(int col, int row, float weight)
 {
     // a diagonal é sempre 0, devolvido por get_edge
     // por isso não é necessário adicionar
@@ -308,7 +314,7 @@ void add_edge(unsigned short int *graph, int col, int row, float weight)
     adiciona uma "não-ligação" entre os vértices u e v
     representada por um infinito
 */
-void add_null_edge(unsigned short int *graph, int col, int row)
+void add_null_edge(int col, int row)
 {
 #ifdef TRACE
     printf("col = %d | row = %d | null_edge = %hu\n", col, row, (unsigned short int)(INFINITE));
