@@ -45,11 +45,11 @@ static void *build_graph(void *arg);
 static void add_remaining_edges(int start_col, int end_col, int local_graph_size, int matrix_size, int edge_percentage);
 static void add_random_edge(int u, int v);
 
-static void create_valid_edge(int start_col, int end_col);
+static void create_valid_edge(random_coordinates *coords, int start_col, int end_col);
 
 static int random_generator(int max, int min);
 static float random_float_generator(float max, float min);
-static random_coordinates *random_coordinate_generator(int start_col, int end_col);
+static void random_coordinate_generator(random_coordinates *coords, int start_col, int end_col);
 static void print_line(int graph_size);
 
 #ifdef TRACE
@@ -172,13 +172,26 @@ void add_remaining_edges(int start_col, int end_col, int local_graph_size, int m
     num_edges -= local_graph_size;
 
 #ifdef DEBUG
-    printf("num_edges= %d\n", num_edges);
+    printf("grafo local = %d \t arestas a atribuir = %d\n", local_graph_size, num_edges);
 #endif
+
+    random_coordinates *coords = (random_coordinates *)(malloc(sizeof(random_coordinates)));
 
     for (int i = 0; i < num_edges; i++)
     {
-        create_valid_edge(start_col, end_col);
+        // int pid = fork();
+
+        // if (pid == 0)
+        // {
+        create_valid_edge(coords, start_col, end_col);
+        // break;
+        // }
+        // else
+        //     continue;
     }
+
+    // wait();
+    free(coords);
 }
 
 /*
@@ -217,7 +230,7 @@ unsigned short int *create_locked_graph()
         }
     }
 
-    //            --c  r  w
+    //     --c  r  w
     add_edge(2, 1, 1);
     add_edge(3, 1, 3);
     add_edge(6, 1, 3);
@@ -237,15 +250,16 @@ unsigned short int *create_locked_graph()
     função recursiva para atribuir uma aresta
     no vértice válido que ainda não tenha aresta
 */
-void create_valid_edge(int start_col, int end_col)
+void create_valid_edge(random_coordinates *coords, int start_col, int end_col)
 {
-    random_coordinates *coords = random_coordinate_generator(start_col, end_col);
+    random_coordinate_generator(coords, start_col, end_col);
 
     float edge = get_edge(graph, coords->column, coords->row);
 
 #ifdef TRACE
     printf("col = %d | row = %d | found_edge = %f\n", coords->column, coords->row, edge);
 #endif
+
     // apenas aceitar coordenadas de forem válidas
     if (edge == INFINITE && coords->column <= end_col && coords->row < coords->column)
     {
@@ -253,10 +267,8 @@ void create_valid_edge(int start_col, int end_col)
     }
     else
     {
-        create_valid_edge(start_col, end_col);
+        create_valid_edge(coords, start_col, end_col);
     }
-
-    free(coords);
 }
 
 /*
@@ -482,13 +494,11 @@ float random_float_generator(float max, float min)
  * implementa o método Box-Muller para gerar uma coordenada aleatoriamente
  * tendendo para uma distribuição normal
 */
-random_coordinates *random_coordinate_generator(int start_col, int end_col)
+void random_coordinate_generator(random_coordinates *coords, int start_col, int end_col)
 {
     double u1, u2, z0, z1;
     static int generate = 0;
     generate = 1 - generate;
-
-    random_coordinates *coords = (random_coordinates *)(malloc(sizeof(random_coordinates)));
 
     // if (!generate)
     //     return z1;
@@ -508,10 +518,12 @@ random_coordinates *random_coordinate_generator(int start_col, int end_col)
 
     // Para graph_size muito grande está a exceder
     // por isso limito-o a graph_size e subtraio um número ao acaso
-    if (z0 > start_col)
-        z0 = start_col - (double)rand() / end_col;
-    if (z1 > start_col)
-        z1 = start_col - (double)rand() / end_col;
+    if (z0 > end_col)
+        // z0 = end_col - ((double)rand() / start_col);
+        z0 = end_col;
+    if (z1 > end_col)
+        z1 = end_col;
+        // z1 = end_col - ((double)rand() / start_col);
 
 #ifdef TRACE
     printf("z0->%f\nz1->%f\n", z0, z1);
@@ -519,7 +531,6 @@ random_coordinates *random_coordinate_generator(int start_col, int end_col)
 
     coords->column = z0;
     coords->row = z1;
-    return coords;
 }
 
 /*

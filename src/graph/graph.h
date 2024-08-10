@@ -19,6 +19,7 @@
 #include <math.h>
 #include <time.h>
 #include <stdint.h>
+#include <unistd.h>
 
 #define MAX_EDGE 3
 #define MIN_EDGE 1
