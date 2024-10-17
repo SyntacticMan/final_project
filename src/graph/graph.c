@@ -177,20 +177,23 @@ void add_remaining_edges(int start_col, int end_col, int local_graph_size, int m
 
     random_coordinates *coords = (random_coordinates *)(malloc(sizeof(random_coordinates)));
 
+    int pid;
     for (int i = 0; i < num_edges; i++)
     {
-        // int pid = fork();
+        // pid = fork();
 
         // if (pid == 0)
         // {
         create_valid_edge(coords, start_col, end_col);
-        // break;
+        // exit(0);
         // }
         // else
         //     continue;
     }
 
-    // wait();
+    // if (pid != 0)
+    //     wait(NULL);
+
     free(coords);
 }
 

@@ -20,6 +20,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #define MAX_EDGE 3
 #define MIN_EDGE 1
@@ -32,7 +33,7 @@
 #define GRAPH_SIZE_MAX 50
 
 #define INFINITE MAX_WEIGHT + 2.0
-#define THREADS 1
+#define THREADS 2
 
 unsigned short int *create_graph(int graph_size, int edge_percentage);
 unsigned short int *create_locked_graph();
