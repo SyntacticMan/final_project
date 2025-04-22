@@ -31,27 +31,27 @@
 * Implementar módulo multithread
     ~~* Função para separar o array do grafo em blocos~~
     ~~* Função para separar o array da árvore em blocos~~
-    * Função para consolidar os resultados dos processos individuais
-    * Comunicação entre threads para determinar o valor mínimo global de __d__
-* Implementar sistema para cronometrar a execução
+    ~~* Função para consolidar os resultados dos processos individuais ~~
+   ~~ * Comunicação entre threads para determinar o valor mínimo global de __d__~~
+* ~~Implementar sistema para cronometrar a execução~~
 * ~~Gerar um .png do grafo~~
-* Gerar um .png da árvore mínima
+*~~ Gerar um .png da árvore mínima~~
 
 ## Visualizador grafos
-* Implementar num binário à parte
-    * ler o grafo do ficheiro
-    * ler a árvore mínima do ficheiro
+* ~~Implementar num binário à parte~~
+    * ~~ler o grafo do ficheiro~~
+    * ~~ler a árvore mínima do ficheiro~~
 * ~~Rever escolha da biblioteca de visualização~~
     * ~~igraph~~
     * ~~graphviz~~
 
 
 ## Resultados
-* Preparar maneira para lançar execuções em lote de modo a recolher dados sobre execução
-* Calcular e exibir dados sobre ganhos no desempenho de processamento
-    * Calcular tempo de execução sequencial
-* Descrição da implementação do algoritmo
-    * Pseudo-código
-    * Diagramas
-* Sobrepôr a árvore mínima geradora sobre o grafo
+* ~~Preparar maneira para lançar execuções em lote de modo a recolher dados sobre execução~~
+* ~~Calcular e exibir dados sobre ganhos no desempenho de processamento~~
+    * ~~Calcular tempo de execução sequencial~~
+* ~~Descrição da implementação do algoritmo~~
+    * ~~Pseudo-código~~
+    * ~~Diagramas~~
+* ~~Sobrepôr a árvore mínima geradora sobre o grafo~~
 
